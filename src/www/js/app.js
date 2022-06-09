@@ -38,6 +38,7 @@ new Vue({
     clientsPersist: {},
     clientDelete: null,
     clientCreate: null,
+    clientConfig: null,
     clientCreateName: '',
     clientEditName: null,
     clientEditNameId: null,
@@ -172,6 +173,15 @@ new Vue({
 
         client.chartOptions = this.clientsPersist[client.id].chartOptions;
 
+        // CONFIGURATION
+
+        this.api.getClientConf({ clientId: client.id })
+          .catch(err => alert(err.message || err.toString()))
+          .finally(() => this.refresh().catch(console.error))
+          .then(res => {
+            client.config = res;
+          });
+
         return client;
       });
     },
@@ -245,6 +255,15 @@ new Vue({
         .finally(() => this.refresh().catch(console.error));
     },
     getClientConf(client) {
+      let conf = '';
+      this.api.getClientConf({clientId: client.id})
+          .catch(err => alert(err.message || err.toString()))
+          .finally(() => this.refresh().catch(console.error))
+          .then(res => { conf = res;});
+
+      return conf;
+    },
+    showClientConf(client) {
       return this.api.getClientConf({ clientId: client.id })
         .then(res => {
           console.log(res);

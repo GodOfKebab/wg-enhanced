@@ -15,6 +15,7 @@
 
   <div id="app">
 
+
     <div class="container mx-auto max-w-3xl">
 
       <div v-if="authenticated === true">
@@ -82,8 +83,7 @@
                 </apexchart>
               </div>
 
-              <!--              conf = `./api/wireguard/client/${client.id}/client.conf`-->
-              <div class="relative p-5 z-10 flex flex-row" @click="conf = `./api/wireguard/client/${client.id}/client.conf`; console.log(getClientConf(client));">
+              <div class="relative p-5 z-10 flex flex-row">
                 <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
                   <svg class="w-6 m-2 text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                     fill="currentColor">
@@ -110,7 +110,7 @@
                       v-on:keyup.escape="clientEditName = null; clientEditNameId = null;"
                       :ref="'client-' + client.id + '-name'"
                       class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                    <span v-show="clientEditNameId !== client.id"
+                    <span v-show="clientEditNameId !== client.id" @click="clientConfig = client"
                       class="inline-block border-t-2 border-b-2 border-transparent">{{client.name}}</span>
 
                     <!-- Edit -->
@@ -417,6 +417,71 @@
             </div>
           </div>
         </div>
+
+
+
+
+        <!-- Configuration Dialog -->
+        <div v-if="clientConfig" class="fixed z-10 inset-0 overflow-y-auto">
+          <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!--
+        Background overlay, show/hide based on modal state.
+
+        Entering: "ease-out duration-300"
+          From: "opacity-0"
+          To: "opacity-100"
+        Leaving: "ease-in duration-200"
+          From: "opacity-100"
+          To: "opacity-0"
+      -->
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <!--
+        Modal panel, show/hide based on modal state.
+
+        Entering: "ease-out duration-300"
+          From: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+          To: "opacity-100 translate-y-0 sm:scale-100"
+        Leaving: "ease-in duration-200"
+          From: "opacity-100 translate-y-0 sm:scale-100"
+          To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+      -->
+            <div
+                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+                    role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+
+                  <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
+                      Configuration file for <strong>{{clientConfig.name}}</strong>:
+                    </h3>
+                    <div class="mt-2">
+                      <span class="text-sm text-gray-500" style="white-space: pre-line">{{clientConfig.config}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" @click="clientConfig = null"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
       </div>
 
       <div v-if="authenticated === false">
