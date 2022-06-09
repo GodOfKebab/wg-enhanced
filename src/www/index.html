@@ -82,7 +82,8 @@
                 </apexchart>
               </div>
 
-              <div class="relative p-5 z-10 flex flex-row">
+              <!--              conf = `./api/wireguard/client/${client.id}/client.conf`-->
+              <div class="relative p-5 z-10 flex flex-row" @click="conf = `./api/wireguard/client/${client.id}/client.conf`; console.log(getClientConf(client));">
                 <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
                   <svg class="w-6 m-2 text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                     fill="currentColor">

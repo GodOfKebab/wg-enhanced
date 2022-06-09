@@ -44,6 +44,7 @@ new Vue({
     clientEditAddress: null,
     clientEditAddressId: null,
     qrcode: null,
+    conf: null,
 
     currentRelease: null,
     latestRelease: null,
@@ -240,6 +241,14 @@ new Vue({
     },
     updateClientAddress(client, address) {
       this.api.updateClientAddress({ clientId: client.id, address })
+        .catch(err => alert(err.message || err.toString()))
+        .finally(() => this.refresh().catch(console.error));
+    },
+    getClientConf(client) {
+      return this.api.getClientConf({ clientId: client.id })
+        .then(res => {
+          console.log(res);
+        })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },

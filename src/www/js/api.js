@@ -117,4 +117,11 @@ class API {
     });
   }
 
+  async getClientConf({ clientId }) {
+    return this.call({
+      method: 'get',
+      path: `/wireguard/client/${clientId}/client.conf`,
+    });
+  }
+
 }
