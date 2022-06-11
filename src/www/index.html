@@ -15,7 +15,6 @@
 
   <div id="app">
 
-
     <div class="container mx-auto max-w-3xl">
 
       <div v-if="authenticated === true">
@@ -30,29 +29,16 @@
         </span>
         <h1 class="text-4xl font-medium mt-10 mb-2">
           <img src="./img/logo.png" width="32" class="inline align-middle" />
-          <span class="align-middle">WireGuard</span>
+          <span class="align-middle">WireGuard Management Console</span>
         </h1>
-        <h2 class="text-sm text-gray-400 mb-10"></h2>
 
-        <div v-if="latestRelease" class="bg-red-800 p-4 text-white text-sm font-small mb-10 rounded-md shadow-lg"
-          :title="`v${currentRelease} → v${latestRelease.version}`">
-          <div class="container mx-auto flex flex-row flex-auto items-center">
-            <div class="flex-grow">
-              <p class="font-bold">There is an update available!</p>
-              <p>{{latestRelease.changelog}}</p>
-            </div>
-
-            <a href="https://github.com/WeeJeWel/wg-easy#updating" target="_blank"
-              class="p-3 rounded-md bg-white float-right font-sm font-semibold text-red-800 flex-shrink-0 border-2 border-red-800 hover:border-white hover:text-white hover:bg-red-800 transition-all">
-              Update →
-            </a>
-          </div>
-        </div>
-
+<!--        Peers box -->
         <div class="shadow-md rounded-lg bg-white overflow-hidden">
+
+<!--          "Peers" + "Add a Peer" line -->
           <div class="flex flex-row flex-auto items-center p-3 px-5 border border-b-2 border-gray-100">
             <div class="flex-grow">
-              <p class="text-2xl font-medium">Clients</p>
+              <p class="text-2xl font-medium">Peers</p>
             </div>
             <div class="flex-shrink-0">
               <button @click="clientCreate = true; clientCreateName = '';"
@@ -62,7 +48,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                <span class="text-sm">New</span>
+                <span class="text-sm">Add a Peer</span>
               </button>
             </div>
           </div>
@@ -110,7 +96,7 @@
                       v-on:keyup.escape="clientEditName = null; clientEditNameId = null;"
                       :ref="'client-' + client.id + '-name'"
                       class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                    <span v-show="clientEditNameId !== client.id" @click="clientConfig = client"
+                    <span v-show="clientEditNameId !== client.id" @click="clientConfig = client; getClientConf(client);"
                       class="inline-block border-t-2 border-b-2 border-transparent">{{client.name}}</span>
 
                     <!-- Edit -->
@@ -534,7 +520,8 @@
     <p class="text-center m-10 text-gray-300 text-xs">Made by <a target="_blank" class="hover:underline"
         href="https://emilenijssen.nl/?ref=wg-easy">Emile Nijssen</a> · <a class="hover:underline"
         href="https://github.com/sponsors/WeeJeWel" target="_blank">Donate</a> · <a class="hover:underline"
-        href="https://github.com/weejewel/wg-easy" target="_blank">GitHub</a></p>
+        href="https://github.com/weejewel/wg-easy" target="_blank">GitHub</a>
+    </p>
 
 
   </div>

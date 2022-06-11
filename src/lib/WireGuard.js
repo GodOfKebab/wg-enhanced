@@ -137,6 +137,7 @@ AllowedIPs = ${client.address}/32`;
       createdAt: new Date(client.createdAt),
       updatedAt: new Date(client.updatedAt),
       allowedIPs: client.allowedIPs,
+      config: client.config,
 
       persistentKeepalive: null,
       latestHandshakeAt: null,

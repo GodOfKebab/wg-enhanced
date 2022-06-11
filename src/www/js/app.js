@@ -45,7 +45,6 @@ new Vue({
     clientEditAddress: null,
     clientEditAddressId: null,
     qrcode: null,
-    conf: null,
 
     currentRelease: null,
     latestRelease: null,
@@ -175,12 +174,12 @@ new Vue({
 
         // CONFIGURATION
 
-        this.api.getClientConf({ clientId: client.id })
-          .catch(err => alert(err.message || err.toString()))
-          .finally(() => this.refresh().catch(console.error))
-          .then(res => {
-            client.config = res;
-          });
+        // this.api.getClientConf({ clientId: client.id })
+        //   .catch(err => alert(err.message || err.toString()))
+        //   .finally(() => this.refresh().catch(console.error))
+        //   .then(res => {
+        //     client.config = res;
+        //   });
 
         return client;
       });
@@ -255,22 +254,21 @@ new Vue({
         .finally(() => this.refresh().catch(console.error));
     },
     getClientConf(client) {
-      let conf = '';
-      this.api.getClientConf({clientId: client.id})
-          .catch(err => alert(err.message || err.toString()))
-          .finally(() => this.refresh().catch(console.error))
-          .then(res => { conf = res;});
-
-      return conf;
-    },
-    showClientConf(client) {
-      return this.api.getClientConf({ clientId: client.id })
-        .then(res => {
-          console.log(res);
-        })
+      this.api.getClientConf({ clientId: client.id })
         .catch(err => alert(err.message || err.toString()))
-        .finally(() => this.refresh().catch(console.error));
+        .finally(() => this.refresh().catch(console.error))
+        .then(res => {
+          client.config = res;
+        });
     },
+    // showClientConf(client) {
+    //   return this.api.getClientConf({ clientId: client.id })
+    //     .then(res => {
+    //       console.log(res);
+    //     })
+    //     .catch(err => alert(err.message || err.toString()))
+    //     .finally(() => this.refresh().catch(console.error));
+    // },
   },
   filters: {
     bytes,
