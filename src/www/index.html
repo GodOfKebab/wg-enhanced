@@ -27,13 +27,71 @@
               d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
         </span>
-        <h1 class="text-4xl font-medium mt-10 mb-2">
-          <img src="./img/logo.png" width="32" class="inline align-middle" />
-          <span class="align-middle">WireGuard Management Console</span>
-        </h1>
+
+        <div class="mt-10 mb-2">
+          <h1 class="text-4xl font-medium inline">
+            <img src="./img/logo.png" width="32" class="inline align-middle" />
+            <span class="align-middle">WireGuard Management Console</span>
+          </h1>
+
+          <div class="inline-block float-right">
+            <div>
+              <div v-if="webServerStatus === 'unknown'" class="inline-block shadow-md rounded-lg bg-yellow-400 p-1.5 mr-0.5"></div>
+              <div v-if="webServerStatus === 'down'" class="inline-block shadow-md rounded-lg bg-red-400 p-1.5 mr-0.5"></div>
+              <div v-if="webServerStatus === 'up'" class="inline-block shadow-md rounded-lg bg-green-400 p-1.5 mr-0.5"></div>
+              <span class="text-sm text-gray-500">Web Server Status</span>
+            </div>
+            <div>
+              <div v-if="wireguardStatus === 'unknown'" class="inline-block shadow-md rounded-lg bg-yellow-400 p-1.5 mr-2"></div>
+              <div v-if="wireguardStatus === 'up'" title="Disable WireGuard Networking" @click="wireguardToggleTo = 'disable'"
+                   class="inline-block align-middle rounded-full w-5 h-3 bg-green-400 cursor-pointer hover:bg-green-400 transition-all">
+                <div class="rounded-full w-1 h-1 m-1 ml-3 bg-white"></div>
+              </div>
+              <div v-if="wireguardStatus === 'down'" title="Enable WireGuard Networking" @click="wireguardToggleTo = 'enable'"
+                   class="inline-block align-middle rounded-full w-5 h-3 mr-0.25 bg-red-400 cursor-pointer hover:bg-red-400 transition-all">
+                <div class="rounded-full w-1 h-1 m-1 bg-white"></div>
+              </div>
+              <span class="text-sm text-gray-500">WireGuard Status</span>
+            </div>
+<!--            <div>-->
+<!--              <div title="Enable Client"-->
+<!--                   class="inline-block align-middle rounded-full w-6 h-4 mr-1 bg-gray-200 cursor-pointer hover:bg-gray-300 transition-all">-->
+<!--                <div class="rounded-full w-2 h-2 m-1 bg-white"></div>-->
+<!--              </div>-->
+<!--              <span class="text-sm text-gray-500">Toggle WireGuard</span>-->
+<!--            </div>-->
+<!--            <div class="flex justify-center ">-->
+<!--            <div class="form-check form-switch mb-7">-->
+<!--              <input class="form-check-input appearance-none w-9 -ml-10 rounded-full float-left h-5 align-top bg-white bg-no-repeat bg-contain bg-gray-300 focus:outline-none cursor-pointer shadow-sm" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>-->
+<!--              <span class="text-sm text-gray-500">WireGuard Status</span>-->
+<!--            </div>-->
+<!--            </div>-->
+<!--            <label class="switch">-->
+<!--              <input type="checkbox">-->
+<!--              <span class="slider round"></span>-->
+<!--            </label>-->
+
+
+            <!--            <div>-->
+<!--              <div class="inline-block shadow-md rounded-lg bg-red-400 p-1.5"></div>-->
+<!--              <span class="text-sm text-gray-500">Is up to date</span>-->
+<!--            </div>-->
+          </div>
+        </div>
+
+
+
+<!--        Map -->
+        <div class="shadow-md rounded-lg bg-white overflow-hidden p-2 my-8 justify-center">
+          <p class="text-center whitespace-pre">
+            This is where the map should be
+          </p>
+        </div>
+
+
 
 <!--        Peers box -->
-        <div class="shadow-md rounded-lg bg-white overflow-hidden">
+        <div class="shadow-md rounded-lg bg-white overflow-hidden m-8">
 
 <!--          "Peers" + "Add a Peer" line -->
           <div class="flex flex-row flex-auto items-center p-3 px-5 border border-b-2 border-gray-100">
@@ -96,8 +154,8 @@
                       v-on:keyup.escape="clientEditName = null; clientEditNameId = null;"
                       :ref="'client-' + client.id + '-name'"
                       class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                    <span v-show="clientEditNameId !== client.id" @click="clientConfig = client; getClientConf(client);"
-                      class="inline-block border-t-2 border-b-2 border-transparent">{{client.name}}</span>
+                    <button v-show="clientEditNameId !== client.id" @click="clientConfig = client; getClientConf(client);"
+                      class="inline-block border-t-2 border-b-2 border-transparent">{{client.name}}</button>
 
                     <!-- Edit -->
                     <span v-show="clientEditNameId !== client.id"
@@ -410,6 +468,41 @@
         <!-- Configuration Dialog -->
         <div v-if="clientConfig" class="fixed z-10 inset-0 overflow-y-auto">
           <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <!-- This element is to trick the browser into centering the modal contents. -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+
+                  <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
+                      Configuration file for <strong>{{clientConfig.name}}</strong>:
+                    </h3>
+                    <div class="mt-2 w-full overflow-auto h-96">
+                      <span class="text-sm text-gray-500 whitespace-pre">{{clientConfig.config}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" @click="clientConfig = null"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- WireGuard Dialog -->
+        <div v-if="wireguardToggleTo !== null" class="fixed z-10 inset-0 overflow-y-auto">
+          <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <!--
         Background overlay, show/hide based on modal state.
 
@@ -441,19 +534,33 @@
                     role="dialog" aria-modal="true" aria-labelledby="modal-headline">
               <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
-
+                  <div
+                          class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <!-- Heroicon name: outline/exclamation -->
+                    <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
                   <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
-                      Configuration file for <strong>{{clientConfig.name}}</strong>:
+                      {{ wireguardToggleTo[0].toUpperCase() + wireguardToggleTo.slice(1) }} the WireGuard Network
                     </h3>
                     <div class="mt-2">
-                      <span class="text-sm text-gray-500" style="white-space: pre-line">{{clientConfig.config}}</span>
+                      <p class="text-sm text-gray-500">
+                        Are you sure you want to {{ wireguardToggleTo }} the WireGuard Network?
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="button" @click="clientConfig = null"
+                <button type="button" @click="toggleWireGuardNetworking();"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                  {{ wireguardToggleTo[0].toUpperCase() + wireguardToggleTo.slice(1) }}
+                </button>
+                <button type="button" @click="wireguardToggleTo = null"
                         class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                   Cancel
                 </button>
@@ -461,8 +568,6 @@
             </div>
           </div>
         </div>
-
-
 
 
 

@@ -313,4 +313,26 @@ Endpoint = ${WG_HOST}:${WG_PORT}`;
     await this.saveConfig();
   }
 
+  async getServerStatus() {
+    const status = await Util.exec('wg', {
+      log: false,
+    });
+    if (status.startsWith('interface: wg0')) {
+      return 'up';
+    }
+    return 'down';
+  }
+
+  async enableServer() {
+    await Util.exec('wg-quick up wg0', {
+      log: false,
+    });
+  }
+
+  async disableServer() {
+    await Util.exec('wg-quick down wg0', {
+      log: false,
+    });
+  }
+
 };

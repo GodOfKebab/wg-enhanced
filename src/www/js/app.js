@@ -46,6 +46,10 @@ new Vue({
     clientEditAddressId: null,
     qrcode: null,
 
+    webServerStatus: 'unknown',
+    wireguardStatus: 'unknown',
+    wireguardToggleTo: null,
+
     currentRelease: null,
     latestRelease: null,
 
@@ -123,65 +127,83 @@ new Vue({
     async refresh() {
       if (!this.authenticated) return;
 
-      const clients = await this.api.getClients();
-      this.clients = clients.map(client => {
-        if (client.name.includes('@') && client.name.includes('.')) {
-          client.avatar = `https://www.gravatar.com/avatar/${md5(client.name)}?d=blank`;
+      // Get WirGuard Server Status
+      await this.api.getWirGuardStatus().then(wgStatus => {
+        this.webServerStatus = 'up';
+        if (wgStatus['status'] === 'up') {
+          this.wireguardStatus = 'up';
+        } else if (wgStatus['status'] === 'down') {
+          this.wireguardStatus = 'down';
         }
+      }).catch(err => {
+        this.wireguardStatus = 'unknown';
+        if (err.toString() === 'TypeError: Load failed') {
+          this.webServerStatus = 'down';
+        } else {
+          console.log('getWirGuardStatus error =>');
+          console.log(err);
+        }
+      });
 
-        if (!this.clientsPersist[client.id]) {
-          this.clientsPersist[client.id] = {};
-          this.clientsPersist[client.id].transferRxHistory = Array(20).fill(0);
+      // Get WirGuard Clients
+      await this.api.getClients().then(clients => {
+        this.clients = clients.map(client => {
+          if (client.name.includes('@') && client.name.includes('.')) {
+            client.avatar = `https://www.gravatar.com/avatar/${md5(client.name)}?d=blank`;
+          }
+
+          if (!this.clientsPersist[client.id]) {
+            this.clientsPersist[client.id] = {};
+            this.clientsPersist[client.id].transferRxHistory = Array(20).fill(0);
+            this.clientsPersist[client.id].transferRxPrevious = client.transferRx;
+            this.clientsPersist[client.id].transferTxHistory = Array(20).fill(0);
+            this.clientsPersist[client.id].transferTxPrevious = client.transferTx;
+
+            this.clientsPersist[client.id].chartOptions = {
+              ...this.chartOptions,
+              yaxis: {
+                ...this.chartOptions.yaxis,
+                max: () => this.clientsPersist[client.id].chartMax,
+              },
+            };
+          }
+
+          this.clientsPersist[client.id].transferRxCurrent = client.transferRx - this.clientsPersist[client.id].transferRxPrevious;
           this.clientsPersist[client.id].transferRxPrevious = client.transferRx;
-          this.clientsPersist[client.id].transferTxHistory = Array(20).fill(0);
+          this.clientsPersist[client.id].transferTxCurrent = client.transferTx - this.clientsPersist[client.id].transferTxPrevious;
           this.clientsPersist[client.id].transferTxPrevious = client.transferTx;
 
-          this.clientsPersist[client.id].chartOptions = {
-            ...this.chartOptions,
-            yaxis: {
-              ...this.chartOptions.yaxis,
-              max: () => this.clientsPersist[client.id].chartMax,
-            },
-          };
+          this.clientsPersist[client.id].transferRxHistory.push(this.clientsPersist[client.id].transferRxCurrent);
+          this.clientsPersist[client.id].transferRxHistory.shift();
+
+          this.clientsPersist[client.id].transferTxHistory.push(this.clientsPersist[client.id].transferTxCurrent);
+          this.clientsPersist[client.id].transferTxHistory.shift();
+
+          client.transferTxCurrent = this.clientsPersist[client.id].transferTxCurrent;
+          client.transferTxSeries = [{
+            name: 'tx',
+            data: this.clientsPersist[client.id].transferTxHistory,
+          }];
+
+          client.transferRxCurrent = this.clientsPersist[client.id].transferRxCurrent;
+          client.transferRxSeries = [{
+            name: 'rx',
+            data: this.clientsPersist[client.id].transferRxHistory,
+          }];
+
+          this.clientsPersist[client.id].chartMax = Math.max(...this.clientsPersist[client.id].transferTxHistory, ...this.clientsPersist[client.id].transferRxHistory);
+
+          client.chartOptions = this.clientsPersist[client.id].chartOptions;
+
+          return client;
+        });
+      }).catch(err => {
+        if (err.toString() === 'TypeError: Load failed') {
+          this.webServerStatus = 'down';
+        } else {
+          console.log('getClients error =>');
+          console.log(err);
         }
-
-        this.clientsPersist[client.id].transferRxCurrent = client.transferRx - this.clientsPersist[client.id].transferRxPrevious;
-        this.clientsPersist[client.id].transferRxPrevious = client.transferRx;
-        this.clientsPersist[client.id].transferTxCurrent = client.transferTx - this.clientsPersist[client.id].transferTxPrevious;
-        this.clientsPersist[client.id].transferTxPrevious = client.transferTx;
-
-        this.clientsPersist[client.id].transferRxHistory.push(this.clientsPersist[client.id].transferRxCurrent);
-        this.clientsPersist[client.id].transferRxHistory.shift();
-
-        this.clientsPersist[client.id].transferTxHistory.push(this.clientsPersist[client.id].transferTxCurrent);
-        this.clientsPersist[client.id].transferTxHistory.shift();
-
-        client.transferTxCurrent = this.clientsPersist[client.id].transferTxCurrent;
-        client.transferTxSeries = [{
-          name: 'tx',
-          data: this.clientsPersist[client.id].transferTxHistory,
-        }];
-
-        client.transferRxCurrent = this.clientsPersist[client.id].transferRxCurrent;
-        client.transferRxSeries = [{
-          name: 'rx',
-          data: this.clientsPersist[client.id].transferRxHistory,
-        }];
-
-        this.clientsPersist[client.id].chartMax = Math.max(...this.clientsPersist[client.id].transferTxHistory, ...this.clientsPersist[client.id].transferRxHistory);
-
-        client.chartOptions = this.clientsPersist[client.id].chartOptions;
-
-        // CONFIGURATION
-
-        // this.api.getClientConf({ clientId: client.id })
-        //   .catch(err => alert(err.message || err.toString()))
-        //   .finally(() => this.refresh().catch(console.error))
-        //   .then(res => {
-        //     client.config = res;
-        //   });
-
-        return client;
       });
     },
     login(e) {
@@ -261,14 +283,20 @@ new Vue({
           client.config = res;
         });
     },
-    // showClientConf(client) {
-    //   return this.api.getClientConf({ clientId: client.id })
-    //     .then(res => {
-    //       console.log(res);
-    //     })
-    //     .catch(err => alert(err.message || err.toString()))
-    //     .finally(() => this.refresh().catch(console.error));
-    // },
+    toggleWireGuardNetworking() {
+      if (this.wireguardStatus === 'up' && this.wireguardToggleTo === 'disable') {
+        this.wireguardStatus = 'unknown';
+        this.api.wireguardDisable()
+          .catch(err => alert(err.message || err.toString()))
+          .finally(() => this.refresh().catch(console.error));
+      } else if (this.wireguardStatus === 'down' && this.wireguardToggleTo === 'enable') {
+        this.wireguardStatus = 'unknown';
+        this.api.wireguardEnable()
+          .catch(err => alert(err.message || err.toString()))
+          .finally(() => this.refresh().catch(console.error));
+      }
+      this.wireguardToggleTo = null;
+    },
   },
   filters: {
     bytes,
@@ -291,7 +319,9 @@ new Vue({
       });
 
     setInterval(() => {
-      this.refresh().catch(console.error);
+      this.refresh().catch(error => {
+        console.log(error);
+      });
     }, 1000);
 
     Promise.resolve().then(async () => {

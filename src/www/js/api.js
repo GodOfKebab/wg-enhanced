@@ -124,4 +124,25 @@ class API {
     });
   }
 
+  async getWirGuardStatus() {
+    return this.call({
+      method: 'get',
+      path: '/wireguard/server/status',
+    });
+  }
+
+  async wireguardEnable() {
+    return this.call({
+      method: 'post',
+      path: '/wireguard/server/enable',
+    });
+  }
+
+  async wireguardDisable() {
+    return this.call({
+      method: 'post',
+      path: '/wireguard/server/disable',
+    });
+  }
+
 }

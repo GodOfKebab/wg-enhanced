@@ -110,6 +110,10 @@ module.exports = class Server {
         res.header('Content-Type', 'text/plain');
         res.send(config);
       }))
+      .get('/api/wireguard/server/status', Util.promisify(async (req, res) => {
+        res.header('Content-Type', 'application/json');
+        res.send(JSON.stringify({ status: await WireGuard.getServerStatus() }));
+      }))
       .post('/api/wireguard/client', Util.promisify(async req => {
         const { name } = req.body;
         return WireGuard.createClient({ name });
@@ -125,6 +129,12 @@ module.exports = class Server {
       .post('/api/wireguard/client/:clientId/disable', Util.promisify(async req => {
         const { clientId } = req.params;
         return WireGuard.disableClient({ clientId });
+      }))
+      .post('/api/wireguard/server/enable', Util.promisify(async req => {
+        return WireGuard.enableServer();
+      }))
+      .post('/api/wireguard/server/disable', Util.promisify(async req => {
+        return WireGuard.disableServer();
       }))
       .put('/api/wireguard/client/:clientId/name', Util.promisify(async req => {
         const { clientId } = req.params;
