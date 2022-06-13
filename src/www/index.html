@@ -27,17 +27,18 @@
             </h1>
           </div>
 
-          <div class="relative inline-block float-right p-3 whitespace-nowrap bg-gray-50 align-middle">
-            <div v-if="requiresPassword"
-                  class="text-sm text-gray-400 cursor-pointer hover:underline absolute top-0 right-3" @click="logout">
-          Logout
-              <svg class="h-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                   stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
+          <div class=" inline-block float-right p-3 whitespace-nowrap bg-gray-50 align-middle">
+            <div v-if="requiresPassword" class="relative mb-5">
+              <div class="text-sm text-gray-400 cursor-pointer hover:underline absolute top-0 right-0" @click="logout">
+                Logout
+                <svg class="h-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </div>
             </div>
-            <div class="mt-3">
+            <div>
               <div v-if="webServerStatus === 'unknown'" title="Management Web Server Status Unknown" class="inline-block shadow-md rounded-lg bg-yellow-500 hover:bg-yellow-400 p-1.5 mr-0.5"></div>
               <div v-if="webServerStatus === 'down'" title="Management Web Server is Down/Not reachable" class="inline-block shadow-md rounded-lg bg-red-500 hover:bg-red-400 p-1.5 mr-0.5"></div>
               <div v-if="webServerStatus === 'up'" title="Management Web Server is Up" class="inline-block shadow-md rounded-lg bg-green-500 hover:bg-green-400 p-1.5 mr-0.5"></div>
