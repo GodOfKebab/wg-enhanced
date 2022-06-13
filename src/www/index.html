@@ -45,7 +45,10 @@
               <span class="text-sm text-gray-500">Web Server Status</span>
             </div>
             <div>
-              <div v-if="wireguardStatus === 'unknown'" title="WireGuard Networking Status Unknown" class="inline-block shadow-md rounded-lg bg-yellow-500 hover:bg-yellow-400 p-1.5 mr-2"></div>
+              <div v-if="wireguardStatus === 'unknown'" title="WireGuard Networking Status Unknown" @click="wireguardToggleTo = 'disable'"
+                   class="inline-block align-middle shadow-md rounded-full w-5 h-3 bg-yellow-500 cursor-pointer hover:bg-yellow-400 transition-all">
+                <div class="shadow-md rounded-full w-1 h-1 m-1 ml-2 bg-white"></div>
+              </div>
               <div v-if="wireguardStatus === 'up'" title="Disable WireGuard Networking" @click="wireguardToggleTo = 'disable'"
                    class="inline-block align-middle shadow-md rounded-full w-5 h-3 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">
                 <div class="shadow-md rounded-full w-1 h-1 m-1 ml-3 bg-white"></div>
