@@ -28,15 +28,15 @@
           </svg>
         </span>
 
-        <div class="mt-10 mb-2 flex-parent">
-          <div class="inline-block float-left text-ellipsis overflow-hidden whitespace-nowrap">
-            <h1 class="text-4xl font-medium inline">
+        <div class="mt-10 mb-2" style="display: flex; align-items: center;">
+          <div class="inline-block float-left" style="flex: 1; min-width: 0;">
+            <h1 class="text-4xl font-medium" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;" >
               <img src="./img/logo.png" width="32" class="inline align-middle" />
-              <p class="inline align-middle ">WireGuard Management Console</p>
+              <span class="align-middle">WireGuard Management Console</span>
             </h1>
           </div>
 
-          <div class="inline-block float-right text-ellipsis overflow-hidden whitespace-nowrap">
+          <div class="inline-block float-right p-2 whitespace-nowrap bg-gray-50">
             <div>
               <div v-if="webServerStatus === 'unknown'" title="Management Web Server Status Unknown" class="inline-block shadow-md rounded-lg bg-yellow-500 hover:bg-yellow-400 p-1.5 mr-0.5"></div>
               <div v-if="webServerStatus === 'down'" title="Management Web Server is Down/Not reachable" class="inline-block shadow-md rounded-lg bg-red-500 hover:bg-red-400 p-1.5 mr-0.5"></div>
