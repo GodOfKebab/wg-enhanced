@@ -28,59 +28,38 @@
           </svg>
         </span>
 
-        <div class="mt-10 mb-2">
-          <h1 class="text-4xl font-medium inline">
-            <img src="./img/logo.png" width="32" class="inline align-middle" />
-            <span class="align-middle">WireGuard Management Console</span>
-          </h1>
+        <div class="mt-10 mb-2 flex-parent">
+          <div class="inline-block float-left text-ellipsis overflow-hidden whitespace-nowrap">
+            <h1 class="text-4xl font-medium inline">
+              <img src="./img/logo.png" width="32" class="inline align-middle" />
+              <p class="inline align-middle ">WireGuard Management Console</p>
+            </h1>
+          </div>
 
-          <div class="inline-block float-right">
+          <div class="inline-block float-right text-ellipsis overflow-hidden whitespace-nowrap">
             <div>
-              <div v-if="webServerStatus === 'unknown'" class="inline-block shadow-md rounded-lg bg-yellow-400 p-1.5 mr-0.5"></div>
-              <div v-if="webServerStatus === 'down'" class="inline-block shadow-md rounded-lg bg-red-400 p-1.5 mr-0.5"></div>
-              <div v-if="webServerStatus === 'up'" class="inline-block shadow-md rounded-lg bg-green-400 p-1.5 mr-0.5"></div>
+              <div v-if="webServerStatus === 'unknown'" title="Management Web Server Status Unknown" class="inline-block shadow-md rounded-lg bg-yellow-500 hover:bg-yellow-400 p-1.5 mr-0.5"></div>
+              <div v-if="webServerStatus === 'down'" title="Management Web Server is Down/Not reachable" class="inline-block shadow-md rounded-lg bg-red-500 hover:bg-red-400 p-1.5 mr-0.5"></div>
+              <div v-if="webServerStatus === 'up'" title="Management Web Server is Up" class="inline-block shadow-md rounded-lg bg-green-500 hover:bg-green-400 p-1.5 mr-0.5"></div>
               <span class="text-sm text-gray-500">Web Server Status</span>
             </div>
             <div>
-              <div v-if="wireguardStatus === 'unknown'" class="inline-block shadow-md rounded-lg bg-yellow-400 p-1.5 mr-2"></div>
+              <div v-if="wireguardStatus === 'unknown'" title="WireGuard Networking Status Unknown" class="inline-block shadow-md rounded-lg bg-yellow-500 hover:bg-yellow-400 p-1.5 mr-2"></div>
               <div v-if="wireguardStatus === 'up'" title="Disable WireGuard Networking" @click="wireguardToggleTo = 'disable'"
-                   class="inline-block align-middle rounded-full w-5 h-3 bg-green-400 cursor-pointer hover:bg-green-400 transition-all">
-                <div class="rounded-full w-1 h-1 m-1 ml-3 bg-white"></div>
+                   class="inline-block align-middle shadow-md rounded-full w-5 h-3 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">
+                <div class="shadow-md rounded-full w-1 h-1 m-1 ml-3 bg-white"></div>
               </div>
               <div v-if="wireguardStatus === 'down'" title="Enable WireGuard Networking" @click="wireguardToggleTo = 'enable'"
-                   class="inline-block align-middle rounded-full w-5 h-3 mr-0.25 bg-red-400 cursor-pointer hover:bg-red-400 transition-all">
-                <div class="rounded-full w-1 h-1 m-1 bg-white"></div>
+                   class="inline-block align-middle shadow-md rounded-full w-5 h-3 mr-0.25 bg-red-500 cursor-pointer hover:bg-red-400 transition-all">
+                <div class="shadow-md rounded-full w-1 h-1 m-1 bg-white"></div>
               </div>
               <span class="text-sm text-gray-500">WireGuard Status</span>
             </div>
-<!--            <div>-->
-<!--              <div title="Enable Client"-->
-<!--                   class="inline-block align-middle rounded-full w-6 h-4 mr-1 bg-gray-200 cursor-pointer hover:bg-gray-300 transition-all">-->
-<!--                <div class="rounded-full w-2 h-2 m-1 bg-white"></div>-->
-<!--              </div>-->
-<!--              <span class="text-sm text-gray-500">Toggle WireGuard</span>-->
-<!--            </div>-->
-<!--            <div class="flex justify-center ">-->
-<!--            <div class="form-check form-switch mb-7">-->
-<!--              <input class="form-check-input appearance-none w-9 -ml-10 rounded-full float-left h-5 align-top bg-white bg-no-repeat bg-contain bg-gray-300 focus:outline-none cursor-pointer shadow-sm" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>-->
-<!--              <span class="text-sm text-gray-500">WireGuard Status</span>-->
-<!--            </div>-->
-<!--            </div>-->
-<!--            <label class="switch">-->
-<!--              <input type="checkbox">-->
-<!--              <span class="slider round"></span>-->
-<!--            </label>-->
-
-
-            <!--            <div>-->
-<!--              <div class="inline-block shadow-md rounded-lg bg-red-400 p-1.5"></div>-->
-<!--              <span class="text-sm text-gray-500">Is up to date</span>-->
-<!--            </div>-->
           </div>
         </div>
 
 
-
+        <br></br>
 <!--        Map -->
         <div class="shadow-md rounded-lg bg-white overflow-hidden p-2 my-8 justify-center">
           <p class="text-center whitespace-pre">
@@ -235,12 +214,12 @@
 
                     <!-- Enable/Disable -->
                     <div @click="disableClient(client)" v-if="client.enabled === true" title="Disable Client"
-                      class="inline-block align-middle rounded-full w-10 h-6 mr-1 bg-red-800 cursor-pointer hover:bg-red-700 transition-all">
-                      <div class="rounded-full w-4 h-4 m-1 ml-5 bg-white"></div>
+                      class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">
+                      <div class="rounded-full shadow-md w-4 h-4 m-1 ml-5 bg-white"></div>
                     </div>
                     <div @click="enableClient(client)" v-if="client.enabled === false" title="Enable Client"
-                      class="inline-block align-middle rounded-full w-10 h-6 mr-1 bg-gray-200 cursor-pointer hover:bg-gray-300 transition-all">
-                      <div class="rounded-full w-4 h-4 m-1 bg-white"></div>
+                      class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-red-500 cursor-pointer hover:bg-red-400 transition-all">
+                      <div class="rounded-full shadow-md w-4 h-4 m-1 bg-white"></div>
                     </div>
 
                     <!-- Show QR-->
