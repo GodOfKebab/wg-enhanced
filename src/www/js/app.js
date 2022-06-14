@@ -144,6 +144,7 @@ new Vue({
           console.log(err);
         }
       });
+      if (this.wireguardStatus !== 'up') return;
 
       // Get WirGuard Clients
       await this.api.getClients().then(clients => {
