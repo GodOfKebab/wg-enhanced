@@ -7,6 +7,7 @@ const debug = require('debug')('WireGuard');
 const uuid = require('uuid');
 const QRCode = require('qrcode');
 
+const Queue = require('queue-fifo');
 const Util = require('./Util');
 const ServerError = require('./ServerError');
 
@@ -47,15 +48,17 @@ module.exports = class WireGuard {
           const address = WG_DEFAULT_ADDRESS.replace('x', '1');
 
           config = {
-            network_map: {
-              self: {
+            peers: {},
+            peers_config: {
+              root: {
+                name: 'vpn-server',
+                address,
                 privateKey,
                 publicKey,
-                address,
-                peers: {},
+                createdAt: new Date(),
+                updatedAt: new Date(),
               },
             },
-            peers_config: {},
           };
           debug('Configuration generated.');
         }
@@ -95,17 +98,17 @@ module.exports = class WireGuard {
 
 # Server
 [Interface]
-PrivateKey = ${config.network_map.self.privateKey}
-Address = ${config.network_map.self.address}/24
+PrivateKey = ${config.peers_config.root.privateKey}
+Address = ${config.peers_config.root.address}/24
 ListenPort = 51820
 PostUp = ${WG_POST_UP}
 PostDown = ${WG_POST_DOWN}
 `;
 
-    for (const [peerId, peer] of Object.entries(config.network_map.self.peers)) {
+    for (const [peerId, peer] of Object.entries(config.peers)) {
       if (!peer.enabled) continue;
 
-      const peerConfig = { ...peer, ...config.peers_config[peerId] };
+      let peerConfig = { ...peer, ...config.peers_config[peerId] };
 
       result += `
 
@@ -114,6 +117,13 @@ PostDown = ${WG_POST_DOWN}
 PublicKey = ${peerConfig.publicKey}
 PresharedKey = ${peerConfig.preSharedKey}
 AllowedIPs = ${peerConfig.address}/32`;
+      while (Object.keys(peerConfig.peers).length !== 0) {
+        for (const [peerId, peer] of Object.entries(peerConfig.peers)) {
+          if (!peer.enabled) continue;
+          peerConfig = { ...peer, ...config.peers_config[peerId] };
+          result += `, ${peerConfig.address}/32`;
+        }
+      }
     }
 
     debug('Config saving...');
@@ -134,7 +144,7 @@ AllowedIPs = ${peerConfig.address}/32`;
 
   async getClients() {
     const config = await this.getConfig();
-    const clients = Object.entries(config.network_map.self.peers).map(([clientId, client]) => ({
+    const clients = Object.entries(config.peers).map(([clientId, client]) => ({
       id: clientId,
       name: config.peers_config[clientId]['name'],
       enabled: client.enabled,
@@ -184,35 +194,86 @@ AllowedIPs = ${peerConfig.address}/32`;
     return clients;
   }
 
-  async getClient({ clientId }) {
+  async getPeer({ clientId }) {
+    const peerId = clientId;
     const config = await this.getConfig();
-    const client = { ...config.network_map.self.peers[clientId], ...config.peers_config[clientId] };
-    if (!client) {
-      throw new ServerError(`Client Not Found: ${clientId}`, 404);
+    const peer = config.peers_config[peerId];
+    if (!peer) {
+      throw new ServerError(`Peer Not Found: ${peerId}`, 404);
     }
 
-    return client;
+    return peer;
   }
 
   async getClientConfiguration({ clientId }) {
+    const peerId = clientId;
     const config = await this.getConfig();
-    const client = await this.getClient({ clientId });
+    let peerConf = await this.getPeer({ clientId });
 
-    return `
+    let conf = `
 [Interface]
-PrivateKey = ${client.privateKey}
-Address = ${client.address}/24
+PrivateKey = ${peerConf.privateKey}
+Address = ${peerConf.address}/24
 ${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}` : ''}
-${WG_MTU ? `MTU = ${WG_MTU}` : ''}
+${WG_MTU ? `MTU = ${WG_MTU}` : ''}`;
 
+    const queue = new Queue();
+
+    for (const [selfPeerId, selfPeer] of Object.entries(config.peers)) {
+      peerConf = { ...selfPeer, ...config.peers_config[selfPeerId] };
+      queue.enqueue([selfPeerId, peerConf]);
+
+      // if part of self, then add self as a peer
+      if (selfPeerId === peerId && selfPeer.enabled) {
+        conf += `
+# Peer: ${config.peers_config.root.name} (root)
 [Peer]
-PublicKey = ${config.network_map.self.publicKey}
-PresharedKey = ${client.preSharedKey}
+PublicKey = ${config.peers_config.root.publicKey}
+PresharedKey = ${peerConf.preSharedKey}
 AllowedIPs = ${WG_ALLOWED_IPS}
 PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
-Endpoint = ${WG_HOST}:${WG_PORT}`;
+Endpoint = ${WG_HOST}:${WG_PORT}\n`;
+      }
+    }
 
-  //  TODO: for loop over the client.peers and add to the config
+    // traverse peers to see if peer exists as a peer in other peers
+    while (queue.size() !== 0) {
+      const [peerCandidateId, peerCandidate] = queue.dequeue();
+
+      if (Object.keys(peerCandidate.peers).length !== 0) {
+        if (peerCandidateId === peerId) {
+          for (const [peerCandidateChildId, peerCandidateChild] of Object.entries(peerCandidate.peers)) {
+            conf += `
+# Peer: ${config.peers_config[peerCandidateChildId].name} (${peerCandidateChildId})
+[Peer]
+PublicKey = ${config.peers_config[peerCandidateChildId].publicKey}
+PresharedKey = ${peerCandidateChild.preSharedKey}
+AllowedIPs = ${config.peers_config[peerCandidateChildId].address}/32
+PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
+Endpoint = TODO
+`;
+          }
+        }
+
+        for (const [peerCandidateChildId, peerCandidateChild] of Object.entries(peerCandidate.peers)) {
+          queue.enqueue([peerCandidateChildId, peerCandidateChild]);
+          if (peerCandidateChildId === peerId) {
+            conf += `
+# Peer: ${config.peers_config[peerCandidateId].name} (${peerCandidateId})
+[Peer]
+PublicKey = ${config.peers_config[peerCandidateId].publicKey}
+PresharedKey = ${peerCandidateChild.preSharedKey}
+AllowedIPs = ${config.peers_config[peerCandidateId].address}/32
+PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
+Endpoint = TODO
+`;
+          }
+        }
+      }
+    }
+    // TODO: allow peers to forward depth>1 packets
+    // TODO: endpoints
+    return conf;
   }
 
   async getClientQRCodeSVG({ clientId }) {
@@ -253,7 +314,7 @@ Endpoint = ${WG_HOST}:${WG_PORT}`;
 
     // Create Client
     const clientId = uuid.v4();
-    config.network_map.self.peers[clientId] = {
+    config.peers[clientId] = {
       preSharedKey,
       enabled: true,
       peers: {},
@@ -278,7 +339,7 @@ Endpoint = ${WG_HOST}:${WG_PORT}`;
 
     if (config.peers_config[clientId]) {
       delete config.peers_config[clientId];
-      delete config.network_map.self.peers[clientId];
+      delete config.peers[clientId];
       await this.saveConfig();
     }
 
@@ -288,7 +349,7 @@ Endpoint = ${WG_HOST}:${WG_PORT}`;
   async enableClient({ clientId }) {
     const config = await this.getConfig();
 
-    config.network_map.self.peers[clientId].enabled = true;
+    config.peers[clientId].enabled = true;
     config.peers_config[clientId].updatedAt = new Date();
 
     // TODO: add the option to enable/disable specific connections in the map
@@ -299,7 +360,7 @@ Endpoint = ${WG_HOST}:${WG_PORT}`;
   async disableClient({ clientId }) {
     const config = await this.getConfig();
 
-    config.network_map.self.peers[clientId].enabled = false;
+    config.peers[clientId].enabled = false;
     config.peers_config[clientId].updatedAt = new Date();
 
     // TODO: add the option to enable/disable specific connections in the map
