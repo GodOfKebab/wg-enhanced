@@ -47,12 +47,15 @@ module.exports = class WireGuard {
           const address = WG_DEFAULT_ADDRESS.replace('x', '1');
 
           config = {
-            server: {
-              privateKey,
-              publicKey,
-              address,
+            network_map: {
+              self: {
+                privateKey,
+                publicKey,
+                address,
+                peers: {},
+              },
             },
-            clients: {},
+            peers_config: {},
           };
           debug('Configuration generated.');
         }
@@ -92,23 +95,25 @@ module.exports = class WireGuard {
 
 # Server
 [Interface]
-PrivateKey = ${config.server.privateKey}
-Address = ${config.server.address}/24
+PrivateKey = ${config.network_map.self.privateKey}
+Address = ${config.network_map.self.address}/24
 ListenPort = 51820
 PostUp = ${WG_POST_UP}
 PostDown = ${WG_POST_DOWN}
 `;
 
-    for (const [clientId, client] of Object.entries(config.clients)) {
-      if (!client.enabled) continue;
+    for (const [peerId, peer] of Object.entries(config.network_map.self.peers)) {
+      if (!peer.enabled) continue;
+
+      const peerConfig = { ...peer, ...config.peers_config[peerId] };
 
       result += `
 
-# Client: ${client.name} (${clientId})
+# Client: ${peerConfig.name} (${peerId})
 [Peer]
-PublicKey = ${client.publicKey}
-PresharedKey = ${client.preSharedKey}
-AllowedIPs = ${client.address}/32`;
+PublicKey = ${peerConfig.publicKey}
+PresharedKey = ${peerConfig.preSharedKey}
+AllowedIPs = ${peerConfig.address}/32`;
     }
 
     debug('Config saving...');
@@ -129,16 +134,15 @@ AllowedIPs = ${client.address}/32`;
 
   async getClients() {
     const config = await this.getConfig();
-    const clients = Object.entries(config.clients).map(([clientId, client]) => ({
+    const clients = Object.entries(config.network_map.self.peers).map(([clientId, client]) => ({
       id: clientId,
-      name: client.name,
+      name: config.peers_config[clientId]['name'],
       enabled: client.enabled,
-      address: client.address,
-      publicKey: client.publicKey,
-      createdAt: new Date(client.createdAt),
-      updatedAt: new Date(client.updatedAt),
-      allowedIPs: client.allowedIPs,
-      config: client.config,
+      address: config.peers_config[clientId]['address'],
+      publicKey: config.peers_config[clientId]['publicKey'],
+      createdAt: new Date(config.peers_config[clientId]['createdAt']),
+      updatedAt: new Date(config.peers_config[clientId]['updatedAt']),
+      allowedIPs: null,
 
       persistentKeepalive: null,
       latestHandshakeAt: null,
@@ -182,7 +186,7 @@ AllowedIPs = ${client.address}/32`;
 
   async getClient({ clientId }) {
     const config = await this.getConfig();
-    const client = config.clients[clientId];
+    const client = { ...config.network_map.self.peers[clientId], ...config.peers_config[clientId] };
     if (!client) {
       throw new ServerError(`Client Not Found: ${clientId}`, 404);
     }
@@ -202,11 +206,13 @@ ${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}` : ''}
 ${WG_MTU ? `MTU = ${WG_MTU}` : ''}
 
 [Peer]
-PublicKey = ${config.server.publicKey}
+PublicKey = ${config.network_map.self.publicKey}
 PresharedKey = ${client.preSharedKey}
 AllowedIPs = ${WG_ALLOWED_IPS}
 PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
 Endpoint = ${WG_HOST}:${WG_PORT}`;
+
+  //  TODO: for loop over the client.peers and add to the config
   }
 
   async getClientQRCodeSVG({ clientId }) {
@@ -231,7 +237,7 @@ Endpoint = ${WG_HOST}:${WG_PORT}`;
     // Calculate next IP
     let address;
     for (let i = 2; i < 255; i++) {
-      const client = Object.values(config.clients).find(client => {
+      const client = Object.values(config.peers_config).find(client => {
         return client.address === WG_DEFAULT_ADDRESS.replace('x', i);
       });
 
@@ -247,20 +253,22 @@ Endpoint = ${WG_HOST}:${WG_PORT}`;
 
     // Create Client
     const clientId = uuid.v4();
-    const client = {
+    config.network_map.self.peers[clientId] = {
+      preSharedKey,
+      enabled: true,
+      peers: {},
+    };
+    config.peers_config[clientId] = {
       name,
       address,
       privateKey,
       publicKey,
-      preSharedKey,
 
       createdAt: new Date(),
       updatedAt: new Date(),
-
-      enabled: true,
     };
 
-    config.clients[clientId] = client;
+    // TODO: add the option to specify where to connect the new peer
 
     await this.saveConfig();
   }
@@ -268,48 +276,55 @@ Endpoint = ${WG_HOST}:${WG_PORT}`;
   async deleteClient({ clientId }) {
     const config = await this.getConfig();
 
-    if (config.clients[clientId]) {
-      delete config.clients[clientId];
+    if (config.peers_config[clientId]) {
+      delete config.peers_config[clientId];
+      delete config.network_map.self.peers[clientId];
       await this.saveConfig();
     }
+
+  //  TODO: add the option to delete specific connections in the map
   }
 
   async enableClient({ clientId }) {
-    const client = await this.getClient({ clientId });
+    const config = await this.getConfig();
 
-    client.enabled = true;
-    client.updatedAt = new Date();
+    config.network_map.self.peers[clientId].enabled = true;
+    config.peers_config[clientId].updatedAt = new Date();
+
+    // TODO: add the option to enable/disable specific connections in the map
 
     await this.saveConfig();
   }
 
   async disableClient({ clientId }) {
-    const client = await this.getClient({ clientId });
+    const config = await this.getConfig();
 
-    client.enabled = false;
-    client.updatedAt = new Date();
+    config.network_map.self.peers[clientId].enabled = false;
+    config.peers_config[clientId].updatedAt = new Date();
+
+    // TODO: add the option to enable/disable specific connections in the map
 
     await this.saveConfig();
   }
 
   async updateClientName({ clientId, name }) {
-    const client = await this.getClient({ clientId });
+    const config = await this.getConfig();
 
-    client.name = name;
-    client.updatedAt = new Date();
+    config.peers_config[clientId].name = name;
+    config.peers_config[clientId].updatedAt = new Date();
 
     await this.saveConfig();
   }
 
   async updateClientAddress({ clientId, address }) {
-    const client = await this.getClient({ clientId });
+    const config = await this.getConfig();
 
     if (!Util.isValidIPv4(address)) {
       throw new ServerError(`Invalid Address: ${address}`, 400);
     }
 
-    client.address = address;
-    client.updatedAt = new Date();
+    config.peers_config[clientId].address = address;
+    config.peers_config[clientId].updatedAt = new Date();
 
     await this.saveConfig();
   }
