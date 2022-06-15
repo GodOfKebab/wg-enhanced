@@ -112,7 +112,7 @@ PostDown = ${WG_POST_DOWN}
 
       result += `
 
-# Client: ${peerConfig.name} (${peerId})
+# Peer: ${peerConfig.name} (${peerId})
 [Peer]
 PublicKey = ${peerConfig.publicKey}
 PresharedKey = ${peerConfig.preSharedKey}
@@ -142,16 +142,16 @@ AllowedIPs = ${peerConfig.address}/32`;
     debug('Config synced.');
   }
 
-  async getClients() {
+  async getPeers() {
     const config = await this.getConfig();
-    const clients = Object.entries(config.peers).map(([clientId, client]) => ({
-      id: clientId,
-      name: config.peers_config[clientId]['name'],
-      enabled: client.enabled,
-      address: config.peers_config[clientId]['address'],
-      publicKey: config.peers_config[clientId]['publicKey'],
-      createdAt: new Date(config.peers_config[clientId]['createdAt']),
-      updatedAt: new Date(config.peers_config[clientId]['updatedAt']),
+    const peers = Object.entries(config.peers).map(([peerId, peer]) => ({
+      id: peerId,
+      name: config.peers_config[peerId]['name'],
+      enabled: peer.enabled,
+      address: config.peers_config[peerId]['address'],
+      publicKey: config.peers_config[peerId]['publicKey'],
+      createdAt: new Date(config.peers_config[peerId]['createdAt']),
+      updatedAt: new Date(config.peers_config[peerId]['updatedAt']),
       allowedIPs: null,
 
       persistentKeepalive: null,
@@ -180,22 +180,21 @@ AllowedIPs = ${peerConfig.address}/32`;
           persistentKeepalive,
         ] = line.split('\t');
 
-        const client = clients.find(client => client.publicKey === publicKey);
-        if (!client) return;
+        const peer = peers.find(peer => peer.publicKey === publicKey);
+        if (!peer) return;
 
-        client.latestHandshakeAt = latestHandshakeAt === '0'
+        peer.latestHandshakeAt = latestHandshakeAt === '0'
           ? null
           : new Date(Number(`${latestHandshakeAt}000`));
-        client.transferRx = Number(transferRx);
-        client.transferTx = Number(transferTx);
-        client.persistentKeepalive = persistentKeepalive;
+        peer.transferRx = Number(transferRx);
+        peer.transferTx = Number(transferTx);
+        peer.persistentKeepalive = persistentKeepalive;
       });
 
-    return clients;
+    return peers;
   }
 
-  async getPeer({ clientId }) {
-    const peerId = clientId;
+  async getPeer({ peerId }) {
     const config = await this.getConfig();
     const peer = config.peers_config[peerId];
     if (!peer) {
@@ -205,10 +204,9 @@ AllowedIPs = ${peerConfig.address}/32`;
     return peer;
   }
 
-  async getClientConfiguration({ clientId }) {
-    const peerId = clientId;
+  async getPeerConfiguration({ peerId }) {
     const config = await this.getConfig();
-    let peerConf = await this.getPeer({ clientId });
+    let peerConf = await this.getPeer({ peerId });
 
     let conf = `
 [Interface]
@@ -276,15 +274,15 @@ Endpoint = TODO
     return conf;
   }
 
-  async getClientQRCodeSVG({ clientId }) {
-    const config = await this.getClientConfiguration({ clientId });
+  async getPeerQRCodeSVG({ peerId }) {
+    const config = await this.getPeerConfiguration({ peerId });
     return QRCode.toString(config, {
       type: 'svg',
       width: 512,
     });
   }
 
-  async createClient({ name }) {
+  async createPeer({ name }) {
     if (!name) {
       throw new Error('Missing: Name');
     }
@@ -298,28 +296,28 @@ Endpoint = TODO
     // Calculate next IP
     let address;
     for (let i = 2; i < 255; i++) {
-      const client = Object.values(config.peers_config).find(client => {
-        return client.address === WG_DEFAULT_ADDRESS.replace('x', i);
+      const peer = Object.values(config.peers_config).find(peer => {
+        return peer.address === WG_DEFAULT_ADDRESS.replace('x', i);
       });
 
-      if (!client) {
+      if (!peer) {
         address = WG_DEFAULT_ADDRESS.replace('x', i);
         break;
       }
     }
 
     if (!address) {
-      throw new Error('Maximum number of clients reached.');
+      throw new Error('Maximum number of peers reached.');
     }
 
-    // Create Client
-    const clientId = uuid.v4();
-    config.peers[clientId] = {
+    // Create Peer
+    const peerId = uuid.v4();
+    config.peers[peerId] = {
       preSharedKey,
       enabled: true,
       peers: {},
     };
-    config.peers_config[clientId] = {
+    config.peers_config[peerId] = {
       name,
       address,
       privateKey,
@@ -334,58 +332,58 @@ Endpoint = TODO
     await this.saveConfig();
   }
 
-  async deleteClient({ clientId }) {
+  async deletePeer({ peerId }) {
     const config = await this.getConfig();
 
-    if (config.peers_config[clientId]) {
-      delete config.peers_config[clientId];
-      delete config.peers[clientId];
+    if (config.peers_config[peerId]) {
+      delete config.peers_config[peerId];
+      delete config.peers[peerId];
       await this.saveConfig();
     }
 
   //  TODO: add the option to delete specific connections in the map
   }
 
-  async enableClient({ clientId }) {
+  async enablePeer({ peerId }) {
     const config = await this.getConfig();
 
-    config.peers[clientId].enabled = true;
-    config.peers_config[clientId].updatedAt = new Date();
+    config.peers[peerId].enabled = true;
+    config.peers_config[peerId].updatedAt = new Date();
 
     // TODO: add the option to enable/disable specific connections in the map
 
     await this.saveConfig();
   }
 
-  async disableClient({ clientId }) {
+  async disablePeer({ peerId }) {
     const config = await this.getConfig();
 
-    config.peers[clientId].enabled = false;
-    config.peers_config[clientId].updatedAt = new Date();
+    config.peers[peerId].enabled = false;
+    config.peers_config[peerId].updatedAt = new Date();
 
     // TODO: add the option to enable/disable specific connections in the map
 
     await this.saveConfig();
   }
 
-  async updateClientName({ clientId, name }) {
+  async updatePeerName({ peerId, name }) {
     const config = await this.getConfig();
 
-    config.peers_config[clientId].name = name;
-    config.peers_config[clientId].updatedAt = new Date();
+    config.peers_config[peerId].name = name;
+    config.peers_config[peerId].updatedAt = new Date();
 
     await this.saveConfig();
   }
 
-  async updateClientAddress({ clientId, address }) {
+  async updatePeerAddress({ peerId, address }) {
     const config = await this.getConfig();
 
     if (!Util.isValidIPv4(address)) {
       throw new ServerError(`Invalid Address: ${address}`, 400);
     }
 
-    config.peers_config[clientId].address = address;
-    config.peers_config[clientId].updatedAt = new Date();
+    config.peers_config[peerId].address = address;
+    config.peers_config[peerId].updatedAt = new Date();
 
     await this.saveConfig();
   }
