@@ -82,7 +82,7 @@
             </div>
             <div class="flex-shrink-0">
               <button @click="peerCreate = true; peerCreateName = '';"
-                class="hover:bg-red-800 hover:border-red-800 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
+                class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -226,7 +226,7 @@
                     </div>
 
                     <!-- Show QR-->
-                    <button class="align-middle bg-gray-100 hover:bg-red-800 hover:text-white p-2 rounded transition"
+                    <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
                       title="Show QR Code" @click="qrcode = `./api/wireguard/peer/${peer.id}/qrcode.svg`">
                       <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -237,7 +237,7 @@
 
                     <!-- Download Config -->
                     <a :href="'./api/wireguard/peer/' + peer.id + '/configuration'" download
-                      class="align-middle inline-block bg-gray-100 hover:bg-red-800 hover:text-white p-2 rounded transition"
+                      class="align-middle inline-block bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
                       title="Download Configuration">
                       <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -247,7 +247,7 @@
                     </a>
 
                     <!-- Delete -->
-                    <button class="align-middle bg-gray-100 hover:bg-red-800 hover:text-white p-2 rounded transition"
+                    <button class="align-middle bg-gray-100 hover:bg-red-600 hover:text-white p-2 rounded transition"
                       title="Delete Peer" @click="peerDelete = peer">
                       <svg class="w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd"
@@ -336,7 +336,7 @@
               <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div class="sm:flex sm:items-start">
                   <div
-                    class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-800 sm:mx-0 sm:h-10 sm:w-10">
+                    class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-700 sm:mx-0 sm:h-10 sm:w-10">
                     <svg class="h-6 w-6 text-white" inline xmlns="http://www.w3.org/2000/svg" fill="none"
                       viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -358,7 +358,7 @@
               </div>
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button v-if="peerCreateName.length" type="button" @click="createPeer(); peerCreate = null"
-                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-800 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
                   Create
                 </button>
                 <button v-else type="button"
