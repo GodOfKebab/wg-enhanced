@@ -248,7 +248,7 @@ PublicKey = ${config.peers_config[peerCandidateChildId].publicKey}
 PresharedKey = ${peerCandidateChild.preSharedKey}
 AllowedIPs = ${config.peers_config[peerCandidateChildId].address}/32
 PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
-Endpoint = TODO
+# Endpoint = TODO
 `;
           }
         }
@@ -263,7 +263,7 @@ PublicKey = ${config.peers_config[peerCandidateId].publicKey}
 PresharedKey = ${peerCandidateChild.preSharedKey}
 AllowedIPs = ${config.peers_config[peerCandidateId].address}/32
 PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
-Endpoint = TODO
+# Endpoint = TODO
 `;
           }
         }
