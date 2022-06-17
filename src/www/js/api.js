@@ -58,69 +58,69 @@ class API {
     });
   }
 
-  async getClients() {
+  async getPeers() {
     return this.call({
       method: 'get',
-      path: '/wireguard/client',
-    }).then(clients => clients.map(client => ({
-      ...client,
-      createdAt: new Date(client.createdAt),
-      updatedAt: new Date(client.updatedAt),
-      latestHandshakeAt: client.latestHandshakeAt !== null
-        ? new Date(client.latestHandshakeAt)
+      path: '/wireguard/peer',
+    }).then(peers => peers.map(peer => ({
+      ...peer,
+      createdAt: new Date(peer.createdAt),
+      updatedAt: new Date(peer.updatedAt),
+      latestHandshakeAt: peer.latestHandshakeAt !== null
+        ? new Date(peer.latestHandshakeAt)
         : null,
     })));
   }
 
-  async createClient({ name }) {
+  async createPeer({ name }) {
     return this.call({
       method: 'post',
-      path: '/wireguard/client',
+      path: '/wireguard/peer',
       body: { name },
     });
   }
 
-  async deleteClient({ clientId }) {
+  async deletePeer({ peerId }) {
     return this.call({
       method: 'delete',
-      path: `/wireguard/client/${clientId}`,
+      path: `/wireguard/peer/${peerId}`,
     });
   }
 
-  async enableClient({ clientId }) {
+  async enablePeer({ peerId }) {
     return this.call({
       method: 'post',
-      path: `/wireguard/client/${clientId}/enable`,
+      path: `/wireguard/peer/${peerId}/enable`,
     });
   }
 
-  async disableClient({ clientId }) {
+  async disablePeer({ peerId }) {
     return this.call({
       method: 'post',
-      path: `/wireguard/client/${clientId}/disable`,
+      path: `/wireguard/peer/${peerId}/disable`,
     });
   }
 
-  async updateClientName({ clientId, name }) {
+  async updatePeerName({ peerId, name }) {
     return this.call({
       method: 'put',
-      path: `/wireguard/client/${clientId}/name/`,
+      path: `/wireguard/peer/${peerId}/name/`,
       body: { name },
     });
   }
 
-  async updateClientAddress({ clientId, address }) {
+  async updatePeerAddress({ peerId, address }) {
     return this.call({
       method: 'put',
-      path: `/wireguard/client/${clientId}/address/`,
+      path: `/wireguard/peer/${peerId}/address/`,
       body: { address },
     });
   }
 
-  async getClientConf({ clientId }) {
+  async getPeerConf({ peerId }) {
     return this.call({
       method: 'get',
-      path: `/wireguard/client/${clientId}/client.conf`,
+      path: `/wireguard/peer/${peerId}/peer.conf`,
     });
   }
 

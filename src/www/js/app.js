@@ -34,16 +34,16 @@ new Vue({
     password: null,
     requiresPassword: null,
 
-    clients: null,
-    clientsPersist: {},
-    clientDelete: null,
-    clientCreate: null,
-    clientConfig: null,
-    clientCreateName: '',
-    clientEditName: null,
-    clientEditNameId: null,
-    clientEditAddress: null,
-    clientEditAddressId: null,
+    peers: null,
+    peersPersist: {},
+    peerDelete: null,
+    peerCreate: null,
+    peerConfig: null,
+    peerCreateName: '',
+    peerEditName: null,
+    peerEditNameId: null,
+    peerEditAddress: null,
+    peerEditAddressId: null,
     qrcode: null,
 
     webServerStatus: 'unknown',
@@ -146,63 +146,63 @@ new Vue({
       });
       if (this.wireguardStatus !== 'up') return;
 
-      // Get WirGuard Clients
-      await this.api.getClients().then(clients => {
-        this.clients = clients.map(client => {
-          if (client.name.includes('@') && client.name.includes('.')) {
-            client.avatar = `https://www.gravatar.com/avatar/${md5(client.name)}?d=blank`;
+      // Get WirGuard Peers
+      await this.api.getPeers().then(peers => {
+        this.peers = peers.map(peer => {
+          if (peer.name.includes('@') && peer.name.includes('.')) {
+            peer.avatar = `https://www.gravatar.com/avatar/${md5(peer.name)}?d=blank`;
           }
 
-          if (!this.clientsPersist[client.id]) {
-            this.clientsPersist[client.id] = {};
-            this.clientsPersist[client.id].transferRxHistory = Array(20).fill(0);
-            this.clientsPersist[client.id].transferRxPrevious = client.transferRx;
-            this.clientsPersist[client.id].transferTxHistory = Array(20).fill(0);
-            this.clientsPersist[client.id].transferTxPrevious = client.transferTx;
+          if (!this.peersPersist[peer.id]) {
+            this.peersPersist[peer.id] = {};
+            this.peersPersist[peer.id].transferRxHistory = Array(20).fill(0);
+            this.peersPersist[peer.id].transferRxPrevious = peer.transferRx;
+            this.peersPersist[peer.id].transferTxHistory = Array(20).fill(0);
+            this.peersPersist[peer.id].transferTxPrevious = peer.transferTx;
 
-            this.clientsPersist[client.id].chartOptions = {
+            this.peersPersist[peer.id].chartOptions = {
               ...this.chartOptions,
               yaxis: {
                 ...this.chartOptions.yaxis,
-                max: () => this.clientsPersist[client.id].chartMax,
+                max: () => this.peersPersist[peer.id].chartMax,
               },
             };
           }
 
-          this.clientsPersist[client.id].transferRxCurrent = client.transferRx - this.clientsPersist[client.id].transferRxPrevious;
-          this.clientsPersist[client.id].transferRxPrevious = client.transferRx;
-          this.clientsPersist[client.id].transferTxCurrent = client.transferTx - this.clientsPersist[client.id].transferTxPrevious;
-          this.clientsPersist[client.id].transferTxPrevious = client.transferTx;
+          this.peersPersist[peer.id].transferRxCurrent = peer.transferRx - this.peersPersist[peer.id].transferRxPrevious;
+          this.peersPersist[peer.id].transferRxPrevious = peer.transferRx;
+          this.peersPersist[peer.id].transferTxCurrent = peer.transferTx - this.peersPersist[peer.id].transferTxPrevious;
+          this.peersPersist[peer.id].transferTxPrevious = peer.transferTx;
 
-          this.clientsPersist[client.id].transferRxHistory.push(this.clientsPersist[client.id].transferRxCurrent);
-          this.clientsPersist[client.id].transferRxHistory.shift();
+          this.peersPersist[peer.id].transferRxHistory.push(this.peersPersist[peer.id].transferRxCurrent);
+          this.peersPersist[peer.id].transferRxHistory.shift();
 
-          this.clientsPersist[client.id].transferTxHistory.push(this.clientsPersist[client.id].transferTxCurrent);
-          this.clientsPersist[client.id].transferTxHistory.shift();
+          this.peersPersist[peer.id].transferTxHistory.push(this.peersPersist[peer.id].transferTxCurrent);
+          this.peersPersist[peer.id].transferTxHistory.shift();
 
-          client.transferTxCurrent = this.clientsPersist[client.id].transferTxCurrent;
-          client.transferTxSeries = [{
+          peer.transferTxCurrent = this.peersPersist[peer.id].transferTxCurrent;
+          peer.transferTxSeries = [{
             name: 'tx',
-            data: this.clientsPersist[client.id].transferTxHistory,
+            data: this.peersPersist[peer.id].transferTxHistory,
           }];
 
-          client.transferRxCurrent = this.clientsPersist[client.id].transferRxCurrent;
-          client.transferRxSeries = [{
+          peer.transferRxCurrent = this.peersPersist[peer.id].transferRxCurrent;
+          peer.transferRxSeries = [{
             name: 'rx',
-            data: this.clientsPersist[client.id].transferRxHistory,
+            data: this.peersPersist[peer.id].transferRxHistory,
           }];
 
-          this.clientsPersist[client.id].chartMax = Math.max(...this.clientsPersist[client.id].transferTxHistory, ...this.clientsPersist[client.id].transferRxHistory);
+          this.peersPersist[peer.id].chartMax = Math.max(...this.peersPersist[peer.id].transferTxHistory, ...this.peersPersist[peer.id].transferRxHistory);
 
-          client.chartOptions = this.clientsPersist[client.id].chartOptions;
+          peer.chartOptions = this.peersPersist[peer.id].chartOptions;
 
-          return client;
+          return peer;
         });
       }).catch(err => {
         if (err.toString() === 'TypeError: Load failed') {
           this.webServerStatus = 'down';
         } else {
-          console.log('getClients error =>');
+          console.log('getPeers error =>');
           console.log(err);
         }
       });
@@ -237,51 +237,51 @@ new Vue({
       this.api.deleteSession()
         .then(() => {
           this.authenticated = false;
-          this.clients = null;
+          this.peers = null;
         })
         .catch(err => {
           alert(err.message || err.toString());
         });
     },
-    createClient() {
-      const name = this.clientCreateName;
+    createPeer() {
+      const name = this.peerCreateName;
       if (!name) return;
 
-      this.api.createClient({ name })
+      this.api.createPeer({ name })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    deleteClient(client) {
-      this.api.deleteClient({ clientId: client.id })
+    deletePeer(peer) {
+      this.api.deletePeer({ peerId: peer.id })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    enableClient(client) {
-      this.api.enableClient({ clientId: client.id })
+    enablePeer(peer) {
+      this.api.enablePeer({ peerId: peer.id })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    disableClient(client) {
-      this.api.disableClient({ clientId: client.id })
+    disablePeer(peer) {
+      this.api.disablePeer({ peerId: peer.id })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    updateClientName(client, name) {
-      this.api.updateClientName({ clientId: client.id, name })
+    updatePeerName(peer, name) {
+      this.api.updatePeerName({ peerId: peer.id, name })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    updateClientAddress(client, address) {
-      this.api.updateClientAddress({ clientId: client.id, address })
+    updatePeerAddress(peer, address) {
+      this.api.updatePeerAddress({ peerId: peer.id, address })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    getClientConf(client) {
-      this.api.getClientConf({ clientId: client.id })
+    getPeerConf(peer) {
+      this.api.getPeerConf({ peerId: peer.id })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error))
         .then(res => {
-          client.config = res;
+          peer.config = res;
         });
     },
     toggleWireGuardNetworking() {

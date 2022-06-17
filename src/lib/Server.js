@@ -86,26 +86,26 @@ module.exports = class Server {
 
         debug(`Deleted Session: ${sessionId}`);
       }))
-      .get('/api/wireguard/client', Util.promisify(async req => {
-        return WireGuard.getClients();
+      .get('/api/wireguard/peer', Util.promisify(async req => {
+        return WireGuard.getPeers();
       }))
-      .get('/api/wireguard/client/:clientId/qrcode.svg', Util.promisify(async (req, res) => {
-        const { clientId } = req.params;
-        const svg = await WireGuard.getClientQRCodeSVG({ clientId });
+      .get('/api/wireguard/peer/:peerId/qrcode.svg', Util.promisify(async (req, res) => {
+        const { peerId } = req.params;
+        const svg = await WireGuard.getPeerQRCodeSVG({ peerId });
         res.header('Content-Type', 'image/svg+xml');
         res.send(svg);
       }))
-      .get('/api/wireguard/client/:clientId/client.conf', Util.promisify(async (req, res) => {
-        const { clientId } = req.params;
-        const config = await WireGuard.getClientConfiguration({ clientId });
+      .get('/api/wireguard/peer/:peerId/peer.conf', Util.promisify(async (req, res) => {
+        const { peerId } = req.params;
+        const config = await WireGuard.getPeerConfiguration({ peerId });
         res.header('Content-Type', 'application/json');
         res.send(JSON.stringify(config));
       }))
-      .get('/api/wireguard/client/:clientId/configuration', Util.promisify(async (req, res) => {
-        const { clientId } = req.params;
-        const client = await WireGuard.getClient({ clientId });
-        const config = await WireGuard.getClientConfiguration({ clientId });
-        const configName = client.name.replace(/[^a-zA-Z0-9_=+.-]/g, '-').replace(/(-{2,}|-$)/g, '-').replace(/-$/, '').substring(0, 32);
+      .get('/api/wireguard/peer/:peerId/configuration', Util.promisify(async (req, res) => {
+        const { peerId } = req.params;
+        const peer = await WireGuard.getPeer({ peerId });
+        const config = await WireGuard.getPeerConfiguration({ peerId });
+        const configName = peer.name.replace(/[^a-zA-Z0-9_=+.-]/g, '-').replace(/(-{2,}|-$)/g, '-').replace(/-$/, '').substring(0, 32);
         res.header('Content-Disposition', `attachment; filename="${configName}.conf"`);
         res.header('Content-Type', 'text/plain');
         res.send(config);
@@ -114,21 +114,21 @@ module.exports = class Server {
         res.header('Content-Type', 'application/json');
         res.send(JSON.stringify({ status: await WireGuard.getServerStatus() }));
       }))
-      .post('/api/wireguard/client', Util.promisify(async req => {
+      .post('/api/wireguard/peer', Util.promisify(async req => {
         const { name } = req.body;
-        return WireGuard.createClient({ name });
+        return WireGuard.createPeer({ name });
       }))
-      .delete('/api/wireguard/client/:clientId', Util.promisify(async req => {
-        const { clientId } = req.params;
-        return WireGuard.deleteClient({ clientId });
+      .delete('/api/wireguard/peer/:peerId', Util.promisify(async req => {
+        const { peerId } = req.params;
+        return WireGuard.deletePeer({ peerId });
       }))
-      .post('/api/wireguard/client/:clientId/enable', Util.promisify(async req => {
-        const { clientId } = req.params;
-        return WireGuard.enableClient({ clientId });
+      .post('/api/wireguard/peer/:peerId/enable', Util.promisify(async req => {
+        const { peerId } = req.params;
+        return WireGuard.enablePeer({ peerId });
       }))
-      .post('/api/wireguard/client/:clientId/disable', Util.promisify(async req => {
-        const { clientId } = req.params;
-        return WireGuard.disableClient({ clientId });
+      .post('/api/wireguard/peer/:peerId/disable', Util.promisify(async req => {
+        const { peerId } = req.params;
+        return WireGuard.disablePeer({ peerId });
       }))
       .post('/api/wireguard/server/enable', Util.promisify(async req => {
         return WireGuard.enableServer();
@@ -136,15 +136,15 @@ module.exports = class Server {
       .post('/api/wireguard/server/disable', Util.promisify(async req => {
         return WireGuard.disableServer();
       }))
-      .put('/api/wireguard/client/:clientId/name', Util.promisify(async req => {
-        const { clientId } = req.params;
+      .put('/api/wireguard/peer/:peerId/name', Util.promisify(async req => {
+        const { peerId } = req.params;
         const { name } = req.body;
-        return WireGuard.updateClientName({ clientId, name });
+        return WireGuard.updatePeerName({ peerId, name });
       }))
-      .put('/api/wireguard/client/:clientId/address', Util.promisify(async req => {
-        const { clientId } = req.params;
+      .put('/api/wireguard/peer/:peerId/address', Util.promisify(async req => {
+        const { peerId } = req.params;
         const { address } = req.body;
-        return WireGuard.updateClientAddress({ clientId, address });
+        return WireGuard.updatePeerAddress({ peerId, address });
       }))
 
       .listen(PORT, () => {
