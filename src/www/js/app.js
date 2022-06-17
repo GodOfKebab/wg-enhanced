@@ -135,14 +135,9 @@ new Vue({
         } else if (wgStatus['status'] === 'down') {
           this.wireguardStatus = 'down';
         }
-      }).catch(err => {
+      }).catch(() => {
+        this.webServerStatus = 'down';
         this.wireguardStatus = 'unknown';
-        if (err.toString() === 'TypeError: Load failed') {
-          this.webServerStatus = 'down';
-        } else {
-          console.log('getWirGuardStatus error =>');
-          console.log(err);
-        }
       });
       if (this.wireguardStatus !== 'up') return;
 
