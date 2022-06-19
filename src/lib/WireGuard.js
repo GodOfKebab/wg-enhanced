@@ -152,6 +152,7 @@ AllowedIPs = ${peerConfig.address}/32`;
       publicKey: config.peers_config[peerId]['publicKey'],
       createdAt: new Date(config.peers_config[peerId]['createdAt']),
       updatedAt: new Date(config.peers_config[peerId]['updatedAt']),
+      roamingStatus: config.peers_config[peerId]['roamingStatus'],
       allowedIPs: null,
 
       persistentKeepalive: null,
