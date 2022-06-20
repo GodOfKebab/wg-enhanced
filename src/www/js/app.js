@@ -50,7 +50,7 @@ new Vue({
     wireguardStatus: 'unknown',
     wireguardToggleTo: null,
 
-    staticPeerCreateShowAdvance: false,
+    peerCreateShowAdvance: false,
 
     currentRelease: null,
     latestRelease: null,

@@ -98,7 +98,7 @@
               <p class="text-2xl font-medium">Static Peers</p>
             </div>
             <div class="flex-shrink-0">
-              <button @click="peerCreate = true; peerCreateName = ''; staticPeerCreateShowAdvance = false;"
+              <button @click="peerCreate = 'static'; peerCreateName = ''; peerCreateShowAdvance = false;"
                       class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
@@ -316,7 +316,7 @@
               <p class="text-2xl font-medium">Roaming Peers</p>
             </div>
             <div class="flex-shrink-0">
-              <button @click="peerCreate = true; peerCreateName = '';"
+              <button @click="peerCreate = 'roaming'; peerCreateName = '';"
                 class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
@@ -591,13 +591,13 @@
                       </p>
                     </div>
                     <div class="mt-2">
-                      <button type="button" @click="staticPeerCreateShowAdvance = !staticPeerCreateShowAdvance;">
+                      <button type="button" @click="peerCreateShowAdvance = !peerCreateShowAdvance;">
                         <span class="text-sm text-gray-500 hover:underline">Advance settings</span>
-                        <span v-if="staticPeerCreateShowAdvance === true" class="text-sm text-gray-500 hover:underline">&#x25B2;</span>
-                        <span v-if="staticPeerCreateShowAdvance === false" class="text-sm text-gray-500 hover:underline">&#x25BC;</span>
+                        <span v-if="peerCreateShowAdvance === true" class="text-sm text-gray-500 hover:underline">&#x25B2;</span>
+                        <span v-if="peerCreateShowAdvance === false" class="text-sm text-gray-500 hover:underline">&#x25BC;</span>
                       </button>
 
-                      <div v-if="staticPeerCreateShowAdvance === true">
+                      <div v-if="peerCreateShowAdvance === true">
                         <div class="m-2 p-1 bg-emerald-50 shadow-md border rounded">
                           <div class="text-gray-800">
                             Attach to these static peers:
