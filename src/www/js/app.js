@@ -50,6 +50,8 @@ new Vue({
     wireguardStatus: 'unknown',
     wireguardToggleTo: null,
 
+    staticPeerCreateShowAdvance: false,
+
     currentRelease: null,
     latestRelease: null,
 
@@ -292,6 +294,31 @@ new Vue({
           .finally(() => this.refresh().catch(console.error));
       }
       this.wireguardToggleTo = null;
+    },
+    handleAttachPeers(mode) {
+      const checkboxArray = [];
+      for (let i = 0; i < this.peers.length; i++) {
+        if (this.peers[i].roamingStatus === 'static') {
+          checkboxArray.push(document.getElementById(`${this.peers[i].id}checkbox`));
+        }
+      }
+      let allChecked = true;
+
+      if (mode === 'all') {
+        for (let i = 0; i < checkboxArray.length; i++) {
+          allChecked &= checkboxArray.at(i).checked;
+        }
+        for (let i = 0; i < checkboxArray.length; i++) {
+          checkboxArray.at(i).checked = !allChecked;
+        }
+      }
+
+      if (mode === 'individual') {
+        for (let i = 0; i < checkboxArray.length; i++) {
+          allChecked &= checkboxArray.at(i).checked;
+        }
+        document.getElementById('selectall checkbox').checked = allChecked;
+      }
     },
   },
   filters: {

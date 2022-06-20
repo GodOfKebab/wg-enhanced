@@ -144,15 +144,15 @@ AllowedIPs = ${peerConfig.address}/32`;
 
   async getPeers() {
     const config = await this.getConfig();
-    const peers = Object.entries(config.peers).map(([peerId, peer]) => ({
+    const peers = Object.entries(config.peers_config).map(([peerId, peer]) => ({
       id: peerId,
-      name: config.peers_config[peerId]['name'],
-      enabled: peer.enabled,
-      address: config.peers_config[peerId]['address'],
-      publicKey: config.peers_config[peerId]['publicKey'],
-      createdAt: new Date(config.peers_config[peerId]['createdAt']),
-      updatedAt: new Date(config.peers_config[peerId]['updatedAt']),
-      roamingStatus: config.peers_config[peerId]['roamingStatus'],
+      name: peer.name,
+      enabled: true,
+      address: peer.address,
+      publicKey: peer.publicKey,
+      createdAt: new Date(peer.createdAt),
+      updatedAt: new Date(peer.updatedAt),
+      roamingStatus: peer.roamingStatus,
       allowedIPs: null,
 
       persistentKeepalive: null,
