@@ -637,11 +637,11 @@
                               </div>
 
                               <div class="truncate">
-                                <label>
+<!--                                <label>-->
                                   <span class="text-gray-800 text-xs mr-1">Allowed IPs: </span>
-                                  <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1">
-                                </label>
-                                <datalist :id="peer.id + '_ip_subnets'">
+                                  <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1" style="width: 25vw;">
+<!--                                </label>-->
+                                <datalist :id="peer.id + '_ip_subnets'"  >
                                   <option :value="peer.address + '/32'">
                                     Forward all {{peer.address}}/32 related traffic to {{peer.address}}
                                   </option>
