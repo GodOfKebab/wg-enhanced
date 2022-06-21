@@ -629,21 +629,19 @@
 
                           <div v-if="attachedPeers && attachedPeers.length > 0" v-for="peer in attachedPeers" :key="peer.id"
                                  class="relative overflow-hidden">
-                            <div class="flex grid grid-cols-2 gap-1 mt-1">
+                            <div class="flex grid grid-cols-3 gap-1 mt-1">
                               <div class="truncate">
                                 <span class="text-gray-800 cursor-pointer text-xs">
                                     <strong class="text-sm">{{ peer.name }}</strong> {{ peer.address }} ({{ peer.id }})
                                 </span>
                               </div>
 
-                              <div class="truncate">
-<!--                                <label>-->
-                                  <span class="text-gray-800 text-xs mr-1">Allowed IPs: </span>
-                                  <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1" style="width: 25vw;">
-<!--                                </label>-->
+                              <div class="truncate col-span-2">
+                                  <span class="text-gray-800 text-xs mr-1">Allowed IPs:</span>
+                                  <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1" style="width: 25vw;" placeholder="click to see recommendations">
                                 <datalist :id="peer.id + '_ip_subnets'"  >
                                   <option :value="peer.address + '/32'">
-                                    Forward all {{peer.address}}/32 related traffic to {{peer.address}}
+                                    Forward all {{peer.address}} related traffic to {{peer.address}}
                                   </option>
                                   <option :value="peer.address.slice(0, -1) + '0/24'">
                                     Forward all {{peer.address.slice(0, -1) + '0-255'}} related traffic to {{peer.address}}
