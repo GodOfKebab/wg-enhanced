@@ -618,7 +618,7 @@
                               <div v-show="peer.roamingStatus === 'static'">
                                 <div class="form-check truncate">
                                   <label>
-                                    <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="peer.id + 'checkbox'" value="" @click="handleAttachPeers('individual')">
+                                    <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="peer.id + '_checkbox'" value="" @click="handleAttachPeers('individual')">
                                     <span class="text-gray-800 cursor-pointer text-xs">
                                       <strong class="text-sm">{{ peer.name }}</strong> {{ peer.address }} ({{ peer.id }})
                                     </span>
@@ -633,18 +633,17 @@
                             Network rules here...
                           </div>
 
-                          <div v-show="peers && peers.length > 0" v-for="peer in peers" :key="peer.id"
+                          <div v-for="peer in peers" :key="peer.id"
                                  class="relative overflow-hidden">
-<!--                            <div v-show="attachedPeers.includes(peer)">-->
-                              <div class="flex grid grid-cols-3 gap-1 mt-1">
-<!--                                <div v-show="attachedPeers.includes(peer)">-->
-                                <div class="truncate" v-show="attachedPeers.includes(peer)">
+                            <div v-show="attachedPeers.find(el => el.id === peer.id)">
+                              <div class="flex grid grid-cols-3 gap-1">
+                                <div class="truncate">
                                   <span class="text-gray-800 cursor-pointer text-xs">
                                       <strong class="text-sm">{{ peer.name }}</strong> {{ peer.address }} ({{ peer.id }})
                                   </span>
                                 </div>
 
-                                <div class="truncate col-span-2" v-show="attachedPeers.includes(peer)">
+                                <div class="truncate col-span-2">
                                   <span class="text-gray-800 text-xs mr-1">Allowed IPs:</span>
                                   <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" :id="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1" style="width: 25vw;" placeholder="click to see recommendations">
                                   <datalist :id="peer.id + '_ip_subnets'"  >
@@ -659,9 +658,8 @@
                                     </option>
                                   </datalist>
                                 </div>
-<!--                                </div>-->
                               </div>
-<!--                            </div>-->
+                            </div>
                           </div>
                         </div>
                       </div>

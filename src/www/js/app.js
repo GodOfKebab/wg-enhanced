@@ -300,23 +300,25 @@ new Vue({
     },
     handleAttachPeers(mode) {
       const checkboxArray = [];
+      const peersArray = this.peers.slice();
       for (let i = 0; i < this.peers.length; i++) {
-        if (this.peers[i].roamingStatus === 'static') {
-          checkboxArray.push(document.getElementById(`${this.peers[i].id}checkbox`));
+        if (peersArray.at(i).roamingStatus === 'static') {
+          checkboxArray.push(document.getElementById(`${peersArray.at(i).id}_checkbox`));
         }
       }
 
       // run when show advance is clicked
       if (mode === 'init') {
         for (let i = 0; i < this.peers.length; i++) {
-          if (this.peers[i].roamingStatus === 'static') {
-            document.getElementById(`${this.peers[i].id}checkbox`).checked = false;
+          if (peersArray.at(i).roamingStatus === 'static') {
+            document.getElementById(`${peersArray.at(i).id}_checkbox`).checked = false;
+            document.getElementById(`${peersArray.at(i).id}_ip_subnet`).value = `${peersArray.at(i).address}/32`;
           }
         }
         // enable the root server as default
-        this.attachedPeers = [this.peers[0]];
+        this.attachedPeers = [peersArray.at(0)];
         document.getElementById('selectall checkbox').checked = false;
-        document.getElementById(`rootcheckbox`).checked = true;
+        document.getElementById(`root_checkbox`).checked = true;
         document.getElementById(`root_ip_subnet`).value = '0.0.0.0/0';
         return;
       }
@@ -343,7 +345,7 @@ new Vue({
       const attachedPeersArray = [];
       for (let i = 0; i < checkboxArray.length; i++) {
         if (checkboxArray.at(i).checked) {
-          this.attachedPeers.push(this.peers[i]);
+          attachedPeersArray.push(peersArray.at(i));
         }
       }
       this.attachedPeers = attachedPeersArray;
