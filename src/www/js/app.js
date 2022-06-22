@@ -40,6 +40,7 @@ new Vue({
     peerCreate: null,
     peerConfig: null,
     peerCreateName: '',
+    peerCreateEndpoint: '',
     peerEditName: null,
     peerEditNameId: null,
     peerEditAddress: null,
@@ -51,6 +52,7 @@ new Vue({
     wireguardToggleTo: null,
 
     peerCreateShowAdvance: false,
+    peerCreateEligibility: true,
     attachedPeers: [],
 
     currentRelease: null,
@@ -297,16 +299,30 @@ new Vue({
       this.wireguardToggleTo = null;
     },
     handleAttachPeers(mode) {
-      const peersArray = [];
       const checkboxArray = [];
       for (let i = 0; i < this.peers.length; i++) {
         if (this.peers[i].roamingStatus === 'static') {
           checkboxArray.push(document.getElementById(`${this.peers[i].id}checkbox`));
-          peersArray.push(this.peers[i]);
         }
       }
-      let allChecked = true;
 
+      // run when show advance is clicked
+      if (mode === 'init') {
+        for (let i = 0; i < this.peers.length; i++) {
+          if (this.peers[i].roamingStatus === 'static') {
+            document.getElementById(`${this.peers[i].id}checkbox`).checked = false;
+          }
+        }
+        // enable the root server as default
+        this.attachedPeers = [this.peers[0]];
+        document.getElementById('selectall checkbox').checked = false;
+        document.getElementById(`rootcheckbox`).checked = true;
+        document.getElementById(`root_ip_subnet`).value = '0.0.0.0/0';
+        return;
+      }
+
+      // run when select all is clicked
+      let allChecked = true;
       if (mode === 'all') {
         for (let i = 0; i < checkboxArray.length; i++) {
           allChecked &= checkboxArray.at(i).checked;
@@ -316,6 +332,7 @@ new Vue({
         }
       }
 
+      // run when individual peer boxes are clicked
       if (mode === 'individual') {
         for (let i = 0; i < checkboxArray.length; i++) {
           allChecked &= checkboxArray.at(i).checked;
@@ -326,10 +343,17 @@ new Vue({
       const attachedPeersArray = [];
       for (let i = 0; i < checkboxArray.length; i++) {
         if (checkboxArray.at(i).checked) {
-          attachedPeersArray.push(peersArray.at(i));
+          this.attachedPeers.push(this.peers[i]);
         }
       }
       this.attachedPeers = attachedPeersArray;
+
+      // check peer create eligibility
+      // this.peerCreateEligibility = this.attachedPeers.length > 0;
+      // for (let i = 0; i < this.attachedPeers.length; i++) {
+      //   const allowedIPs = document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`);
+      //   this.peerCreateEligibility &= allowedIPs.value.length > 0;
+      // }
     },
   },
   filters: {
