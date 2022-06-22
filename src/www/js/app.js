@@ -351,11 +351,11 @@ new Vue({
       this.attachedPeers = attachedPeersArray;
 
       // check peer create eligibility
-      // this.peerCreateEligibility = this.attachedPeers.length > 0;
-      // for (let i = 0; i < this.attachedPeers.length; i++) {
-      //   const allowedIPs = document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`);
-      //   this.peerCreateEligibility &= allowedIPs.value.length > 0;
-      // }
+      this.peerCreateEligibility = this.attachedPeers.length > 0;
+      for (let i = 0; i < this.attachedPeers.length; i++) {
+        const allowedIPs = document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`);
+        this.peerCreateEligibility &= allowedIPs.value.length > 0;
+      }
     },
   },
   filters: {
