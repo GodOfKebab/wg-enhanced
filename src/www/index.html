@@ -98,7 +98,7 @@
               <p class="text-2xl font-medium">Static Peers</p>
             </div>
             <div class="flex-shrink-0">
-              <button @click="peerCreate = 'static'; peerCreateName = ''; peerCreateShowAdvance = false;"
+              <button @click="peerCreate = 'static'; handleAttachPeers('init');"
                       class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
@@ -539,7 +539,7 @@
         </div>
 
         <!-- Create Dialog -->
-        <div v-if="peerCreate" class="fixed z-10 inset-0 overflow-y-auto">
+        <div v-show="peerCreate" class="fixed z-10 inset-0 overflow-y-auto">
           <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <!--
         Background overlay, show/hide based on modal state.
@@ -587,17 +587,17 @@
                     <div class="mt-2">
                       <p class="text-sm text-gray-500">
                         <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                               type="text" v-model.trim="peerCreateName" placeholder="Name" />
+                               type="text" v-model.trim="peerCreateName" placeholder="Name" @keyup="checkPeerCreateEligibility('name')" />
                       </p>
                     </div>
                     <div class="mt-2">
                       <p class="text-sm text-gray-500">
                         <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                               type="text" v-model.trim="peerCreateEndpoint" placeholder="Endpoint" />
+                               type="text" v-model.trim="peerCreateEndpoint" placeholder="Endpoint" @keyup="checkPeerCreateEligibility('endpoint')" />
                       </p>
                     </div>
                     <div class="mt-2">
-                      <button type="button" @click="peerCreateShowAdvance = !peerCreateShowAdvance; handleAttachPeers('init');">
+                      <button type="button" @click="peerCreateShowAdvance = !peerCreateShowAdvance;">
                         <span class="text-sm text-gray-500 hover:underline">Advance settings</span>
                         <span v-show="peerCreateShowAdvance === true" class="text-sm text-gray-500 hover:underline">&#x25B2;</span>
                         <span v-show="peerCreateShowAdvance === false" class="text-sm text-gray-500 hover:underline">&#x25BC;</span>
@@ -609,7 +609,7 @@
                             Attach to these static peers:
                           </div>
                           <div class="form-check mt-1">
-                            <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="selectall checkbox" value="" @click="handleAttachPeers('all')">
+                            <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="selectall checkbox" value="" @click="handleAttachPeers('all');" >
                             <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm" for="selectall checkbox">Select All</label>
                           </div>
                           <div class="flex grid grid-cols-2 gap-1 mt-1">
@@ -645,8 +645,8 @@
 
                                 <div class="truncate col-span-2">
                                   <span class="text-gray-800 text-xs mr-1">Allowed IPs:</span>
-                                  <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" :id="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1" style="width: 25vw;" placeholder="click to see recommendations" @keyup="peerCreateEligibility = document.getElementById(`${peer.id}_ip_subnet`).value.match(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|2[0-9]|[0-9])$`);">
-                                  <datalist :id="peer.id + '_ip_subnets'"  >
+                                  <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" :id="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1" style="width: 25vw;" placeholder="click to see recommendations" @keyup="checkPeerCreateEligibility('allowedIPs')">
+                                  <datalist :id="peer.id + '_ip_subnets'">
                                     <option :value="peer.address + '/32'">
                                       Forward all {{peer.address}} related traffic to {{peer.address}}
                                     </option>
@@ -667,7 +667,7 @@
                   </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                  <button v-if="this.peerCreateName.length > 0 && this.peerCreateEndpoint.length > 7 && peerCreateEligibility" type="button" @click="createPeer(); peerCreate = null"
+                  <button v-if="peerCreateEligibility" type="button" @click="createPeer(); peerCreate = null"
                     class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
                     Create
                   </button>

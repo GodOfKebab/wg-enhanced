@@ -52,7 +52,11 @@ new Vue({
     wireguardToggleTo: null,
 
     peerCreateShowAdvance: false,
-    peerCreateEligibility: true,
+    peerCreateEligibility: false,
+    peerCreateEligibilityName: false,
+    peerCreateEligibilityEndpoint: false,
+    peerCreateEligibilityPeers: false,
+    peerCreateEligibilityAllowedIPs: false,
     attachedPeers: [],
 
     currentRelease: null,
@@ -309,6 +313,9 @@ new Vue({
 
       // run when show advance is clicked
       if (mode === 'init') {
+        this.peerCreateName = '';
+        this.peerCreateShowAdvance = false;
+
         for (let i = 0; i < this.peers.length; i++) {
           if (peersArray.at(i).roamingStatus === 'static') {
             document.getElementById(`${peersArray.at(i).id}_checkbox`).checked = false;
@@ -351,11 +358,25 @@ new Vue({
       this.attachedPeers = attachedPeersArray;
 
       // check peer create eligibility
-      this.peerCreateEligibility = this.attachedPeers.length > 0;
-      for (let i = 0; i < this.attachedPeers.length; i++) {
-        const allowedIPs = document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`);
-        this.peerCreateEligibility &= allowedIPs.value.length > 0;
-      }
+      this.checkPeerCreateEligibility('peers');
+    },
+    checkPeerCreateEligibility(mode) {
+      // if (mode === 'name') {
+        this.peerCreateEligibilityName = this.peerCreateName.length > 0;
+      // } else if (mode === 'endpoint') {
+        this.peerCreateEligibilityEndpoint = this.peerCreateEndpoint.match(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`);
+        this.peerCreateEligibilityEndpoint ||= this.peerCreateEndpoint.match(`^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}$`);
+        // this.peerCreateEligibilityEndpoint = true;
+      // } else if (mode === 'peers') {
+        this.peerCreateEligibilityPeers = this.attachedPeers.length > 0;
+      // } else if (mode === 'allowedIPs') {
+        this.peerCreateEligibilityAllowedIPs = true;
+        for (let i = 0; i < this.attachedPeers.length; i++) {
+          this.peerCreateEligibilityAllowedIPs &&= document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`).value.match(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|2[0-9]|[0-9])$`);
+        }
+      // }
+
+      this.peerCreateEligibility = this.peerCreateEligibilityName && this.peerCreateEligibilityEndpoint && this.peerCreateEligibilityPeers && this.peerCreateEligibilityAllowedIPs;
     },
   },
   filters: {
