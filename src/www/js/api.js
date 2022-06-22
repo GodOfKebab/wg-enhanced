@@ -72,11 +72,11 @@ class API {
     })));
   }
 
-  async createPeer({ name }) {
+  async createPeer({ name, endpoint, attachedPeers }) {
     return this.call({
       method: 'post',
       path: '/wireguard/peer',
-      body: { name },
+      body: { name, endpoint, attachedPeers },
     });
   }
 

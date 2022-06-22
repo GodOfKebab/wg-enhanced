@@ -283,7 +283,7 @@ PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
     });
   }
 
-  async createPeer({ name }) {
+  async createPeer({ name, endpoint, attachedPeers }) {
     if (!name) {
       throw new Error('Missing: Name');
     }
@@ -323,6 +323,7 @@ PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
       address,
       privateKey,
       publicKey,
+      endpoint,
 
       createdAt: new Date(),
       updatedAt: new Date(),

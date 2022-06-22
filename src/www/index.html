@@ -587,13 +587,13 @@
                     <div class="mt-2">
                       <p class="text-sm text-gray-500">
                         <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                               type="text" v-model.trim="peerCreateName" placeholder="Name" @keyup="checkPeerCreateEligibility('name')" />
+                               type="text" v-model.trim="peerCreateName" placeholder="Name" id="peerCreateName" @change="checkPeerCreateEligibility('name')" @keyup="checkPeerCreateEligibility('name')" />
                       </p>
                     </div>
                     <div class="mt-2">
                       <p class="text-sm text-gray-500">
                         <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                               type="text" v-model.trim="peerCreateEndpoint" placeholder="Endpoint" @keyup="checkPeerCreateEligibility('endpoint')" />
+                               type="text" v-model.trim="peerCreateEndpoint" placeholder="Endpoint (IPv4 or domain name)" id="peerCreateEndpoint" @change="checkPeerCreateEligibility('endpoint')" @keyup="checkPeerCreateEligibility('endpoint')" />
                       </p>
                     </div>
                     <div class="mt-2">
@@ -604,7 +604,7 @@
                       </button>
 
                       <div v-show="peerCreateShowAdvance === true">
-                        <div class="m-2 p-1 bg-emerald-50 shadow-md border rounded">
+                        <div class="m-2 p-1 shadow-md border rounded" id="attachPeersDiv" @click="checkPeerCreateEligibility('peerCount')">
                           <div class="text-gray-800">
                             Attach to these static peers:
                           </div>
@@ -628,7 +628,7 @@
                             </div>
                           </div>
                         </div>
-                        <div class="m-2 p-1 bg-teal-50 shadow-md border rounded">
+                        <div class="m-2 p-1 shadow-md border rounded" id="networkRulesDiv">
                           <div class="text-gray-800">
                             Network rules here...
                           </div>
@@ -645,7 +645,7 @@
 
                                 <div class="truncate col-span-2">
                                   <span class="text-gray-800 text-xs mr-1">Allowed IPs:</span>
-                                  <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" :id="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1" style="width: 25vw;" placeholder="click to see recommendations" @keyup="checkPeerCreateEligibility('allowedIPs')">
+                                  <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" :id="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" @change="checkPeerCreateEligibility('allowedIPs')" @keyup="checkPeerCreateEligibility('allowedIPs')" >
                                   <datalist :id="peer.id + '_ip_subnets'">
                                     <option :value="peer.address + '/32'">
                                       Forward all {{peer.address}} related traffic to {{peer.address}}
@@ -667,7 +667,7 @@
                   </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                  <button v-if="peerCreateEligibility" type="button" @click="createPeer(); peerCreate = null"
+                  <button v-if="peerCreateEligibility" type="button" @click="createPeer(peerCreate); peerCreate = null"
                     class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
                     Create
                   </button>

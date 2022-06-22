@@ -247,11 +247,26 @@ new Vue({
           alert(err.message || err.toString());
         });
     },
-    createPeer() {
+    createPeer(newPeerType) {
       const name = this.peerCreateName;
       if (!name) return;
+      const endpoint = this.peerCreateEndpoint;
+      if (!endpoint && newPeerType === 'static') return;
 
-      this.api.createPeer({ name })
+      const newPeerJSON = {
+        name,
+        endpoint,
+        attachedPeers: [],
+      };
+
+      for (let i = 0; i < this.attachedPeers.length; i++) {
+        newPeerJSON.attachedPeers.push({
+          peer: this.attachedPeers[i].id,
+          allowedIPs: document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`).value,
+        });
+      }
+
+      this.api.createPeer({ name, endpoint, attachedPeers })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
@@ -314,6 +329,7 @@ new Vue({
       // run when show advance is clicked
       if (mode === 'init') {
         this.peerCreateName = '';
+        this.peerCreateEndpoint = '';
         this.peerCreateShowAdvance = false;
 
         for (let i = 0; i < this.peers.length; i++) {
@@ -325,8 +341,10 @@ new Vue({
         // enable the root server as default
         this.attachedPeers = [peersArray.at(0)];
         document.getElementById('selectall checkbox').checked = false;
-        document.getElementById(`root_checkbox`).checked = true;
-        document.getElementById(`root_ip_subnet`).value = '0.0.0.0/0';
+        document.getElementById('root_checkbox').checked = true;
+        document.getElementById('root_ip_subnet').value = '0.0.0.0/0';
+
+        this.checkPeerCreateEligibility('all');
         return;
       }
 
@@ -361,21 +379,51 @@ new Vue({
       this.checkPeerCreateEligibility('peers');
     },
     checkPeerCreateEligibility(mode) {
-      // if (mode === 'name') {
+      const tailwindLightGreen = 'rgb(240 253 244)';
+      const tailwindDarkerGreen = 'rgb(187 247 208)';
+      const tailwindLightRed = 'rgb(254 242 242)';
+      const tailwindDarkerRed = 'rgb(254 202 202)';
+
+      // check name
+      if (mode === 'name') {
         this.peerCreateEligibilityName = this.peerCreateName.length > 0;
-      // } else if (mode === 'endpoint') {
-        this.peerCreateEligibilityEndpoint = this.peerCreateEndpoint.match(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`);
-        this.peerCreateEligibilityEndpoint ||= this.peerCreateEndpoint.match(`^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}$`);
-        // this.peerCreateEligibilityEndpoint = true;
-      // } else if (mode === 'peers') {
+        document.getElementById('peerCreateName').style.backgroundColor = this.peerCreateEligibilityName ? tailwindLightGreen : tailwindLightRed;
+      }
+
+      // check endpoint
+      if (mode === 'endpoint') {
+        this.peerCreateEligibilityEndpoint = this.peerCreateEndpoint.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$');
+        this.peerCreateEligibilityEndpoint ||= this.peerCreateEndpoint.match('^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}$');
+        document.getElementById('peerCreateEndpoint').style.backgroundColor = this.peerCreateEligibilityEndpoint ? tailwindLightGreen : tailwindLightRed;
+      }
+
+      // check peer count
+      if (mode === 'peerCount') {
         this.peerCreateEligibilityPeers = this.attachedPeers.length > 0;
-      // } else if (mode === 'allowedIPs') {
+        document.getElementById('attachPeersDiv').style.backgroundColor = this.peerCreateEligibilityPeers ? tailwindLightGreen : tailwindLightRed;
+        this.checkPeerCreateEligibility('allowedIPs');
+      }
+
+      // check allowedIPs
+      if (mode === 'allowedIPs') {
         this.peerCreateEligibilityAllowedIPs = true;
         for (let i = 0; i < this.attachedPeers.length; i++) {
-          this.peerCreateEligibilityAllowedIPs &&= document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`).value.match(`^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|2[0-9]|[0-9])$`);
+          const allowedIPsEligibility = document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`).value.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
+          this.peerCreateEligibilityAllowedIPs &&= allowedIPsEligibility;
+          document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`).style.backgroundColor = allowedIPsEligibility ? tailwindDarkerGreen : tailwindDarkerRed;
         }
-      // }
+        document.getElementById('networkRulesDiv').style.backgroundColor = this.peerCreateEligibilityAllowedIPs ? tailwindLightGreen : tailwindLightRed;
+      }
 
+      // check all
+      if (mode === 'all') {
+        const modes = ['name', 'endpoint', 'peerCount', 'allowedIPs'];
+        for (let i = 0; i < mode.length; i++) {
+          this.checkPeerCreateEligibility(modes[i]);
+        }
+      }
+
+      // final AND check
       this.peerCreateEligibility = this.peerCreateEligibilityName && this.peerCreateEligibilityEndpoint && this.peerCreateEligibilityPeers && this.peerCreateEligibilityAllowedIPs;
     },
   },

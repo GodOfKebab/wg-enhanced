@@ -115,8 +115,8 @@ module.exports = class Server {
         res.send(JSON.stringify({ status: await WireGuard.getServerStatus() }));
       }))
       .post('/api/wireguard/peer', Util.promisify(async req => {
-        const { name } = req.body;
-        return WireGuard.createPeer({ name });
+        const { name, endpoint, attachedPeers } = req.body;
+        return WireGuard.createPeer({ name, endpoint, attachedPeers });
       }))
       .delete('/api/wireguard/peer/:peerId', Util.promisify(async req => {
         const { peerId } = req.params;
