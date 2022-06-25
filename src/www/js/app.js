@@ -316,7 +316,7 @@ new Vue({
       const checkboxArray = [];
       const peersArray = this.peers.slice();
       for (let i = 0; i < this.peers.length; i++) {
-        if (peersArray.at(i).roamingStatus === 'static') {
+        if (peersArray.at(i).endpoint.startsWith('static')) {
           checkboxArray.push(document.getElementById(`${peersArray.at(i).id}_checkbox`));
         }
       }
@@ -328,7 +328,7 @@ new Vue({
         this.peerCreateShowAdvance = false;
 
         for (let i = 0; i < this.peers.length; i++) {
-          if (peersArray.at(i).roamingStatus === 'static') {
+          if (peersArray.at(i).endpoint.startsWith('static')) {
             document.getElementById(`${peersArray.at(i).id}_checkbox`).checked = false;
             document.getElementById(`${peersArray.at(i).id}_ip_subnet`).value = `${peersArray.at(i).address}/32`;
           }

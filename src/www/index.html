@@ -114,7 +114,7 @@
             <!-- Peer -->
             <div v-if="peers && peers.length > 0" v-for="peer in peers" :key="peer.id"
                  class="relative overflow-hidden border-b border-gray-100 border-solid">
-              <div v-if="peer.roamingStatus === 'static' ">
+              <div v-if="peer.endpoint.startsWith('static')">
 
                 <!-- Chart -->
                 <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">
@@ -332,7 +332,7 @@
             <!-- Peer -->
             <div v-if="peers && peers.length > 0" v-for="peer in peers" :key="peer.id"
               class="relative overflow-hidden border-b border-gray-100 border-solid">
-              <div v-if="peer.roamingStatus === 'roaming' ">
+              <div v-if="peer.endpoint.startsWith('roaming') ">
 
                 <!-- Chart -->
                 <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">
@@ -615,7 +615,7 @@
                           <div class="flex grid grid-cols-2 gap-1 mt-1">
                             <div v-show="peers && peers.length > 0" v-for="peer in peers" :key="peer.id"
                                  class="relative overflow-hidden">
-                              <div v-show="peer.roamingStatus === 'static'">
+                              <div v-show="peer.endpoint.startsWith('static')">
                                 <div class="form-check truncate">
                                   <label>
                                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="peer.id + '_checkbox'" value="" @click="handleAttachPeers('individual')">

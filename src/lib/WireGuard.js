@@ -57,7 +57,7 @@ module.exports = class WireGuard {
                 publicKey,
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                endpoint: `static->${WG_HOST}`,
+                endpoint: `static->${WG_HOST}:${WG_PORT}`,
               },
             },
           };
@@ -155,7 +155,7 @@ AllowedIPs = ${allowedIPsThisServer}`;
       publicKey: peer.publicKey,
       createdAt: new Date(peer.createdAt),
       updatedAt: new Date(peer.updatedAt),
-      endpoint: peer.endpoint.split('->').length === 2 ? peer.endpoint.split('->')[1] : '',
+      endpoint: peer.endpoint,
       allowedIPs: null,
 
       persistentKeepalive: null,
@@ -193,8 +193,10 @@ AllowedIPs = ${allowedIPsThisServer}`;
         peer.transferRx = Number(transferRx);
         peer.transferTx = Number(transferTx);
         peer.persistentKeepalive = persistentKeepalive;
+        peer.persistentKeepalive = persistentKeepalive;
       });
 
+    console.log(peers);
     return peers;
   }
 
