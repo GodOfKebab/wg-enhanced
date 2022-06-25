@@ -350,8 +350,8 @@ new Vue({
         }
         // enable the root server as default
         this.attachedPeers = [peersArray.at(0)];
-        document.getElementById('selectall_checkbox').checked = false;
         document.getElementById('root_checkbox').checked = true;
+        document.getElementById('selectall_checkbox').checked = checkboxArray.length === 1;
         document.getElementById('root_ip_subnet').value = '0.0.0.0/0';
 
         this.checkPeerCreateEligibility('all');
