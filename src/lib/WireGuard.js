@@ -273,7 +273,6 @@ PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}\n`;
 
     const privateKey = await Util.exec('wg genkey');
     const publicKey = await Util.exec(`echo ${privateKey} | wg pubkey`);
-    const preSharedKey = await Util.exec('wg genpsk');
 
     // Calculate next IP
     let address;
@@ -308,6 +307,7 @@ PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}\n`;
     // create the connections
     for (let i = 0; i < attachedPeers.length; i++) {
       const connectionPeers = `${peerId}*${attachedPeers[i].peer}`;
+      const preSharedKey = await Util.exec('wg genpsk');
       config.connections[connectionPeers] = {
         preSharedKey,
         enabled: true,
