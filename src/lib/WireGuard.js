@@ -7,7 +7,6 @@ const debug = require('debug')('WireGuard');
 const uuid = require('uuid');
 const QRCode = require('qrcode');
 
-const Queue = require('queue-fifo');
 const Util = require('./Util');
 const ServerError = require('./ServerError');
 
