@@ -151,22 +151,31 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
 
   async getPeers() {
     const config = await this.getConfig();
-    const peers = Object.entries(config.peers).map(([peerId, peer]) => ({
-      id: peerId,
-      name: peer.name,
-      enabled: true,
-      address: peer.address,
-      publicKey: peer.publicKey,
-      createdAt: new Date(peer.createdAt),
-      updatedAt: new Date(peer.updatedAt),
-      endpoint: peer.endpoint,
-      allowedIPs: null,
+    const peers = [];
+    for (const [peerId, peerDetails] of Object.entries(config.peers)) {
+      let isEnabled = true;
+      for (const [connectionPeers, connectionDetails] of Object.entries(config.connections)) {
+        if (!connectionPeers.includes(peerId)) continue;
+        isEnabled &&= connectionDetails.enabled;
+      }
 
-      persistentKeepalive: null,
-      latestHandshakeAt: null,
-      transferRx: null,
-      transferTx: null,
-    }));
+      peers.push({
+        id: peerId,
+        name: peerDetails.name,
+        enabled: isEnabled || peerDetails.endpoint.startsWith('static'),
+        address: peerDetails.address,
+        publicKey: peerDetails.publicKey,
+        createdAt: new Date(peerDetails.createdAt),
+        updatedAt: new Date(peerDetails.updatedAt),
+        endpoint: peerDetails.endpoint,
+        allowedIPs: null,
+
+        persistentKeepalive: null,
+        latestHandshakeAt: null,
+        transferRx: null,
+        transferTx: null,
+      });
+    }
 
     // Loop WireGuard status
     const dump = await Util.exec(`wg show ${WG_INTERFACE} dump`, {
@@ -338,7 +347,10 @@ PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}\n`;
   async enablePeer({ peerId }) {
     const config = await this.getConfig();
 
-    // config.peers[peerId].enabled = true;
+    for (const [connectionPeers, connectionDetails] of Object.entries(config.connections)) {
+      if (!connectionPeers.includes(peerId)) continue;
+      connectionDetails.enabled = true;
+    }
     config.peers[peerId].updatedAt = new Date();
 
     // TODO: add the option to enable/disable specific connections in the map
@@ -349,7 +361,10 @@ PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}\n`;
   async disablePeer({ peerId }) {
     const config = await this.getConfig();
 
-    // config.peers[peerId].enabled = false;
+    for (const [connectionPeers, connectionDetails] of Object.entries(config.connections)) {
+      if (!connectionPeers.includes(peerId)) continue;
+      connectionDetails.enabled = false;
+    }
     config.peers[peerId].updatedAt = new Date();
 
     // TODO: add the option to enable/disable specific connections in the map
