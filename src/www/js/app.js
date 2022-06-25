@@ -253,20 +253,15 @@ new Vue({
       const endpoint = this.peerCreateEndpoint;
       if (!endpoint && newPeerType === 'static') return;
 
-      const newPeerJSON = {
-        name,
-        endpoint,
-        attachedPeers: [],
-      };
+      const attachedPeersCompact = [];
 
       for (let i = 0; i < this.attachedPeers.length; i++) {
-        newPeerJSON.attachedPeers.push({
+        attachedPeersCompact.push({
           peer: this.attachedPeers[i].id,
           allowedIPs: document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`).value,
         });
       }
-
-      this.api.createPeer({ name, endpoint, attachedPeers })
+      this.api.createPeer({ name, endpoint, attachedPeers: attachedPeersCompact })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
