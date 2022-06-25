@@ -112,7 +112,7 @@
 
           <div>
             <!-- Peer -->
-            <div v-if="peers && peers.length > 0" v-for="peer in peers" :key="peer.id"
+            <div v-if="peers && staticPeersCount" v-for="peer in peers" :key="peer.id"
                  class="relative overflow-hidden border-b border-gray-100 border-solid">
               <div v-if="peer.endpoint.startsWith('static')">
 
@@ -265,9 +265,10 @@
                       </a>
 
                       <!-- Delete -->
-                      <button class="align-middle bg-gray-100 hover:bg-red-600 hover:text-white p-2 rounded transition"
-                              title="Delete Peer" @click="peerDelete = peer">
-                        <svg class="w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <button class="align-middle p-2 rounded"
+                              :class="{'bg-gray-100 hover:bg-red-600 hover:text-white transition': peer.id !== 'root', 'bg-gray-50': peer.id === 'root'}"
+                              title="Delete Peer" @click="peerDelete = peer" :disabled="peer.id === 'root'">
+                        <svg class="w-5" :class="{'fill-gray-300': peer.id === 'root'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd"
                                 d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                                 clip-rule="evenodd" />
@@ -277,19 +278,19 @@
                   </div>
                 </div>
               </div>
-
             </div>
-            <div v-if="peers && peers.length === 0">
+
+            <div v-if="peers && staticPeersCount === 0">
               <p class="text-center m-10 text-gray-400 text-sm">There are no peers yet.<br /><br />
-                <button @click="peerCreate = true; peerCreateName = '';"
-                        class="bg-red-800 text-white hover:bg-red-700 border-2 border-none py-2 px-4 rounded inline-flex items-center transition">
-                  <svg class="w-4 mr-2" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                       stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  <span class="text-sm">New Peer</span>
-                </button>
+              <button @click="peerCreate = 'static'; handleAttachPeers('init');"
+                      class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
+                <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span class="text-sm">Add a Peer</span>
+              </button>
               </p>
             </div>
             <div v-if="peers === null" class="text-gray-200 p-5">
@@ -493,32 +494,31 @@
                       </button>
                     </div>
                   </div>
-
                 </div>
+              </div>
+            </div>
 
-              </div>
-              <div v-if="peers && peers.length === 0">
-                <p class="text-center m-10 text-gray-400 text-sm">There are no peers yet.<br /><br />
-                  <button @click="peerCreate = true; peerCreateName = '';"
-                    class="bg-red-800 text-white hover:bg-red-700 border-2 border-none py-2 px-4 rounded inline-flex items-center transition">
-                    <svg class="w-4 mr-2" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            <div v-if="peers && roamingPeersCount === 0">
+              <p class="text-center m-10 text-gray-400 text-sm">There are no peers yet.<br /><br />
+              <button @click="peerCreate = 'roaming'; handleAttachPeers('init');"
+                      class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
+                <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <span class="text-sm">New Peer</span>
-                  </button>
-                </p>
-              </div>
-              <div v-if="peers === null" class="text-gray-200 p-5">
-                <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                  fill="currentColor">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                  </path>
                 </svg>
-              </div>
+                <span class="text-sm">Add a Peer</span>
+              </button>
+              </p>
+            </div>
+            <div v-if="peers === null" class="text-gray-200 p-5">
+              <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                   fill="currentColor">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+              </svg>
             </div>
           </div>
         </div>
@@ -609,11 +609,11 @@
                             Attach to these static peers:
                           </div>
                           <div class="form-check mt-1">
-                            <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="selectall checkbox" value="" @click="handleAttachPeers('all');" >
-                            <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm" for="selectall checkbox">Select All</label>
+                            <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="selectall_checkbox" value="" @click="handleAttachPeers('all');" >
+                            <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm" for="selectall_checkbox">Select All</label>
                           </div>
                           <div class="flex grid grid-cols-2 gap-1 mt-1">
-                            <div v-show="peers && peers.length > 0" v-for="peer in peers" :key="peer.id"
+                            <div v-show="peers && staticPeersCount" v-for="peer in peers" :key="peer.id"
                                  class="relative overflow-hidden">
                               <div v-show="peer.endpoint.startsWith('static')">
                                 <div class="form-check truncate">

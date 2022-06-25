@@ -47,6 +47,9 @@ new Vue({
     peerEditAddressId: null,
     qrcode: null,
 
+    staticPeersCount: 0,
+    roamingPeersCount: 0,
+
     webServerStatus: 'unknown',
     wireguardStatus: 'unknown',
     wireguardToggleTo: null,
@@ -150,6 +153,8 @@ new Vue({
       });
       if (this.wireguardStatus !== 'up') return;
 
+      let staticPeersCount = 0;
+      let roamingPeersCount = 0;
       // Get WirGuard Peers
       await this.api.getPeers().then(peers => {
         this.peers = peers.map(peer => {
@@ -200,6 +205,12 @@ new Vue({
 
           peer.chartOptions = this.peersPersist[peer.id].chartOptions;
 
+          if (peer.endpoint.startsWith('static')) {
+            staticPeersCount += 1;
+          } else if (peer.endpoint.startsWith('roaming')) {
+            roamingPeersCount += 1;
+          }
+
           return peer;
         });
       }).catch(err => {
@@ -210,6 +221,9 @@ new Vue({
           console.log(err);
         }
       });
+
+      this.staticPeersCount = staticPeersCount;
+      this.roamingPeersCount = roamingPeersCount;
     },
     login(e) {
       e.preventDefault();
@@ -336,7 +350,7 @@ new Vue({
         }
         // enable the root server as default
         this.attachedPeers = [peersArray.at(0)];
-        document.getElementById('selectall checkbox').checked = false;
+        document.getElementById('selectall_checkbox').checked = false;
         document.getElementById('root_checkbox').checked = true;
         document.getElementById('root_ip_subnet').value = '0.0.0.0/0';
 
@@ -360,7 +374,7 @@ new Vue({
         for (let i = 0; i < checkboxArray.length; i++) {
           allChecked &= checkboxArray.at(i).checked;
         }
-        document.getElementById('selectall checkbox').checked = allChecked;
+        document.getElementById('selectall_checkbox').checked = allChecked;
       }
 
       const attachedPeersArray = [];
