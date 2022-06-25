@@ -419,7 +419,7 @@ new Vue({
       }
 
       // final AND check
-      this.peerCreateEligibility = this.peerCreateEligibilityName && this.peerCreateEligibilityEndpoint && this.peerCreateEligibilityPeers && this.peerCreateEligibilityAllowedIPs;
+      this.peerCreateEligibility = this.peerCreateEligibilityName && (this.peerCreateEligibilityEndpoint || this.peerCreate === 'roaming') && this.peerCreateEligibilityPeers && this.peerCreateEligibilityAllowedIPs;
     },
   },
   filters: {

@@ -316,7 +316,7 @@
               <p class="text-2xl font-medium">Roaming Peers</p>
             </div>
             <div class="flex-shrink-0">
-              <button @click="peerCreate = 'roaming'; peerCreateName = '';"
+              <button @click="peerCreate = 'roaming'; handleAttachPeers('init');"
                 class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
@@ -590,7 +590,7 @@
                                type="text" v-model.trim="peerCreateName" placeholder="Name" id="peerCreateName" @change="checkPeerCreateEligibility('name')" @keyup="checkPeerCreateEligibility('name')" />
                       </p>
                     </div>
-                    <div class="mt-2">
+                    <div v-show="peerCreate === 'static'" class="mt-2">
                       <p class="text-sm text-gray-500">
                         <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
                                type="text" v-model.trim="peerCreateEndpoint" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)" id="peerCreateEndpoint" @change="checkPeerCreateEligibility('endpoint')" @keyup="checkPeerCreateEligibility('endpoint')" />
