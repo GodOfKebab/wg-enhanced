@@ -126,7 +126,12 @@ PostDown = ${WG_POST_DOWN}
 [Peer]
 PublicKey = ${config.peers[peerId].publicKey}
 PresharedKey = ${connectionDetails.preSharedKey}
-AllowedIPs = ${allowedIPsThisServer}`;
+AllowedIPs = ${allowedIPsThisServer}\n`;
+
+      // Add the Endpoint line if known TODO: get roaming endpoints as well
+      if (config.peers[peerId].endpoint.split('->')[1] !== '') {
+        result += `Endpoint = ${config.peers[peerId].endpoint.split('->')[1]}\n`;
+      }
     }
 
     debug('Config saving...');
@@ -196,7 +201,6 @@ AllowedIPs = ${allowedIPsThisServer}`;
         peer.persistentKeepalive = persistentKeepalive;
       });
 
-    console.log(peers);
     return peers;
   }
 
@@ -227,7 +231,7 @@ ${WG_MTU ? `MTU = ${WG_MTU}` : ''}`;
 
       let otherPeerId = '';
       let allowedIPsThisPeer = '';
-      if (connectionPeers.split('*')[0] === 'root') {
+      if (connectionPeers.split('*')[0] === peerId) {
         otherPeerId = connectionPeers.split('*')[1];
         allowedIPsThisPeer = connectionDetails['allowedIPs:a->b'];
       } else {
@@ -241,8 +245,12 @@ ${WG_MTU ? `MTU = ${WG_MTU}` : ''}`;
 PublicKey = ${config.peers[otherPeerId].publicKey}
 PresharedKey = ${connectionDetails.preSharedKey}
 AllowedIPs = ${allowedIPsThisPeer}
-PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}
-Endpoint = ${config.peers[otherPeerId].endpoint.split('->')[1]}\n`;
+PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}\n`;
+
+      // Add the Endpoint line if known TODO: get roaming endpoints as well
+      if (config.peers[otherPeerId].endpoint.split('->')[1] !== '') {
+        conf += `Endpoint = ${config.peers[otherPeerId].endpoint.split('->')[1]}\n`;
+      }
     }
 
     return conf;
