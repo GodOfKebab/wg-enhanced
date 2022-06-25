@@ -267,7 +267,7 @@
                       <!-- Delete -->
                       <button class="align-middle p-2 rounded"
                               :class="{'bg-gray-100 hover:bg-red-600 hover:text-white transition': peer.id !== 'root', 'bg-gray-50': peer.id === 'root'}"
-                              title="Delete Peer" @click="peerDelete = peer" :disabled="peer.id === 'root'">
+                              :title="peer.id !== 'root' ? 'Delete Peer' : 'You can\'t delete the root peer'" @click="peerDelete = peer" :disabled="peer.id === 'root'">
                         <svg class="w-5" :class="{'fill-gray-300': peer.id === 'root'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd"
                                 d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
