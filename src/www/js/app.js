@@ -352,7 +352,7 @@ new Vue({
         this.attachedPeers = [peersArray.at(0)];
         document.getElementById('root_checkbox').checked = true;
         document.getElementById('selectall_checkbox').checked = checkboxArray.length === 1;
-        document.getElementById('root_ip_subnet').value = '0.0.0.0/0';
+        document.getElementById('root_ip_subnet').value = this.peerCreate === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
 
         this.checkPeerCreateEligibility('all');
         return;
