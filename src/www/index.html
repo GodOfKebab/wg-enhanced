@@ -234,12 +234,12 @@
                     <div class="text-gray-400">
 
                       <!-- Enable/Disable -->
-                      <div @click="disablePeer(peer)" v-if="peer.enabled === true" title="Disable Peer"
-                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">
+                      <div v-if="peer.enabled === true" title="Disable Peer (not available for static peers)"
+                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-green-500 opacity-20 transition-all">
                         <div class="rounded-full shadow-md w-4 h-4 m-1 ml-5 bg-white"></div>
                       </div>
-                      <div @click="enablePeer(peer)" v-if="peer.enabled === false" title="Enable Peer"
-                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-red-500 cursor-pointer hover:bg-red-400 transition-all">
+                      <div v-if="peer.enabled === false" title="Enable Peer (not available for static peers)"
+                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-red-500 opacity-20 transition-all">
                         <div class="rounded-full shadow-md w-4 h-4 m-1 bg-white"></div>
                       </div>
 
