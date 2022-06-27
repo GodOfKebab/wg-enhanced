@@ -19,7 +19,6 @@ const {
   WG_DEFAULT_DNS,
   WG_DEFAULT_ADDRESS,
   WG_PERSISTENT_KEEPALIVE,
-  WG_ALLOWED_IPS,
   WG_POST_UP,
   WG_POST_DOWN,
 } = require('../config');
