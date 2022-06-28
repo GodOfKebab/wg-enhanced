@@ -41,6 +41,7 @@ new Vue({
     peerConfig: null,
     peerCreateName: '',
     peerCreateEndpoint: '',
+    peerEdit: null,
     peerEditName: null,
     peerEditNameId: null,
     peerEditAddress: null,
