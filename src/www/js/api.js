@@ -58,6 +58,13 @@ class API {
     });
   }
 
+  async getNetwork() {
+    return this.call({
+      method: 'get',
+      path: '/wireguard/network',
+    });
+  }
+
   async getPeers() {
     return this.call({
       method: 'get',

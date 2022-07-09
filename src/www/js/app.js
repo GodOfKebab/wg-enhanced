@@ -34,6 +34,8 @@ new Vue({
     password: null,
     requiresPassword: null,
 
+    network: null,
+
     peers: null,
     peersPersist: {},
     peerDelete: null,
@@ -153,6 +155,9 @@ new Vue({
         this.wireguardStatus = 'unknown';
       });
       if (this.wireguardStatus !== 'up') return;
+
+      // Get the network-wide config
+      this.network = await this.api.getNetwork();
 
       let staticPeersCount = 0;
       let roamingPeersCount = 0;

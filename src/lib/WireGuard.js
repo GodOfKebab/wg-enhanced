@@ -148,6 +148,10 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
     debug('Config synced.');
   }
 
+  async getNetwork() {
+    return this.getConfig();
+  }
+
   async getPeers() {
     const config = await this.getConfig();
     const peers = [];

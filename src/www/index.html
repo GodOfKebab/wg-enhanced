@@ -941,9 +941,45 @@
                       Edit peer <strong>{{ peerEdit.name }}</strong>
                     </h3>
                     <div class="mt-2">
-                      <p class="text-sm text-gray-500">
-                        TODO
-                      </p>
+                      <div>Below are peer information: </div>
+                      <div v-for="key in Object.keys(network.peers[peerEdit.id])" class="relative overflow-hidden">
+                        <div class="flex grid grid-cols-3 gap-1">
+                          <div class="truncate">
+                            <span class="text-gray-800 cursor-pointer text-xs">
+                                <strong class="text-sm">{{ key }}:</strong>
+                            </span>
+                          </div>
+
+                          <div class="truncate col-span-2">
+                            <span class="text-sm text-gray-500">
+                              {{ network.peers[peerEdit.id][key] }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <br/>
+                      <div>Below are connection information: </div>
+                      <div v-for="pairs in Object.keys(network.connections)" class="relative overflow-hidden">
+                        <div v-show="pairs.split('*').includes(peerEdit.id)" class="">
+                          <div>
+                            {{ pairs }} :
+                            {{ network.connections[pairs] }}
+                          </div>
+                          <br/>
+<!--                          <div class="truncate">-->
+<!--                            <span class="text-gray-800 cursor-pointer text-xs">-->
+<!--                                <strong class="text-sm">{{ key }}</strong>-->
+<!--                            </span>-->
+<!--                          </div>-->
+
+<!--                          <div class="truncate col-span-2">-->
+<!--                            <span class="text-sm text-gray-500">-->
+<!--                              {{ network.peers[peerEdit.id][key] }}-->
+<!--                            </span>-->
+<!--                          </div>-->
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
