@@ -5,7 +5,6 @@ const path = require('path');
 
 const debug = require('debug')('WireGuard');
 const uuid = require('uuid');
-const QRCode = require('qrcode');
 
 const Util = require('./Util');
 const ServerError = require('./ServerError');
