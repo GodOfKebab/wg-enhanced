@@ -146,7 +146,7 @@
                     <div class="text-gray-700 group" :title="'Created at ' + dateTime(new Date(peer.createdAt))">
 
                       <!-- Show -->
-                      <input v-show="peerEditNameId === peer.id" v-model="peerEditName"
+                      <input v-if="peerEditNameId === peer.id" v-model="peerEditName"
                              v-on:keyup.enter="updatePeerName(peer, peerEditName); peerEditName = null; peerEditNameId = null;"
                              v-on:keyup.escape="peerEditName = null; peerEditNameId = null;"
                              :ref="'peer-' + peer.id + '-name'"
@@ -155,9 +155,9 @@
                               class="inline-block border-t-2 border-b-2 border-transparent">{{peer.name}}</button>
 
                       <!-- Edit -->
-                      <span v-show="peerEditNameId !== peer.id"
+                      <span v-if="peerEditNameId !== peer.id"
                             @click="peerEditName = peer.name; peerEditNameId = peer.id; setTimeout(() => $refs['peer-' + peer.id + '-name'][0].select(), 1);"
-                            class="cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                            class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
@@ -185,7 +185,7 @@
                         <!-- Edit -->
                         <span v-show="peerEditAddressId !== peer.id"
                               @click="peerEditAddress = peer.address; peerEditAddressId = peer.id; setTimeout(() => $refs['peer-' + peer.id + '-address'][0].select(), 1);"
-                              class="cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                              class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg"
                                class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none"
                                viewBox="0 0 24 24" stroke="currentColor">
@@ -386,7 +386,7 @@
                       <!-- Edit -->
                       <span v-show="peerEditNameId !== peer.id"
                         @click="peerEditName = peer.name; peerEditNameId = peer.id; setTimeout(() => $refs['peer-' + peer.id + '-name'][0].select(), 1);"
-                        class="cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                        class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg"
                           class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none" viewBox="0 0 24 24"
                           stroke="currentColor">
@@ -414,7 +414,7 @@
                         <!-- Edit -->
                         <span v-show="peerEditAddressId !== peer.id"
                           @click="peerEditAddress = peer.address; peerEditAddressId = peer.id; setTimeout(() => $refs['peer-' + peer.id + '-address'][0].select(), 1);"
-                          class="cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                          class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
@@ -446,7 +446,6 @@
                             clip-rule="evenodd" />
                         </svg>
                         {{peer.transferRxCurrent | bytes}}/s
-                      </span>
 
                       <!-- Last seen -->
                       <span v-if="peer.latestHandshakeAt"
