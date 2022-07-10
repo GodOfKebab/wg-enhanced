@@ -796,14 +796,14 @@
                       Configuration file for <strong>{{peerConfig.name}}</strong>:
                     </h3>
                     <div class="mt-2 w-full overflow-scroll h-96">
-                      <span class="text-sm text-gray-500 whitespace-pre">{{ getPeerConf(peerConfig) }}</span>
+                      <span class="text-sm text-gray-500 whitespace-pre">{{ getPeerConf(peerConfig.id) }}</span>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button type="button"
-                        @click="navigator.clipboard.writeText(getPeerConf(peerConfig)).then(() => {
+                        @click="navigator.clipboard.writeText(getPeerConf(peerConfig.id)).then(() => {
                                 alert('successfully copied');
                                 })
                                 .catch(() => {
@@ -1065,6 +1065,7 @@
   <script src="./js/vendor/vue-apexcharts.min.js"></script>
   <script src="./js/vendor/md5.min.js"></script>
   <script src="./js/vendor/timeago.min.js"></script>
+  <script src="./js/wg.js"></script>
   <script src="./js/api.js"></script>
   <script src="./js/app.js"></script>
   <script src="./js/vendor/index.tailwind.min.js"></script>

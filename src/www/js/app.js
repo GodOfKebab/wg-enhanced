@@ -310,45 +310,8 @@ new Vue({
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    getPeerConf(peer) {
-      const peerConf = this.network.peers[peer.id];
-
-      let conf = `
-[Interface]
-PrivateKey = ${peerConf.privateKey}
-Address = ${peerConf.address}/24\n`;
-// ${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}` : ''}
-// ${WG_MTU ? `MTU = ${WG_MTU}` : ''}`;
-
-      for (const [connectionPeers, connectionDetails] of Object.entries(this.network.connections)) {
-        if (!connectionPeers.includes(peer.id)) continue;
-        if (!connectionDetails.enabled) continue;
-
-        let otherPeerId = '';
-        let allowedIPsThisPeer = '';
-        if (connectionPeers.split('*')[0] === peer.id) {
-          otherPeerId = connectionPeers.split('*')[1];
-          allowedIPsThisPeer = connectionDetails['allowedIPs:a->b'];
-        } else {
-          otherPeerId = connectionPeers.split('*')[0];
-          allowedIPsThisPeer = connectionDetails['allowedIPs:b->a'];
-        }
-
-        conf += `
-# Peer: ${this.network.peers[otherPeerId].name} (${otherPeerId})
-[Peer]
-PublicKey = ${this.network.peers[otherPeerId].publicKey}
-PresharedKey = ${connectionDetails.preSharedKey}
-AllowedIPs = ${allowedIPsThisPeer}\n`;
-// PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}\n`;
-
-        // Add the Endpoint line if known TODO: get roaming endpoints as well
-        if (this.network.peers[otherPeerId].endpoint.split('->')[1] !== '') {
-          conf += `Endpoint = ${this.network.peers[otherPeerId].endpoint.split('->')[1]}\n`;
-        }
-      }
-
-      return conf;
+    getPeerConf(peerId) {
+      return this.wg.getPeerConfig(this.network, peerId);
     },
     toggleWireGuardNetworking() {
       if (this.wireguardStatus === 'up' && this.wireguardToggleTo === 'disable') {
@@ -483,6 +446,7 @@ AllowedIPs = ${allowedIPsThisPeer}\n`;
   },
   mounted() {
     this.api = new API();
+    this.wg = new WG();
     this.api.getSession()
       .then(session => {
         this.authenticated = session.authenticated;
