@@ -148,7 +148,7 @@
                       <!-- Show -->
                       <input v-if="peerEditNameId === peer.id" v-model="peerEditName"
                              v-on:keyup.enter="updatePeerName(peer, peerEditName); peerEditName = null; peerEditNameId = null;"
-                             v-on:keyup.escape="peerEditName = null; peerEditNameId = null;"
+                             v-on:focusout="peerEditName = null; peerEditNameId = null;"
                              :ref="'peer-' + peer.id + '-name'"
                              class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
                       <button v-show="peerEditNameId !== peer.id" @click="peerConfig = peer;"
@@ -176,7 +176,7 @@
                         <!-- Show -->
                         <input v-show="peerEditAddressId === peer.id" v-model="peerEditAddress"
                                v-on:keyup.enter="updatePeerAddress(peer, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
-                               v-on:keyup.escape="peerEditAddress = null; peerEditAddressId = null;"
+                               v-on:focusout="peerEditAddress = null; peerEditAddressId = null;"
                                :ref="'peer-' + peer.id + '-address'"
                                class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
                         <span v-show="peerEditAddressId !== peer.id"
@@ -377,8 +377,8 @@
                       <!-- Show -->
                       <input v-show="peerEditNameId === peer.id" v-model="peerEditName"
                         v-on:keyup.enter="updatePeerName(peer, peerEditName); peerEditName = null; peerEditNameId = null;"
-                        v-on:keyup.escape="peerEditName = null; peerEditNameId = null;"
-                        :ref="'peer-' + peer.id + '-name'"
+                        v-on:focusout="peerEditName = null; peerEditNameId = null;"
+                             :ref="'peer-' + peer.id + '-name'"
                         class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
                       <button v-show="peerEditNameId !== peer.id" @click="peerConfig = peer;"
                         class="inline-block border-t-2 border-b-2 border-transparent">{{peer.name}}</button>
@@ -405,7 +405,7 @@
                         <!-- Show -->
                         <input v-show="peerEditAddressId === peer.id" v-model="peerEditAddress"
                           v-on:keyup.enter="updatePeerAddress(peer, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
-                          v-on:keyup.escape="peerEditAddress = null; peerEditAddressId = null;"
+                          v-on:focusout="peerEditAddress = null; peerEditAddressId = null;"
                           :ref="'peer-' + peer.id + '-address'"
                           class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
                         <span v-show="peerEditAddressId !== peer.id"
