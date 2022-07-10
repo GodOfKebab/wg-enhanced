@@ -92,12 +92,6 @@ module.exports = class Server {
       .get('/api/wireguard/peer', Util.promisify(async req => {
         return WireGuard.getPeers();
       }))
-      .get('/api/wireguard/peer/:peerId/qrcode.svg', Util.promisify(async (req, res) => {
-        const { peerId } = req.params;
-        const svg = await WireGuard.getPeerQRCodeSVG({ peerId });
-        res.header('Content-Type', 'image/svg+xml');
-        res.send(svg);
-      }))
       .get('/api/wireguard/server/status', Util.promisify(async (req, res) => {
         res.header('Content-Type', 'application/json');
         res.send(JSON.stringify({ status: await WireGuard.getServerStatus() }));

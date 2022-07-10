@@ -48,7 +48,7 @@ new Vue({
     peerEditNameId: null,
     peerEditAddress: null,
     peerEditAddressId: null,
-    qrcode: null,
+    peerQR: null,
 
     staticPeersCount: 0,
     roamingPeersCount: 0,

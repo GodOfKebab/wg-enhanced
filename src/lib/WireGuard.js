@@ -276,56 +276,6 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
     return peer;
   }
 
-  async getPeerConfiguration({ peerId }) {
-    const config = await this.getConfig();
-    const peerConf = await this.getPeer({ peerId });
-
-    let conf = `
-[Interface]
-PrivateKey = ${peerConf.privateKey}
-Address = ${peerConf.address}/24
-${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}` : ''}
-${WG_MTU ? `MTU = ${WG_MTU}` : ''}`;
-
-    for (const [connectionPeers, connectionDetails] of Object.entries(config.connections)) {
-      if (!connectionPeers.includes(peerId)) continue;
-      if (!connectionDetails.enabled) continue;
-
-      let otherPeerId = '';
-      let allowedIPsThisPeer = '';
-      if (connectionPeers.split('*')[0] === peerId) {
-        otherPeerId = connectionPeers.split('*')[1];
-        allowedIPsThisPeer = connectionDetails['allowedIPs:a->b'];
-      } else {
-        otherPeerId = connectionPeers.split('*')[0];
-        allowedIPsThisPeer = connectionDetails['allowedIPs:b->a'];
-      }
-
-      conf += `
-# Peer: ${config.peers[otherPeerId].name} (${otherPeerId})
-[Peer]
-PublicKey = ${config.peers[otherPeerId].publicKey}
-PresharedKey = ${connectionDetails.preSharedKey}
-AllowedIPs = ${allowedIPsThisPeer}
-PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}\n`;
-
-      // Add the Endpoint line if known TODO: get roaming endpoints as well
-      if (config.peers[otherPeerId].endpoint.split('->')[1] !== '') {
-        conf += `Endpoint = ${config.peers[otherPeerId].endpoint.split('->')[1]}\n`;
-      }
-    }
-
-    return conf;
-  }
-
-  async getPeerQRCodeSVG({ peerId }) {
-    const config = await this.getPeerConfiguration({ peerId });
-    return QRCode.toString(config, {
-      type: 'svg',
-      width: 512,
-    });
-  }
-
   async createPeer({ name, endpoint, attachedPeers }) {
     if (!name) {
       throw new Error('Missing: Name');
