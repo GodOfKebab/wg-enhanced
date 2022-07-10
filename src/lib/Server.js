@@ -98,21 +98,6 @@ module.exports = class Server {
         res.header('Content-Type', 'image/svg+xml');
         res.send(svg);
       }))
-      .get('/api/wireguard/peer/:peerId/peer.conf', Util.promisify(async (req, res) => {
-        const { peerId } = req.params;
-        const config = await WireGuard.getPeerConfiguration({ peerId });
-        res.header('Content-Type', 'application/json');
-        res.send(JSON.stringify(config));
-      }))
-      .get('/api/wireguard/peer/:peerId/configuration', Util.promisify(async (req, res) => {
-        const { peerId } = req.params;
-        const peer = await WireGuard.getPeer({ peerId });
-        const config = await WireGuard.getPeerConfiguration({ peerId });
-        const configName = peer.name.replace(/[^a-zA-Z0-9_=+.-]/g, '-').replace(/(-{2,}|-$)/g, '-').replace(/-$/, '').substring(0, 32);
-        res.header('Content-Disposition', `attachment; filename="${configName}.conf"`);
-        res.header('Content-Type', 'text/plain');
-        res.send(config);
-      }))
       .get('/api/wireguard/server/status', Util.promisify(async (req, res) => {
         res.header('Content-Type', 'application/json');
         res.send(JSON.stringify({ status: await WireGuard.getServerStatus() }));
