@@ -109,20 +109,20 @@
 
           <div>
             <!-- Peer -->
-            <div v-if="peers && staticPeersCount" v-for="peer in peers" :key="peer.id"
+            <div v-if="network.peers && staticPeersCount" v-for="(peerDetails, peerId) in network.peers"
                  class="relative overflow-hidden border-b border-gray-100 border-solid">
-              <div v-if="peer.endpoint.startsWith('static')">
+              <div v-if="peerDetails.endpoint.startsWith('static')">
 
                 <!-- Chart -->
-                <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">
-                  <apexchart width="100%" height="100%" :options="peer.chartOptions" :series="peer.transferTxSeries">
-                  </apexchart>
-                </div>
-                <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">
-                  <apexchart width="100%" height="100%" :options="peer.chartOptions" :series="peer.transferRxSeries"
-                             style="transform: scaleY(-1);">
-                  </apexchart>
-                </div>
+<!--                <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
+<!--                  <apexchart width="100%" height="100%" :options="network.connections[peer].chartOptions" :series="network.connections[peer].transferTxSeries">-->
+<!--                  </apexchart>-->
+<!--                </div>-->
+<!--                <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
+<!--                  <apexchart width="100%" height="100%" :options="peer.chartOptions" :series="peer.transferRxSeries"-->
+<!--                             style="transform: scaleY(-1);">-->
+<!--                  </apexchart>-->
+<!--                </div>-->
 
                 <div class="relative p-5 z-10 flex flex-row">
                   <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
@@ -131,32 +131,32 @@
                       <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                             clip-rule="evenodd" />
                     </svg>
-                    <img v-if="peer.avatar" :src="peer.avatar" class="w-10 rounded-full absolute top-0 left-0" />
+                    <img v-if="peerDetails.avatar" :src="peerDetails.avatar" class="w-10 rounded-full absolute top-0 left-0" />
 
-                    <div
-                            v-if="peer.latestHandshakeAt && ((new Date() - new Date(peer.latestHandshakeAt) < 1000 * 60 * 10))">
-                      <div class="animate-ping w-4 h-4 p-1 bg-red-100 rounded-full absolute -bottom-1 -right-1"></div>
-                      <div class="w-2 h-2 bg-red-800 rounded-full absolute bottom-0 right-0"></div>
-                    </div>
+<!--                    <div-->
+<!--                            v-if="peer.latestHandshakeAt && ((new Date() - new Date(peer.latestHandshakeAt) < 1000 * 60 * 10))">-->
+<!--                      <div class="animate-ping w-4 h-4 p-1 bg-red-100 rounded-full absolute -bottom-1 -right-1"></div>-->
+<!--                      <div class="w-2 h-2 bg-red-800 rounded-full absolute bottom-0 right-0"></div>-->
+<!--                    </div>-->
                   </div>
 
                   <div class="flex-grow">
 
                     <!-- Name -->
-                    <div class="text-gray-700 group" :title="'Created at ' + dateTime(new Date(peer.createdAt))">
+                    <div class="text-gray-700 group" :title="'Created at ' + dateTime(new Date(peerDetails.createdAt))">
 
                       <!-- Show -->
-                      <input v-if="peerEditNameId === peer.id" v-model="peerEditName"
-                             v-on:keyup.enter="updatePeerName(peer, peerEditName); peerEditName = null; peerEditNameId = null;"
+                      <input v-if="peerEditNameId === peerId" v-model="peerEditName"
+                             v-on:keyup.enter="updatePeerName(peerId, peerEditName); peerEditName = null; peerEditNameId = null;"
                              v-on:focusout="peerEditName = null; peerEditNameId = null;"
-                             :ref="'peer-' + peer.id + '-name'"
+                             :ref="'peer-' + peerId + '-name'"
                              class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peer.id" @click="peerConfig = peer;"
-                              class="inline-block border-t-2 border-b-2 border-transparent">{{peer.name}}</button>
+                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId;"
+                              class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
-                      <span v-if="peerEditNameId !== peer.id"
-                            @click="peerEditName = peer.name; peerEditNameId = peer.id; setTimeout(() => $refs['peer-' + peer.id + '-name'][0].select(), 1);"
+                      <span v-if="peerEditNameId !== peerId"
+                            @click="peerEditName = peerDetails.name; peerEditNameId = peerId; setTimeout(() => $refs['peer-' + peerId + '-name'][0].select(), 1);"
                             class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none" viewBox="0 0 24 24"
@@ -174,17 +174,17 @@
                       <span class="group">
 
                         <!-- Show -->
-                        <input v-show="peerEditAddressId === peer.id" v-model="peerEditAddress"
-                               v-on:keyup.enter="updatePeerAddress(peer, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
+                        <input v-show="peerEditAddressId === peerId" v-model="peerEditAddress"
+                               v-on:keyup.enter="updatePeerAddress(peerId, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
                                v-on:focusout="peerEditAddress = null; peerEditAddressId = null;"
-                               :ref="'peer-' + peer.id + '-address'"
+                               :ref="'peer-' + peerId + '-address'"
                                class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
-                        <span v-show="peerEditAddressId !== peer.id"
-                              class="inline-block border-t-2 border-b-2 border-transparent">{{peer.address}}</span>
+                        <span v-show="peerEditAddressId !== peerId"
+                              class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.address}}</span>
 
                         <!-- Edit -->
-                        <span v-show="peerEditAddressId !== peer.id"
-                              @click="peerEditAddress = peer.address; peerEditAddressId = peer.id; setTimeout(() => $refs['peer-' + peer.id + '-address'][0].select(), 1);"
+                        <span v-show="peerEditAddressId !== peerId"
+                              @click="peerEditAddress = peerDetails.address; peerEditAddressId = peerId; setTimeout(() => $refs['peer-' + peerId + '-address'][0].select(), 1);"
                               class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg"
                                class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none"
@@ -196,34 +196,34 @@
                       </span>
 
                       <!-- Transfer TX -->
-                      <span v-if="peer.transferTx":title="'Total Download: ' + bytes(peer.transferTx)">
-                        ·
-                        <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                             fill="currentColor">
-                          <path fill-rule="evenodd"
-                                d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        {{peer.transferTxCurrent | bytes}}/s
-                      </span>
+<!--                      <span v-if="peer.transferTx":title="'Total Download: ' + bytes(peer.transferTx)">-->
+<!--                        ·-->
+<!--                        <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"-->
+<!--                             fill="currentColor">-->
+<!--                          <path fill-rule="evenodd"-->
+<!--                                d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z"-->
+<!--                                clip-rule="evenodd" />-->
+<!--                        </svg>-->
+<!--                        {{peer.transferTxCurrent | bytes}}/s-->
+<!--                      </span>-->
 
                       <!-- Transfer RX -->
-                      <span v-if="peer.transferRx" :title="'Total Upload: ' + bytes(peer.transferRx)">
-                        ·
-                        <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                             fill="currentColor">
-                          <path fill-rule="evenodd"
-                                d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        {{peer.transferRxCurrent | bytes}}/s
-                      </span>
+<!--                      <span v-if="peer.transferRx" :title="'Total Upload: ' + bytes(peer.transferRx)">-->
+<!--                        ·-->
+<!--                        <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"-->
+<!--                             fill="currentColor">-->
+<!--                          <path fill-rule="evenodd"-->
+<!--                                d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"-->
+<!--                                clip-rule="evenodd" />-->
+<!--                        </svg>-->
+<!--                        {{peer.transferRxCurrent | bytes}}/s-->
+<!--                      </span>-->
 
                       <!-- Last seen -->
-                      <span v-if="peer.latestHandshakeAt"
-                            :title="'Last seen at ' + dateTime(new Date(peer.latestHandshakeAt))">
-                        · {{new Date(peer.latestHandshakeAt) | timeago}}
-                      </span>
+<!--                      <span v-if="peer.latestHandshakeAt"-->
+<!--                            :title="'Last seen at ' + dateTime(new Date(peer.latestHandshakeAt))">-->
+<!--                        · {{new Date(peer.latestHandshakeAt) | timeago}}-->
+<!--                      </span>-->
                     </div>
                   </div>
 
@@ -231,18 +231,18 @@
                     <div class="text-gray-400">
 
                       <!-- Enable/Disable -->
-                      <div v-if="peer.enabled === true" title="Disable Peer (not available for static peers)"
-                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-green-500 opacity-20 transition-all">
-                        <div class="rounded-full shadow-md w-4 h-4 m-1 ml-5 bg-white"></div>
-                      </div>
-                      <div v-if="peer.enabled === false" title="Enable Peer (not available for static peers)"
-                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-red-500 opacity-20 transition-all">
-                        <div class="rounded-full shadow-md w-4 h-4 m-1 bg-white"></div>
-                      </div>
+<!--                      <div v-if="peer.enabled === true" title="Disable Peer (not available for static peers)"-->
+<!--                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-green-500 opacity-20 transition-all">-->
+<!--                        <div class="rounded-full shadow-md w-4 h-4 m-1 ml-5 bg-white"></div>-->
+<!--                      </div>-->
+<!--                      <div v-if="peer.enabled === false" title="Enable Peer (not available for static peers)"-->
+<!--                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-red-500 opacity-20 transition-all">-->
+<!--                        <div class="rounded-full shadow-md w-4 h-4 m-1 bg-white"></div>-->
+<!--                      </div>-->
 
                       <!-- Edit -->
                       <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                              title="Edit this peer" @click="peerEdit = peer">
+                              title="Edit this peer" @click="peerEditId = peerId">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="w-5" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
@@ -253,7 +253,7 @@
 
                       <!-- Show QR-->
                       <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                              title="Show QR Code" @click="peerQR = peer.id; QRCode.toCanvas(document.getElementById('qr-canvas'), getPeerConf(peerQR))">
+                              title="Show QR Code" @click="peerQRId = peerId; QRCode.toCanvas(document.getElementById('qr-canvas'), getPeerConf(peerQRId))">
                         <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -263,7 +263,7 @@
 
                       <!-- Download Config -->
                       <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                              title="Download Configuration" @click="downloadPeerConf(peer.id)">
+                              title="Download Configuration" @click="downloadPeerConf(peerId)">
                         <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -273,9 +273,9 @@
 
                       <!-- Delete -->
                       <button class="align-middle p-2 rounded"
-                              :class="{'bg-gray-100 hover:bg-red-600 hover:text-white transition': peer.id !== 'root', 'bg-gray-50': peer.id === 'root'}"
-                              :title="peer.id !== 'root' ? 'Delete Peer' : 'You can\'t delete the root peer'" @click="peerDelete = peer" :disabled="peer.id === 'root'">
-                        <svg class="w-5" :class="{'fill-gray-300': peer.id === 'root'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              :class="{'bg-gray-100 hover:bg-red-600 hover:text-white transition': peerId !== 'root', 'bg-gray-50': peerId === 'root'}"
+                              :title="peerId !== 'root' ? 'Delete Peer' : 'You can\'t delete the root peer'" @click="peerDeleteId = peerId" :disabled="peerId === 'root'">
+                        <svg class="w-5" :class="{'fill-gray-300': peerId === 'root'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd"
                                 d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                                 clip-rule="evenodd" />
@@ -287,7 +287,7 @@
               </div>
             </div>
 
-            <div v-if="peers && staticPeersCount === 0">
+            <div v-if="network.peers && staticPeersCount === 0">
               <p class="text-center m-10 text-gray-400 text-sm">There are no peers yet.<br /><br />
               <button @click="peerCreate = 'static'; handleAttachPeers('init');"
                       class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
@@ -300,7 +300,7 @@
               </button>
               </p>
             </div>
-            <div v-if="peers === null" class="text-gray-200 p-5">
+            <div v-if="network.peers === null" class="text-gray-200 p-5">
               <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                    fill="currentColor">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -338,20 +338,20 @@
 
           <div>
             <!-- Peer -->
-            <div v-if="peers && peers.length > 0" v-for="peer in peers" :key="peer.id"
+            <div v-if="network.peers && roamingPeersCount" v-for="(peerDetails, peerId) in network.peers"
               class="relative overflow-hidden border-b border-gray-100 border-solid">
-              <div v-if="peer.endpoint.startsWith('roaming') ">
+              <div v-if="peerDetails.endpoint.startsWith('roaming') ">
 
                 <!-- Chart -->
-                <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">
-                  <apexchart width="100%" height="100%" :options="peer.chartOptions" :series="peer.transferTxSeries">
-                  </apexchart>
-                </div>
-                <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">
-                  <apexchart width="100%" height="100%" :options="peer.chartOptions" :series="peer.transferRxSeries"
-                    style="transform: scaleY(-1);">
-                  </apexchart>
-                </div>
+<!--                <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
+<!--                  <apexchart width="100%" height="100%" :options="peer.chartOptions" :series="peer.transferTxSeries">-->
+<!--                  </apexchart>-->
+<!--                </div>-->
+<!--                <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
+<!--                  <apexchart width="100%" height="100%" :options="peer.chartOptions" :series="peer.transferRxSeries"-->
+<!--                    style="transform: scaleY(-1);">-->
+<!--                  </apexchart>-->
+<!--                </div>-->
 
                 <div class="relative p-5 z-10 flex flex-row">
                   <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
@@ -360,32 +360,32 @@
                       <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                         clip-rule="evenodd" />
                     </svg>
-                    <img v-if="peer.avatar" :src="peer.avatar" class="w-10 rounded-full absolute top-0 left-0" />
+                    <img v-if="peerDetails.avatar" :src="peerDetails.avatar" class="w-10 rounded-full absolute top-0 left-0" />
 
-                    <div
-                      v-if="peer.latestHandshakeAt && ((new Date() - new Date(peer.latestHandshakeAt) < 1000 * 60 * 10))">
-                      <div class="animate-ping w-4 h-4 p-1 bg-red-100 rounded-full absolute -bottom-1 -right-1"></div>
-                      <div class="w-2 h-2 bg-red-800 rounded-full absolute bottom-0 right-0"></div>
-                    </div>
+<!--                    <div-->
+<!--                      v-if="peer.latestHandshakeAt && ((new Date() - new Date(peer.latestHandshakeAt) < 1000 * 60 * 10))">-->
+<!--                      <div class="animate-ping w-4 h-4 p-1 bg-red-100 rounded-full absolute -bottom-1 -right-1"></div>-->
+<!--                      <div class="w-2 h-2 bg-red-800 rounded-full absolute bottom-0 right-0"></div>-->
+<!--                    </div>-->
                   </div>
 
                   <div class="flex-grow">
 
                     <!-- Name -->
-                    <div class="text-gray-700 group" :title="'Created at ' + dateTime(new Date(peer.createdAt))">
+                    <div class="text-gray-700 group" :title="'Created at ' + dateTime(new Date(peerDetails.createdAt))">
 
                       <!-- Show -->
-                      <input v-show="peerEditNameId === peer.id" v-model="peerEditName"
-                        v-on:keyup.enter="updatePeerName(peer, peerEditName); peerEditName = null; peerEditNameId = null;"
+                      <input v-show="peerEditNameId === peerId" v-model="peerEditName"
+                        v-on:keyup.enter="updatePeerName(peerId, peerEditName); peerEditName = null; peerEditNameId = null;"
                         v-on:focusout="peerEditName = null; peerEditNameId = null;"
-                             :ref="'peer-' + peer.id + '-name'"
+                             :ref="'peer-' + peerId + '-name'"
                         class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peer.id" @click="peerConfig = peer;"
-                        class="inline-block border-t-2 border-b-2 border-transparent">{{peer.name}}</button>
+                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId;"
+                        class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
-                      <span v-show="peerEditNameId !== peer.id"
-                        @click="peerEditName = peer.name; peerEditNameId = peer.id; setTimeout(() => $refs['peer-' + peer.id + '-name'][0].select(), 1);"
+                      <span v-show="peerEditNameId !== peerId"
+                        @click="peerEditName = peerDetails.name; peerEditNameId = peerId; setTimeout(() => $refs['peer-' + peerId + '-name'][0].select(), 1);"
                         class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg"
                           class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none" viewBox="0 0 24 24"
@@ -403,17 +403,17 @@
                       <span class="group">
 
                         <!-- Show -->
-                        <input v-show="peerEditAddressId === peer.id" v-model="peerEditAddress"
-                          v-on:keyup.enter="updatePeerAddress(peer, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
+                        <input v-show="peerEditAddressId === peerId" v-model="peerEditAddress"
+                          v-on:keyup.enter="updatePeerAddress(peerId, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
                           v-on:focusout="peerEditAddress = null; peerEditAddressId = null;"
-                          :ref="'peer-' + peer.id + '-address'"
+                          :ref="'peer-' + peerId + '-address'"
                           class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
-                        <span v-show="peerEditAddressId !== peer.id"
-                          class="inline-block border-t-2 border-b-2 border-transparent">{{peer.address}}</span>
+                        <span v-show="peerEditAddressId !== peerId"
+                          class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.address}}</span>
 
                         <!-- Edit -->
-                        <span v-show="peerEditAddressId !== peer.id"
-                          @click="peerEditAddress = peer.address; peerEditAddressId = peer.id; setTimeout(() => $refs['peer-' + peer.id + '-address'][0].select(), 1);"
+                        <span v-show="peerEditAddressId !== peerId"
+                          @click="peerEditAddress = peerDetails.address; peerEditAddressId = peerId; setTimeout(() => $refs['peer-' + peerId + '-address'][0].select(), 1);"
                           class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none"
@@ -425,33 +425,34 @@
                       </span>
 
                       <!-- Transfer TX -->
-                      <span v-if="peer.transferTx":title="'Total Download: ' + bytes(peer.transferTx)">
-                        ·
-                        <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                          fill="currentColor">
-                          <path fill-rule="evenodd"
-                            d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z"
-                            clip-rule="evenodd" />
-                        </svg>
-                        {{peer.transferTxCurrent | bytes}}/s
-                      </span>
+<!--                      <span v-if="peer.transferTx":title="'Total Download: ' + bytes(peer.transferTx)">-->
+<!--                        ·-->
+<!--                        <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"-->
+<!--                          fill="currentColor">-->
+<!--                          <path fill-rule="evenodd"-->
+<!--                            d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z"-->
+<!--                            clip-rule="evenodd" />-->
+<!--                        </svg>-->
+<!--                        {{peer.transferTxCurrent | bytes}}/s-->
+<!--                      </span>-->
 
                       <!-- Transfer RX -->
-                      <span v-if="peer.transferRx" :title="'Total Upload: ' + bytes(peer.transferRx)">
-                        ·
-                        <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                          fill="currentColor">
-                          <path fill-rule="evenodd"
-                            d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
-                            clip-rule="evenodd" />
-                        </svg>
-                        {{peer.transferRxCurrent | bytes}}/s
+<!--                      <span v-if="peer.transferRx" :title="'Total Upload: ' + bytes(peer.transferRx)">-->
+<!--                        ·-->
+<!--                        <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"-->
+<!--                          fill="currentColor">-->
+<!--                          <path fill-rule="evenodd"-->
+<!--                            d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"-->
+<!--                            clip-rule="evenodd" />-->
+<!--                        </svg>-->
+<!--                        {{peer.transferRxCurrent | bytes}}/s-->
+<!--                      </span>-->
 
                       <!-- Last seen -->
-                      <span v-if="peer.latestHandshakeAt"
-                        :title="'Last seen at ' + dateTime(new Date(peer.latestHandshakeAt))">
-                        · {{new Date(peer.latestHandshakeAt) | timeago}}
-                      </span>
+<!--                      <span v-if="peer.latestHandshakeAt"-->
+<!--                        :title="'Last seen at ' + dateTime(new Date(peer.latestHandshakeAt))">-->
+<!--                        · {{new Date(peer.latestHandshakeAt) | timeago}}-->
+<!--                      </span>-->
                     </div>
                   </div>
 
@@ -459,18 +460,18 @@
                     <div class="text-gray-400">
 
                       <!-- Enable/Disable -->
-                      <div @click="disablePeer(peer)" v-if="peer.enabled === true" title="Disable Peer"
-                        class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">
-                        <div class="rounded-full shadow-md w-4 h-4 m-1 ml-5 bg-white"></div>
-                      </div>
-                      <div @click="enablePeer(peer)" v-if="peer.enabled === false" title="Enable Peer"
-                        class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-red-500 cursor-pointer hover:bg-red-400 transition-all">
-                        <div class="rounded-full shadow-md w-4 h-4 m-1 bg-white"></div>
-                      </div>
+<!--                      <div @click="disablePeer(peer)" v-if="peer.enabled === true" title="Disable Peer"-->
+<!--                        class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">-->
+<!--                        <div class="rounded-full shadow-md w-4 h-4 m-1 ml-5 bg-white"></div>-->
+<!--                      </div>-->
+<!--                      <div @click="enablePeer(peer)" v-if="peer.enabled === false" title="Enable Peer"-->
+<!--                        class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-red-500 cursor-pointer hover:bg-red-400 transition-all">-->
+<!--                        <div class="rounded-full shadow-md w-4 h-4 m-1 bg-white"></div>-->
+<!--                      </div>-->
 
                       <!-- Edit -->
                       <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                              title="Edit this peer" @click="peerEdit = peer">
+                              title="Edit this peer" @click="peerEditId = peerId">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="w-5" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
@@ -481,7 +482,7 @@
 
                       <!-- Show QR-->
                       <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                        title="Show QR Code" @click="peerQR = peer.id; QRCode.toCanvas(document.getElementById('qr-canvas'), getPeerConf(peerQR))" >
+                        title="Show QR Code" @click="peerQRId = peerId; QRCode.toCanvas(document.getElementById('qr-canvas'), getPeerConf(peerQRId))" >
                         <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                           stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -491,7 +492,7 @@
 
                       <!-- Download Config -->
                       <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                              title="Download Configuration" @click="downloadPeerConf(peer.id)">
+                              title="Download Configuration" @click="downloadPeerConf(peerId)">
                         <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -501,7 +502,7 @@
 
                       <!-- Delete -->
                       <button class="align-middle bg-gray-100 hover:bg-red-600 hover:text-white p-2 rounded transition"
-                        title="Delete Peer" @click="peerDelete = peer">
+                        title="Delete Peer" @click="peerDeleteId = peerId">
                         <svg class="w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                           <path fill-rule="evenodd"
                             d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -514,7 +515,7 @@
               </div>
             </div>
 
-            <div v-if="peers && roamingPeersCount === 0">
+            <div v-if="network.peers && roamingPeersCount === 0">
               <p class="text-center m-10 text-gray-400 text-sm">There are no peers yet.<br /><br />
               <button @click="peerCreate = 'roaming'; handleAttachPeers('init');"
                       class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
@@ -527,7 +528,7 @@
               </button>
               </p>
             </div>
-            <div v-if="peers === null" class="text-gray-200 p-5">
+            <div v-if="network.peers === null" class="text-gray-200 p-5">
               <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                    fill="currentColor">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -540,10 +541,10 @@
         </div>
 
         <!-- QR Code-->
-        <div v-show="peerQR">
+        <div v-show="peerQRId">
           <div class="bg-black bg-opacity-50 fixed top-0 right-0 left-0 bottom-0 flex items-center justify-center z-20">
             <div class="bg-white rounded-md shadow-lg relative p-8">
-              <button @click="peerQR = null" class="absolute right-4 top-4 text-gray-600 hover:text-gray-800">
+              <button @click="peerQRId = null" class="absolute right-4 top-4 text-gray-600 hover:text-gray-800">
                 <svg class="w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -629,14 +630,14 @@
                             <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm" for="selectall_checkbox">Select All</label>
                           </div>
                           <div class="flex grid grid-cols-2 gap-1 mt-1">
-                            <div v-show="peers && staticPeersCount" v-for="peer in peers" :key="peer.id"
+                            <div v-show="network.peers && staticPeersCount" v-for="(peerDetails, peerId) in network.peers"
                                  class="relative overflow-hidden">
-                              <div v-show="peer.endpoint.startsWith('static')">
+                              <div v-show="peerDetails.endpoint.startsWith('static')">
                                 <div class="form-check truncate">
                                   <label>
-                                    <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="peer.id + '_checkbox'" value="" @click="handleAttachPeers('individual')">
+                                    <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="peerId + '_checkbox'" value="" @click="handleAttachPeers('individual')">
                                     <span class="text-gray-800 cursor-pointer text-xs">
-                                      <strong class="text-sm">{{ peer.name }}</strong> {{ peer.address }} ({{ peer.id }})
+                                      <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
                                     </span>
                                   </label>
                                 </div>
@@ -649,28 +650,28 @@
                             Network rules here...
                           </div>
 
-                          <div v-for="peer in peers" :key="peer.id"
+                          <div v-for="(peerDetails, peerId) in network.peers"
                                  class="relative overflow-hidden">
-                            <div v-show="attachedPeers.find(el => el.id === peer.id)">
+                            <div v-show="attachedPeers.includes(peerId)">
                               <div class="flex grid grid-cols-3 gap-1">
                                 <div class="truncate">
                                   <span class="text-gray-800 cursor-pointer text-xs">
-                                      <strong class="text-sm">{{ peer.name }}</strong> {{ peer.address }} ({{ peer.id }})
+                                      <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
                                   </span>
                                 </div>
 
                                 <div class="truncate col-span-2">
                                   <span class="text-gray-800 text-xs mr-1">Allowed IPs:</span>
-                                  <input :list="peer.id + '_ip_subnets'" :name="peer.id + '_ip_subnet'" :id="peer.id + '_ip_subnet'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" @change="checkPeerCreateEligibility('allowedIPs')" @keyup="checkPeerCreateEligibility('allowedIPs')" >
-                                  <datalist :id="peer.id + '_ip_subnets'">
-                                    <option :value="peer.address + '/32'">
-                                      Forward all {{peer.address}} related traffic to {{peer.address}}
+                                  <input :list="peerId + '_ip_subnets'" :name="peerId + '_ip_subnet'" :id="peerId + '_ip_subnet'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" @change="checkPeerCreateEligibility('allowedIPs')" @keyup="checkPeerCreateEligibility('allowedIPs')" >
+                                  <datalist :id="peerId + '_ip_subnets'">
+                                    <option :value="peerDetails.address + '/32'">
+                                      Forward all {{peerDetails.address}} related traffic to {{peerDetails.address}}
                                     </option>
-                                    <option :value="peer.address.slice(0, -1) + '0/24'">
-                                      Forward all {{peer.address.slice(0, -1) + '0-255'}} related traffic to {{peer.address}}
+                                    <option :value="peerDetails.address.slice(0, -1) + '0/24'">
+                                      Forward all {{peerDetails.address.slice(0, -1) + '0-255'}} related traffic to {{peerDetails.address}}
                                     </option>
                                     <option value="0.0.0.0/0">
-                                      Forward all IPv4 traffic to {{peer.address}}
+                                      Forward all IPv4 traffic to {{peerDetails.address}}
                                     </option>
                                   </datalist>
                                 </div>
@@ -702,7 +703,7 @@
         </div>
 
         <!-- Delete Dialog -->
-        <div v-if="peerDelete" class="fixed z-10 inset-0 overflow-y-auto">
+        <div v-if="peerDeleteId" class="fixed z-10 inset-0 overflow-y-auto">
           <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <!--
         Background overlay, show/hide based on modal state.
@@ -750,7 +751,7 @@
                     </h3>
                     <div class="mt-2">
                       <p class="text-sm text-gray-500">
-                        Are you sure you want to delete <strong>{{peerDelete.name}}</strong>?
+                        Are you sure you want to delete <strong>{{network.peers[peerDeleteId].name}}</strong>?
                         This action cannot be undone.
                       </p>
                     </div>
@@ -758,11 +759,11 @@
                 </div>
               </div>
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="button" @click="deletePeer(peerDelete); peerDelete = null"
+                <button type="button" @click="deletePeer(peerDeleteId); peerDeleteId = null"
                   class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
                   Delete
                 </button>
-                <button type="button" @click="peerDelete = null"
+                <button type="button" @click="peerDeleteId = null"
                   class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                   Cancel
                 </button>
@@ -775,7 +776,7 @@
 
 
         <!-- Configuration Dialog -->
-        <div v-if="peerConfig" class="fixed z-10 inset-0 overflow-y-auto">
+        <div v-if="peerConfigId" class="fixed z-10 inset-0 overflow-y-auto">
           <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity" aria-hidden="true">
               <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
@@ -790,17 +791,17 @@
 
                   <div class="mt-3 text-center sm:text-left w-full">
                     <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
-                      Configuration file for <strong>{{peerConfig.name}}</strong>:
+                      Configuration file for <strong>{{network.peers[peerConfigId].name}}</strong>:
                     </h3>
                     <div class="mt-2 w-full overflow-scroll h-96">
-                      <span class="text-sm text-gray-500 whitespace-pre">{{ getPeerConf(peerConfig.id) }}</span>
+                      <span class="text-sm text-gray-500 whitespace-pre">{{ getPeerConf(peerConfigId) }}</span>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button type="button"
-                        @click="navigator.clipboard.writeText(getPeerConf(peerConfig.id)).then(() => {
+                        @click="navigator.clipboard.writeText(getPeerConf(peerConfigId)).then(() => {
                                 alert('successfully copied');
                                 })
                                 .catch(() => {
@@ -809,7 +810,7 @@
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
                   Copy To Clipboard
                 </button>
-                <button type="button" @click="peerConfig = null"
+                <button type="button" @click="peerConfigId = null"
                         class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                   Cancel
                 </button>
@@ -891,7 +892,7 @@
 
 
         <!-- Peer edit config window-->
-        <div v-if="peerEdit !== null" class="fixed z-10 inset-0 overflow-y-auto">
+        <div v-if="peerEditId !== null" class="fixed z-10 inset-0 overflow-y-auto">
           <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <!--
         Background overlay, show/hide based on modal state.
@@ -935,11 +936,11 @@
                   </div>
                   <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
-                      Edit peer <strong>{{ peerEdit.name }}</strong>
+                      Edit peer <strong>{{ network.peers[peerEditId].name }}</strong>
                     </h3>
                     <div class="mt-2">
                       <div>Below are peer information: </div>
-                      <div v-for="key in Object.keys(network.peers[peerEdit.id])" class="relative overflow-hidden">
+                      <div v-for="key in Object.keys(network.peers[peerEditId])" class="relative overflow-hidden">
                         <div class="flex grid grid-cols-3 gap-1">
                           <div class="truncate">
                             <span class="text-gray-800 cursor-pointer text-xs">
@@ -949,7 +950,7 @@
 
                           <div class="truncate col-span-2">
                             <span class="text-sm text-gray-500">
-                              {{ network.peers[peerEdit.id][key] }}
+                              {{ network.peers[peerEditId][key] }}
                             </span>
                           </div>
                         </div>
@@ -958,7 +959,7 @@
                       <br/>
                       <div>Below are connection information: </div>
                       <div v-for="pairs in Object.keys(network.connections)" class="relative overflow-hidden">
-                        <div v-show="pairs.split('*').includes(peerEdit.id)" class="">
+                        <div v-show="pairs.split('*').includes(peerEditId)" class="">
                           <div>
                             {{ pairs }} :
                             {{ network.connections[pairs] }}
@@ -986,7 +987,7 @@
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
                   Apply
                 </button>
-                <button type="button" @click="peerEdit = null"
+                <button type="button" @click="peerEditId = null"
                         class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                   Cancel
                 </button>

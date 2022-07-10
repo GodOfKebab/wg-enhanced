@@ -36,19 +36,18 @@ new Vue({
 
     network: null,
 
-    peers: null,
     peersPersist: {},
-    peerDelete: null,
+    peerDeleteId: null,
     peerCreate: null,
-    peerConfig: null,
+    peerConfigId: null,
     peerCreateName: '',
     peerCreateEndpoint: '',
-    peerEdit: null,
+    peerEditId: null,
     peerEditName: null,
     peerEditNameId: null,
     peerEditAddress: null,
     peerEditAddressId: null,
-    peerQR: null,
+    peerQRId: null,
 
     staticPeersCount: 0,
     roamingPeersCount: 0,
@@ -156,77 +155,153 @@ new Vue({
       });
       if (this.wireguardStatus !== 'up') return;
 
-      // Get the network-wide config
-      this.network = await this.api.getNetwork();
-
       let staticPeersCount = 0;
       let roamingPeersCount = 0;
-      // Get WirGuard Peers
-      await this.api.getPeers().then(peers => {
-        this.peers = peers.map(peer => {
-          if (peer.name.includes('@') && peer.name.includes('.')) {
-            peer.avatar = `https://www.gravatar.com/avatar/${md5(peer.name)}?d=blank`;
+      // Get the network-wide config
+      await this.api.getNetwork().then(network => {
+        this.network = network;
+
+        // start append to network.connections
+        for (const [connectionId, connectionDetails] of Object.entries(network.connections)) {
+          // only parse the connections including root
+          if (connectionId.includes('root') && connectionDetails.enabled) {
+            const peerId = connectionId.replace('root', '').replace('*', '');
+            if (!this.peersPersist[peerId]) {
+              this.peersPersist[peerId] = {};
+              this.peersPersist[peerId].transferRxHistory = Array(20).fill(0);
+              this.peersPersist[peerId].transferRxPrevious = connectionDetails.transferRx;
+              this.peersPersist[peerId].transferTxHistory = Array(20).fill(0);
+              this.peersPersist[peerId].transferTxPrevious = connectionDetails.transferTx;
+
+              this.peersPersist[peerId].chartOptions = {
+                ...this.chartOptions,
+                yaxis: {
+                  ...this.chartOptions.yaxis,
+                  max: () => this.peersPersist[peerId].chartMax,
+                },
+              };
+            }
+
+            this.peersPersist[peerId].transferRxCurrent = connectionDetails.transferRx - this.peersPersist[peerId].transferRxPrevious;
+            this.peersPersist[peerId].transferRxPrevious = connectionDetails.transferRx;
+            this.peersPersist[peerId].transferTxCurrent = connectionDetails.transferTx - this.peersPersist[peerId].transferTxPrevious;
+            this.peersPersist[peerId].transferTxPrevious = connectionDetails.transferTx;
+
+            this.peersPersist[peerId].transferRxHistory.push(this.peersPersist[peerId].transferRxCurrent);
+            this.peersPersist[peerId].transferRxHistory.shift();
+
+            this.peersPersist[peerId].transferTxHistory.push(this.peersPersist[peerId].transferTxCurrent);
+            this.peersPersist[peerId].transferTxHistory.shift();
+
+            this.network.connections[connectionId].transferTxCurrent = this.peersPersist[peerId].transferTxCurrent;
+            this.network.connections[connectionId].transferTxSeries = [{
+              name: 'tx',
+              data: this.peersPersist[peerId].transferTxHistory,
+            }];
+
+            this.network.connections[connectionId].transferRxCurrent = this.peersPersist[peerId].transferRxCurrent;
+            this.network.connections[connectionId].transferRxSeries = [{
+              name: 'rx',
+              data: this.peersPersist[peerId].transferRxHistory,
+            }];
+
+            this.peersPersist[peerId].chartMax = Math.max(...this.peersPersist[peerId].transferTxHistory, ...this.peersPersist[peerId].transferRxHistory);
+
+            this.network.connections[connectionId].chartOptions = this.peersPersist[peerId].chartOptions;
+          }
+        }
+        // end append to network.connections
+
+        console.log(JSON.stringify(this.network, null, 2));
+
+        // start append to network.peers
+        for (const [peerId, peerDetails] of Object.entries(network.peers)) {
+          if (peerDetails.name.includes('@') && peerDetails.name.includes('.')) {
+            this.network.peers[peerId].avatar = `https://www.gravatar.com/avatar/${md5(peerDetails.name)}?d=blank`;
           }
 
-          if (!this.peersPersist[peer.id]) {
-            this.peersPersist[peer.id] = {};
-            this.peersPersist[peer.id].transferRxHistory = Array(20).fill(0);
-            this.peersPersist[peer.id].transferRxPrevious = peer.transferRx;
-            this.peersPersist[peer.id].transferTxHistory = Array(20).fill(0);
-            this.peersPersist[peer.id].transferTxPrevious = peer.transferTx;
-
-            this.peersPersist[peer.id].chartOptions = {
-              ...this.chartOptions,
-              yaxis: {
-                ...this.chartOptions.yaxis,
-                max: () => this.peersPersist[peer.id].chartMax,
-              },
-            };
-          }
-
-          this.peersPersist[peer.id].transferRxCurrent = peer.transferRx - this.peersPersist[peer.id].transferRxPrevious;
-          this.peersPersist[peer.id].transferRxPrevious = peer.transferRx;
-          this.peersPersist[peer.id].transferTxCurrent = peer.transferTx - this.peersPersist[peer.id].transferTxPrevious;
-          this.peersPersist[peer.id].transferTxPrevious = peer.transferTx;
-
-          this.peersPersist[peer.id].transferRxHistory.push(this.peersPersist[peer.id].transferRxCurrent);
-          this.peersPersist[peer.id].transferRxHistory.shift();
-
-          this.peersPersist[peer.id].transferTxHistory.push(this.peersPersist[peer.id].transferTxCurrent);
-          this.peersPersist[peer.id].transferTxHistory.shift();
-
-          peer.transferTxCurrent = this.peersPersist[peer.id].transferTxCurrent;
-          peer.transferTxSeries = [{
-            name: 'tx',
-            data: this.peersPersist[peer.id].transferTxHistory,
-          }];
-
-          peer.transferRxCurrent = this.peersPersist[peer.id].transferRxCurrent;
-          peer.transferRxSeries = [{
-            name: 'rx',
-            data: this.peersPersist[peer.id].transferRxHistory,
-          }];
-
-          this.peersPersist[peer.id].chartMax = Math.max(...this.peersPersist[peer.id].transferTxHistory, ...this.peersPersist[peer.id].transferRxHistory);
-
-          peer.chartOptions = this.peersPersist[peer.id].chartOptions;
-
-          if (peer.endpoint.startsWith('static')) {
+          if (peerDetails.endpoint.startsWith('static')) {
             staticPeersCount += 1;
-          } else if (peer.endpoint.startsWith('roaming')) {
+          } else if (peerDetails.endpoint.startsWith('roaming')) {
             roamingPeersCount += 1;
           }
-
-          return peer;
-        });
+        }
+        // end append to network.peers
       }).catch(err => {
         if (err.toString() === 'TypeError: Load failed') {
           this.webServerStatus = 'down';
         } else {
-          console.log('getPeers error =>');
+          console.log('getNetwork error =>');
           console.log(err);
         }
       });
+
+      // // Get WirGuard Peers
+      // await this.api.getPeers().then(peers => {
+      //   this.peers = peers.map(peer => {
+      //     if (peer.name.includes('@') && peer.name.includes('.')) {
+      //       peer.avatar = `https://www.gravatar.com/avatar/${md5(peer.name)}?d=blank`;
+      //     }
+      //
+      //     if (!this.peersPersist[peer.id]) {
+      //       this.peersPersist[peer.id] = {};
+      //       this.peersPersist[peer.id].transferRxHistory = Array(20).fill(0);
+      //       this.peersPersist[peer.id].transferRxPrevious = peer.transferRx;
+      //       this.peersPersist[peer.id].transferTxHistory = Array(20).fill(0);
+      //       this.peersPersist[peer.id].transferTxPrevious = peer.transferTx;
+      //
+      //       this.peersPersist[peer.id].chartOptions = {
+      //         ...this.chartOptions,
+      //         yaxis: {
+      //           ...this.chartOptions.yaxis,
+      //           max: () => this.peersPersist[peer.id].chartMax,
+      //         },
+      //       };
+      //     }
+      //
+      //     this.peersPersist[peer.id].transferRxCurrent = peer.transferRx - this.peersPersist[peer.id].transferRxPrevious;
+      //     this.peersPersist[peer.id].transferRxPrevious = peer.transferRx;
+      //     this.peersPersist[peer.id].transferTxCurrent = peer.transferTx - this.peersPersist[peer.id].transferTxPrevious;
+      //     this.peersPersist[peer.id].transferTxPrevious = peer.transferTx;
+      //
+      //     this.peersPersist[peer.id].transferRxHistory.push(this.peersPersist[peer.id].transferRxCurrent);
+      //     this.peersPersist[peer.id].transferRxHistory.shift();
+      //
+      //     this.peersPersist[peer.id].transferTxHistory.push(this.peersPersist[peer.id].transferTxCurrent);
+      //     this.peersPersist[peer.id].transferTxHistory.shift();
+      //
+      //     peer.transferTxCurrent = this.peersPersist[peer.id].transferTxCurrent;
+      //     peer.transferTxSeries = [{
+      //       name: 'tx',
+      //       data: this.peersPersist[peer.id].transferTxHistory,
+      //     }];
+      //
+      //     peer.transferRxCurrent = this.peersPersist[peer.id].transferRxCurrent;
+      //     peer.transferRxSeries = [{
+      //       name: 'rx',
+      //       data: this.peersPersist[peer.id].transferRxHistory,
+      //     }];
+      //
+      //     this.peersPersist[peer.id].chartMax = Math.max(...this.peersPersist[peer.id].transferTxHistory, ...this.peersPersist[peer.id].transferRxHistory);
+      //
+      //     peer.chartOptions = this.peersPersist[peer.id].chartOptions;
+      //
+      //     if (peer.endpoint.startsWith('static')) {
+      //       staticPeersCount += 1;
+      //     } else if (peer.endpoint.startsWith('roaming')) {
+      //       roamingPeersCount += 1;
+      //     }
+      //
+      //     return peer;
+      //   });
+      // }).catch(err => {
+      //   if (err.toString() === 'TypeError: Load failed') {
+      //     this.webServerStatus = 'down';
+      //   } else {
+      //     console.log('getPeers error =>');
+      //     console.log(err);
+      //   }
+      // });
 
       this.staticPeersCount = staticPeersCount;
       this.roamingPeersCount = roamingPeersCount;
@@ -261,7 +336,7 @@ new Vue({
       this.api.deleteSession()
         .then(() => {
           this.authenticated = false;
-          this.peers = null;
+          this.network = null;
         })
         .catch(err => {
           alert(err.message || err.toString());
@@ -275,38 +350,38 @@ new Vue({
 
       const attachedPeersCompact = [];
 
-      for (let i = 0; i < this.attachedPeers.length; i++) {
+      for (const [peerId, peerDetails] of attachedPeersCompact) {
         attachedPeersCompact.push({
-          peer: this.attachedPeers[i].id,
-          allowedIPs: document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`).value,
+          peer: peerId,
+          allowedIPs: document.getElementById(`${peerId}_ip_subnet`).value,
         });
       }
       this.api.createPeer({ name, endpoint, attachedPeers: attachedPeersCompact })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    deletePeer(peer) {
-      this.api.deletePeer({ peerId: peer.id })
+    deletePeer(peerId) {
+      this.api.deletePeer({ peerId })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    enablePeer(peer) {
-      this.api.enablePeer({ peerId: peer.id })
+    enablePeer(peerId) {
+      this.api.enablePeer({ peerId })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    disablePeer(peer) {
-      this.api.disablePeer({ peerId: peer.id })
+    disablePeer(peerId) {
+      this.api.disablePeer({ peerId })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    updatePeerName(peer, name) {
-      this.api.updatePeerName({ peerId: peer.id, name })
+    updatePeerName(peerId, name) {
+      this.api.updatePeerName({ peerId, name })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
-    updatePeerAddress(peer, address) {
-      this.api.updatePeerAddress({ peerId: peer.id, address })
+    updatePeerAddress(peerId, address) {
+      this.api.updatePeerAddress({ peerId, address })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
@@ -333,10 +408,10 @@ new Vue({
     handleAttachPeers(mode) {
       const checkboxArray = [];
       const peersArray = [];
-      for (let i = 0; i < this.peers.length; i++) {
-        if (this.peers.at(i).endpoint.startsWith('static')) {
-          checkboxArray.push(document.getElementById(`${this.peers.at(i).id}_checkbox`));
-          peersArray.push(this.peers.at(i));
+      for (const [peerId, peerDetails] of this.network.peers) {
+        if (peerDetails.endpoint.startsWith('static')) {
+          checkboxArray.push(document.getElementById(`${peerId}_checkbox`));
+          peersArray.push(peerId);
         }
       }
 
@@ -346,12 +421,13 @@ new Vue({
         this.peerCreateEndpoint = '';
         this.peerCreateShowAdvance = false;
 
-        for (let i = 0; i < peersArray.length; i++) {
-          if (peersArray.at(i).endpoint.startsWith('static')) {
-            document.getElementById(`${peersArray.at(i).id}_checkbox`).checked = false;
-            document.getElementById(`${peersArray.at(i).id}_ip_subnet`).value = `${peersArray.at(i).address}/32`;
+        for (const peerId of peersArray) {
+          if (this.network[peerId].endpoint.startsWith('static')) {
+            document.getElementById(`${peerId}_checkbox`).checked = false;
+            document.getElementById(`${peerId}_ip_subnet`).value = `${this.network[peerId].address}/32`;
           }
         }
+
         // enable the root server as default
         this.attachedPeers = [peersArray.at(0)];
         document.getElementById('root_checkbox').checked = true;
@@ -421,11 +497,12 @@ new Vue({
       // check allowedIPs
       if (mode === 'allowedIPs') {
         this.peerCreateEligibilityAllowedIPs = true;
-        for (let i = 0; i < this.attachedPeers.length; i++) {
-          const allowedIPsEligibility = document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`).value.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
+        for (const peerId of this.attachedPeers) {
+          const allowedIPsEligibility = document.getElementById(`${peerId}_ip_subnet`).value.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
           this.peerCreateEligibilityAllowedIPs &&= allowedIPsEligibility;
-          document.getElementById(`${this.attachedPeers[i].id}_ip_subnet`).style.backgroundColor = allowedIPsEligibility ? tailwindDarkerGreen : tailwindDarkerRed;
+          document.getElementById(`${peerId}_ip_subnet`).style.backgroundColor = allowedIPsEligibility ? tailwindDarkerGreen : tailwindDarkerRed;
         }
+
         document.getElementById('networkRulesDiv').style.backgroundColor = this.peerCreateEligibilityAllowedIPs ? tailwindLightGreen : tailwindLightRed;
       }
 
