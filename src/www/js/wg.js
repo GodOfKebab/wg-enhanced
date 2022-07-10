@@ -8,8 +8,7 @@ class WG {
   getPeerConfig(network, peerId) {
     const peerConf = network.peers[peerId];
 
-    let conf = `
-[Interface]
+    let conf = `[Interface]
 PrivateKey = ${peerConf.privateKey}
 Address = ${peerConf.address}/24\n`;
 // ${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}` : ''}
@@ -44,6 +43,22 @@ AllowedIPs = ${allowedIPsThisPeer}\n`;
     }
 
     return conf;
+  }
+
+  downloadPeerConfig(network, peerId) {
+    const peerConfigFileContents = this.getPeerConfig(network, peerId);
+    const peerConfigFileName = network.peers[peerId].name.replace(/[^a-zA-Z0-9_=+.-]/g, '-').replace(/(-{2,}|-$)/g, '-').replace(/-$/, '').substring(0, 32);
+
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(peerConfigFileContents));
+    element.setAttribute('download', `${peerConfigFileName}.conf`);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
   }
 
 }

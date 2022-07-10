@@ -313,6 +313,9 @@ new Vue({
     getPeerConf(peerId) {
       return this.wg.getPeerConfig(this.network, peerId);
     },
+    downloadPeerConf(peerId) {
+      this.wg.downloadPeerConfig(this.network, peerId);
+    },
     toggleWireGuardNetworking() {
       if (this.wireguardStatus === 'up' && this.wireguardToggleTo === 'disable') {
         this.wireguardStatus = 'unknown';

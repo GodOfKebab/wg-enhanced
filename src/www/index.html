@@ -262,15 +262,14 @@
                       </button>
 
                       <!-- Download Config -->
-                      <a :href="'./api/wireguard/peer/' + peer.id + '/configuration'" download
-                         class="align-middle inline-block bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                         title="Download Configuration">
+                      <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
+                              title="Download Configuration" @click="downloadPeerConf(peer.id)">
                         <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                      </a>
+                      </button>
 
                       <!-- Delete -->
                       <button class="align-middle p-2 rounded"
@@ -492,15 +491,14 @@
                       </button>
 
                       <!-- Download Config -->
-                      <a :href="'./api/wireguard/peer/' + peer.id + '/configuration'" download
-                        class="align-middle inline-block bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                        title="Download Configuration">
+                      <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
+                              title="Download Configuration" @click="downloadPeerConf(peer.id)">
                         <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                          stroke="currentColor">
+                             stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
-                      </a>
+                      </button>
 
                       <!-- Delete -->
                       <button class="align-middle bg-gray-100 hover:bg-red-600 hover:text-white p-2 rounded transition"
