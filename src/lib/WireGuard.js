@@ -149,7 +149,59 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
   }
 
   async getNetwork() {
-    return this.getConfig();
+    const config = await this.getConfig();
+
+    // By default, set all these to null
+    Object.keys(config.connections).forEach(peerConnectionId => {
+      config.connections[peerConnectionId].latestHandshakeAt = null;
+      config.connections[peerConnectionId].transferRx = null;
+      config.connections[peerConnectionId].transferTx = null;
+      config.connections[peerConnectionId].persistentKeepalive = null;
+    });
+
+    // Loop WireGuard status to fill the above values
+    const dump = await Util.exec(`wg show ${WG_INTERFACE} dump`, {
+      log: false,
+    });
+    dump
+      .trim()
+      .split('\n')
+      .slice(1)
+      .forEach(line => {
+        const [
+          publicKey,
+          preSharedKey, // eslint-disable-line no-unused-vars
+          endpoint, // eslint-disable-line no-unused-vars
+          allowedIps, // eslint-disable-line no-unused-vars
+          latestHandshakeAt,
+          transferRx,
+          transferTx,
+          persistentKeepalive,
+        ] = line.split('\t');
+
+        let clientId = null; // Object.values(config.peers).find(peer => peer.publicKey === publicKey);
+        for (const [peerId, peerDetails] of Object.entries(config.peers)) {
+          if (peerDetails.publicKey !== publicKey) continue;
+          clientId = peerId;
+        }
+        if (clientId == null) return;
+
+        let clientConnectionId = null;
+        if (`root*${clientId}` in config.connections) {
+          clientConnectionId = `root*${clientId}`;
+        } else if (`${clientId}*root` in config.connections) {
+          clientConnectionId = `${clientId}*root`;
+        }
+        if (clientConnectionId == null) return;
+        config.connections[clientConnectionId].latestHandshakeAt = latestHandshakeAt === '0'
+          ? null
+          : new Date(Number(`${latestHandshakeAt}000`));
+        config.connections[clientConnectionId].transferRx = Number(transferRx);
+        config.connections[clientConnectionId].transferTx = Number(transferTx);
+        config.connections[clientConnectionId].persistentKeepalive = persistentKeepalive;
+      });
+
+    return config;
   }
 
   async getPeers() {
@@ -208,7 +260,6 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
           : new Date(Number(`${latestHandshakeAt}000`));
         peer.transferRx = Number(transferRx);
         peer.transferTx = Number(transferTx);
-        peer.persistentKeepalive = persistentKeepalive;
         peer.persistentKeepalive = persistentKeepalive;
       });
 
