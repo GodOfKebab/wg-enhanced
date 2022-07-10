@@ -151,7 +151,7 @@
                              v-on:keyup.escape="peerEditName = null; peerEditNameId = null;"
                              :ref="'peer-' + peer.id + '-name'"
                              class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peer.id" @click="peerConfig = peer; getPeerConf(peer);"
+                      <button v-show="peerEditNameId !== peer.id" @click="peerConfig = peer;"
                               class="inline-block border-t-2 border-b-2 border-transparent">{{peer.name}}</button>
 
                       <!-- Edit -->
@@ -381,7 +381,7 @@
                         v-on:keyup.escape="peerEditName = null; peerEditNameId = null;"
                         :ref="'peer-' + peer.id + '-name'"
                         class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peer.id" @click="peerConfig = peer; getPeerConf(peer);"
+                      <button v-show="peerEditNameId !== peer.id" @click="peerConfig = peer;"
                         class="inline-block border-t-2 border-b-2 border-transparent">{{peer.name}}</button>
 
                       <!-- Edit -->
@@ -796,14 +796,14 @@
                       Configuration file for <strong>{{peerConfig.name}}</strong>:
                     </h3>
                     <div class="mt-2 w-full overflow-scroll h-96">
-                      <span class="text-sm text-gray-500 whitespace-pre">{{peerConfig.config}}</span>
+                      <span class="text-sm text-gray-500 whitespace-pre">{{ getPeerConf(peerConfig) }}</span>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button type="button"
-                        @click="navigator.clipboard.writeText(peerConfig.config).then(() => {
+                        @click="navigator.clipboard.writeText(getPeerConf(peerConfig)).then(() => {
                                 alert('successfully copied');
                                 })
                                 .catch(() => {

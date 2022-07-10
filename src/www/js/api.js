@@ -124,13 +124,6 @@ class API {
     });
   }
 
-  async getPeerConf({ peerId }) {
-    return this.call({
-      method: 'get',
-      path: `/wireguard/peer/${peerId}/peer.conf`,
-    });
-  }
-
   async getWirGuardStatus() {
     return this.call({
       method: 'get',
