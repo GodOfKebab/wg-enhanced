@@ -149,14 +149,14 @@
                       <input v-if="peerEditNameId === peerId" v-model="peerEditName"
                              v-on:keyup.enter="updatePeerName(peerId, peerEditName); peerEditName = null; peerEditNameId = null;"
                              v-on:focusout="peerEditName = null; peerEditNameId = null;"
-                             :ref="'peer-' + peerId + '-name'"
+                             :ref="`peer-${peerId}-name`"
                              class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
                       <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId;"
                               class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
                       <span v-if="peerEditNameId !== peerId"
-                            @click="peerEditName = peerDetails.name; peerEditNameId = peerId; setTimeout(() => $refs['peer-' + peerId + '-name'][0].select(), 1);"
+                            @click="peerEditName = peerDetails.name; peerEditNameId = peerId; setTimeout(() => $refs[`peer-${peerId}-name`][0].select(), 1);"
                             class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none" viewBox="0 0 24 24"
@@ -177,14 +177,14 @@
                         <input v-show="peerEditAddressId === peerId" v-model="peerEditAddress"
                                v-on:keyup.enter="updatePeerAddress(peerId, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
                                v-on:focusout="peerEditAddress = null; peerEditAddressId = null;"
-                               :ref="'peer-' + peerId + '-address'"
+                               :ref="`peer-${peerId}-address`"
                                class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
                         <span v-show="peerEditAddressId !== peerId"
                               class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.address}}</span>
 
                         <!-- Edit -->
                         <span v-show="peerEditAddressId !== peerId"
-                              @click="peerEditAddress = peerDetails.address; peerEditAddressId = peerId; setTimeout(() => $refs['peer-' + peerId + '-address'][0].select(), 1);"
+                              @click="peerEditAddress = peerDetails.address; peerEditAddressId = peerId; setTimeout(() => $refs[`peer-${peerId}-address`][0].select(), 1);"
                               class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg"
                                class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none"
@@ -378,14 +378,14 @@
                       <input v-show="peerEditNameId === peerId" v-model="peerEditName"
                         v-on:keyup.enter="updatePeerName(peerId, peerEditName); peerEditName = null; peerEditNameId = null;"
                         v-on:focusout="peerEditName = null; peerEditNameId = null;"
-                             :ref="'peer-' + peerId + '-name'"
+                             :ref="`peer-${peerId}-name`"
                         class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
                       <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId;"
                         class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
                       <span v-show="peerEditNameId !== peerId"
-                        @click="peerEditName = peerDetails.name; peerEditNameId = peerId; setTimeout(() => $refs['peer-' + peerId + '-name'][0].select(), 1);"
+                        @click="peerEditName = peerDetails.name; peerEditNameId = peerId; setTimeout(() => $refs[`peer-${peerId}-name`][0].select(), 1);"
                         class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg"
                           class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none" viewBox="0 0 24 24"
@@ -406,14 +406,14 @@
                         <input v-show="peerEditAddressId === peerId" v-model="peerEditAddress"
                           v-on:keyup.enter="updatePeerAddress(peerId, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
                           v-on:focusout="peerEditAddress = null; peerEditAddressId = null;"
-                          :ref="'peer-' + peerId + '-address'"
+                          :ref="`peer-${peerId}-address`"
                           class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
                         <span v-show="peerEditAddressId !== peerId"
                           class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.address}}</span>
 
                         <!-- Edit -->
                         <span v-show="peerEditAddressId !== peerId"
-                          @click="peerEditAddress = peerDetails.address; peerEditAddressId = peerId; setTimeout(() => $refs['peer-' + peerId + '-address'][0].select(), 1);"
+                          @click="peerEditAddress = peerDetails.address; peerEditAddressId = peerId; setTimeout(() => $refs[`peer-${peerId}-address`][0].select(), 1);"
                           class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none"
@@ -635,7 +635,7 @@
                               <div v-show="peerDetails.endpoint.startsWith('static')">
                                 <div class="form-check truncate">
                                   <label>
-                                    <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="peerId + '_checkbox'" value="" @click="handleAttachPeers('individual')">
+                                    <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="`${peerId}_checkbox`" value="" @click="handleAttachPeers('individual')">
                                     <span class="text-gray-800 cursor-pointer text-xs">
                                       <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
                                     </span>
@@ -662,8 +662,8 @@
 
                                 <div class="truncate col-span-2">
                                   <span class="text-gray-800 text-xs mr-1">Allowed IPs:</span>
-                                  <input :list="peerId + '_ip_subnets'" :name="peerId + '_ip_subnet'" :id="peerId + '_ip_subnet'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" @change="checkPeerCreateEligibility('allowedIPs')" @keyup="checkPeerCreateEligibility('allowedIPs')" >
-                                  <datalist :id="peerId + '_ip_subnets'">
+                                  <input :list="`${peerId}_ip_subnets`" :name="`${peerId}_ip_subnet`" :id="`${peerId}_ip_subnet`" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" @change="checkPeerCreateEligibility('allowedIPs')" @keyup="checkPeerCreateEligibility('allowedIPs')" >
+                                  <datalist :id="`${peerId}_ip_subnets`">
                                     <option :value="peerDetails.address + '/32'">
                                       Forward all {{peerDetails.address}} related traffic to {{peerDetails.address}}
                                     </option>
