@@ -276,8 +276,8 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
       config.connections[connectionId] = {
         preSharedKey,
         enabled: true,
-        'allowedIPs:a->b': attachedPeer.allowedIPs,
-        'allowedIPs:b->a': `${address}/32`,
+        'allowedIPs:a->b': connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
+        'allowedIPs:b->a': !connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
       };
     }
 
