@@ -148,7 +148,7 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
   }
 
   getConnectionId(peer1, peer2) {
-    if (peer1.localeCompare(peer2, 'en')) return `${peer1}*${peer2}`;
+    if (peer1.localeCompare(peer2, 'en') === 1) return `${peer1}*${peer2}`;
     return `${peer2}*${peer1}`;
   }
 
@@ -185,12 +185,14 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
 
         let clientId = null; // Object.values(config.peers).find(peer => peer.publicKey === publicKey);
         for (const [peerId, peerDetails] of Object.entries(config.peers)) {
-          if (peerDetails.publicKey !== publicKey) continue;
-          clientId = peerId;
+          if (peerDetails.publicKey === publicKey) {
+            clientId = peerId;
+          }
         }
         if (clientId == null) return;
 
         const clientConnectionId = this.getConnectionId('root', clientId);
+        console.log(clientConnectionId);
         if (!config.connections[clientConnectionId]) return;
 
         config.connections[clientConnectionId].latestHandshakeAt = latestHandshakeAt === '0'

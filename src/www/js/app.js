@@ -165,49 +165,48 @@ new Vue({
         for (const [connectionId, connectionDetails] of Object.entries(network.connections)) {
           // only parse the connections including root
           if (connectionId.includes('root') && connectionDetails.enabled) {
-            const peerId = connectionId.replace('root', '').replace('*', '');
-            if (!this.peersPersist[peerId]) {
-              this.peersPersist[peerId] = {};
-              this.peersPersist[peerId].transferRxHistory = Array(20).fill(0);
-              this.peersPersist[peerId].transferRxPrevious = connectionDetails.transferRx;
-              this.peersPersist[peerId].transferTxHistory = Array(20).fill(0);
-              this.peersPersist[peerId].transferTxPrevious = connectionDetails.transferTx;
+            if (!this.peersPersist[connectionId]) {
+              this.peersPersist[connectionId] = {};
+              this.peersPersist[connectionId].transferRxHistory = Array(20).fill(0);
+              this.peersPersist[connectionId].transferRxPrevious = connectionDetails.transferRx;
+              this.peersPersist[connectionId].transferTxHistory = Array(20).fill(0);
+              this.peersPersist[connectionId].transferTxPrevious = connectionDetails.transferTx;
 
-              this.peersPersist[peerId].chartOptions = {
+              this.peersPersist[connectionId].chartOptions = {
                 ...this.chartOptions,
                 yaxis: {
                   ...this.chartOptions.yaxis,
-                  max: () => this.peersPersist[peerId].chartMax,
+                  max: () => this.peersPersist[connectionId].chartMax,
                 },
               };
             }
 
-            this.peersPersist[peerId].transferRxCurrent = connectionDetails.transferRx - this.peersPersist[peerId].transferRxPrevious;
-            this.peersPersist[peerId].transferRxPrevious = connectionDetails.transferRx;
-            this.peersPersist[peerId].transferTxCurrent = connectionDetails.transferTx - this.peersPersist[peerId].transferTxPrevious;
-            this.peersPersist[peerId].transferTxPrevious = connectionDetails.transferTx;
+            this.peersPersist[connectionId].transferRxCurrent = connectionDetails.transferRx - this.peersPersist[connectionId].transferRxPrevious;
+            this.peersPersist[connectionId].transferRxPrevious = connectionDetails.transferRx;
+            this.peersPersist[connectionId].transferTxCurrent = connectionDetails.transferTx - this.peersPersist[connectionId].transferTxPrevious;
+            this.peersPersist[connectionId].transferTxPrevious = connectionDetails.transferTx;
 
-            this.peersPersist[peerId].transferRxHistory.push(this.peersPersist[peerId].transferRxCurrent);
-            this.peersPersist[peerId].transferRxHistory.shift();
+            this.peersPersist[connectionId].transferRxHistory.push(this.peersPersist[connectionId].transferRxCurrent);
+            this.peersPersist[connectionId].transferRxHistory.shift();
 
-            this.peersPersist[peerId].transferTxHistory.push(this.peersPersist[peerId].transferTxCurrent);
-            this.peersPersist[peerId].transferTxHistory.shift();
+            this.peersPersist[connectionId].transferTxHistory.push(this.peersPersist[connectionId].transferTxCurrent);
+            this.peersPersist[connectionId].transferTxHistory.shift();
 
-            this.network.connections[connectionId].transferTxCurrent = this.peersPersist[peerId].transferTxCurrent;
+            this.network.connections[connectionId].transferTxCurrent = this.peersPersist[connectionId].transferTxCurrent;
             this.network.connections[connectionId].transferTxSeries = [{
               name: 'tx',
-              data: this.peersPersist[peerId].transferTxHistory,
+              data: this.peersPersist[connectionId].transferTxHistory,
             }];
 
-            this.network.connections[connectionId].transferRxCurrent = this.peersPersist[peerId].transferRxCurrent;
+            this.network.connections[connectionId].transferRxCurrent = this.peersPersist[connectionId].transferRxCurrent;
             this.network.connections[connectionId].transferRxSeries = [{
               name: 'rx',
-              data: this.peersPersist[peerId].transferRxHistory,
+              data: this.peersPersist[connectionId].transferRxHistory,
             }];
 
-            this.peersPersist[peerId].chartMax = Math.max(...this.peersPersist[peerId].transferTxHistory, ...this.peersPersist[peerId].transferRxHistory);
+            this.peersPersist[connectionId].chartMax = Math.max(...this.peersPersist[connectionId].transferTxHistory, ...this.peersPersist[connectionId].transferRxHistory);
 
-            this.network.connections[connectionId].chartOptions = this.peersPersist[peerId].chartOptions;
+            this.network.connections[connectionId].chartOptions = this.peersPersist[connectionId].chartOptions;
           }
         }
         // end append to network.connections
@@ -236,6 +235,7 @@ new Vue({
 
       this.staticPeersCount = staticPeersCount;
       this.roamingPeersCount = roamingPeersCount;
+      console.log(JSON.stringify(this.network));
     },
     login(e) {
       e.preventDefault();
@@ -447,6 +447,10 @@ new Vue({
 
       // final AND check
       this.peerCreateEligibility = this.peerCreateEligibilityName && (this.peerCreateEligibilityEndpoint || this.peerCreate === 'roaming') && this.peerCreateEligibilityPeers && this.peerCreateEligibilityAllowedIPs;
+    },
+    getConnectionId(peer1, peer2) {
+      if (peer1.localeCompare(peer2, 'en')) return `${peer1}*${peer2}`;
+      return `${peer2}*${peer1}`;
     },
   },
   filters: {
