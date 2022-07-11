@@ -281,7 +281,7 @@ new Vue({
 
       const attachedPeersCompact = [];
 
-      for (const [peerId, peerDetails] of attachedPeersCompact) {
+      for (const peerId of this.attachedPeers) {
         attachedPeersCompact.push({
           peer: peerId,
           allowedIPs: document.getElementById(`${peerId}_ip_subnet`).value,

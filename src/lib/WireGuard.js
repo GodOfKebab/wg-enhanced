@@ -103,17 +103,17 @@ PostUp = ${WG_POST_UP}
 PostDown = ${WG_POST_DOWN}
 `;
 
-    for (const [connectionPeers, connectionDetails] of Object.entries(config.connections)) {
-      if (!connectionPeers.includes('root')) continue;
+    for (const [connectionId, connectionDetails] of Object.entries(config.connections)) {
+      if (!connectionId.includes('root')) continue;
       if (!connectionDetails.enabled) continue;
 
       let peerId = '';
       let allowedIPsThisServer = '';
-      if (connectionPeers.split('*')[0] === 'root') {
-        peerId = connectionPeers.split('*')[1];
+      if (connectionId.split('*')[0] === 'root') {
+        peerId = connectionId.split('*')[1];
         allowedIPsThisServer = connectionDetails['allowedIPs:a->b'];
       } else {
-        peerId = connectionPeers.split('*')[0];
+        peerId = connectionId.split('*')[0];
         allowedIPsThisServer = connectionDetails['allowedIPs:b->a'];
       }
 
@@ -145,6 +145,11 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
     debug('Config syncing...');
     await Util.exec(`wg syncconf ${WG_INTERFACE} <(wg-quick strip ${WG_INTERFACE})`);
     debug('Config synced.');
+  }
+
+  getConnectionId(peer1, peer2) {
+    if (peer1.localeCompare(peer2, 'en')) return `${peer1}*${peer2}`;
+    return `${peer2}*${peer1}`;
   }
 
   async getNetwork() {
@@ -185,13 +190,9 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
         }
         if (clientId == null) return;
 
-        let clientConnectionId = null;
-        if (`root*${clientId}` in config.connections) {
-          clientConnectionId = `root*${clientId}`;
-        } else if (`${clientId}*root` in config.connections) {
-          clientConnectionId = `${clientId}*root`;
-        }
-        if (clientConnectionId == null) return;
+        const clientConnectionId = this.getConnectionId('root', clientId);
+        if (!config.connections[clientConnectionId]) return;
+
         config.connections[clientConnectionId].latestHandshakeAt = latestHandshakeAt === '0'
           ? null
           : new Date(Number(`${latestHandshakeAt}000`));
@@ -216,15 +217,16 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
   async createPeer({ name, endpoint, attachedPeers }) {
     if (!name) throw new Error('Missing: Name : str');
 
-    if (!endpoint) throw new Error('Missing: Endpoint : str (in the format x.x.x.x:x)');
-    let peerCreateEligibilityEndpoint = endpoint.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
-    peerCreateEligibilityEndpoint ||= endpoint.match('^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}:(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
-    if (!peerCreateEligibilityEndpoint) throw new Error('Couldn\'t parse: Endpoint : str (in the format x.x.x.x:x)');
+    // if (!endpoint) throw new Error('Missing: Endpoint : str (in the format x.x.x.x:x)');
+    // let peerCreateEligibilityEndpoint = endpoint.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
+    // peerCreateEligibilityEndpoint ||= endpoint.match('^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}:(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
+    // if (!peerCreateEligibilityEndpoint) throw new Error('Couldn\'t parse: Endpoint : str (in the format x.x.x.x:x)');
 
     if (!attachedPeers) throw new Error('Missing: attachedPeers : array ([peerId: str, allowedIPs: str (in the format x.x.x.x/32)])');
+    if (!attachedPeers.length) throw new Error('Couldn\'t parse: attachedPeers : array ([peerId: str, allowedIPs: str (in the format x.x.x.x/32)])');
     for (const attachedPeer of attachedPeers) {
-      if (!attachedPeer.peerId || !attachedPeer.allowedIPs) throw new Error('Couldn\'t parse: attachedPeers : array ([{peerId: str, allowedIPs: str (in the format x.x.x.x/32)}, ...])');
-      if (!await this.getPeer({ peerId: attachedPeer.peerId })) throw new Error(`attachedPeer doesn't exist: ${attachedPeer.peerId}`);
+      if (!attachedPeer.peer || !attachedPeer.allowedIPs) throw new Error('Couldn\'t parse: attachedPeers : array ([{peerId: str, allowedIPs: str (in the format x.x.x.x/32)}, ...])');
+      if (!await this.getPeer({ peerId: attachedPeer.peer })) throw new Error(`attachedPeer doesn't exist: ${attachedPeer.peer}`);
       const allowedIPsEligibility = attachedPeer.allowedIPs.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
       if (!allowedIPsEligibility) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPs}`);
     }
@@ -265,13 +267,13 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
     };
 
     // create the connections
-    for (let i = 0; i < attachedPeers.length; i++) {
-      const connectionPeers = `${peerId}*${attachedPeers[i].peer}`;
+    for (const attachedPeer of attachedPeers) {
+      const connectionId = this.getConnectionId(peerId, attachedPeer.peer);
       const preSharedKey = await Util.exec('wg genpsk');
-      config.connections[connectionPeers] = {
+      config.connections[connectionId] = {
         preSharedKey,
         enabled: true,
-        'allowedIPs:a->b': attachedPeers[i].allowedIPs,
+        'allowedIPs:a->b': attachedPeer.allowedIPs,
         'allowedIPs:b->a': `${address}/32`,
       };
     }
