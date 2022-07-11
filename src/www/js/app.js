@@ -212,8 +212,6 @@ new Vue({
         }
         // end append to network.connections
 
-        console.log(JSON.stringify(this.network, null, 2));
-
         // start append to network.peers
         for (const [peerId, peerDetails] of Object.entries(network.peers)) {
           if (peerDetails.name.includes('@') && peerDetails.name.includes('.')) {
@@ -235,73 +233,6 @@ new Vue({
           console.log(err);
         }
       });
-
-      // // Get WirGuard Peers
-      // await this.api.getPeers().then(peers => {
-      //   this.peers = peers.map(peer => {
-      //     if (peer.name.includes('@') && peer.name.includes('.')) {
-      //       peer.avatar = `https://www.gravatar.com/avatar/${md5(peer.name)}?d=blank`;
-      //     }
-      //
-      //     if (!this.peersPersist[peer.id]) {
-      //       this.peersPersist[peer.id] = {};
-      //       this.peersPersist[peer.id].transferRxHistory = Array(20).fill(0);
-      //       this.peersPersist[peer.id].transferRxPrevious = peer.transferRx;
-      //       this.peersPersist[peer.id].transferTxHistory = Array(20).fill(0);
-      //       this.peersPersist[peer.id].transferTxPrevious = peer.transferTx;
-      //
-      //       this.peersPersist[peer.id].chartOptions = {
-      //         ...this.chartOptions,
-      //         yaxis: {
-      //           ...this.chartOptions.yaxis,
-      //           max: () => this.peersPersist[peer.id].chartMax,
-      //         },
-      //       };
-      //     }
-      //
-      //     this.peersPersist[peer.id].transferRxCurrent = peer.transferRx - this.peersPersist[peer.id].transferRxPrevious;
-      //     this.peersPersist[peer.id].transferRxPrevious = peer.transferRx;
-      //     this.peersPersist[peer.id].transferTxCurrent = peer.transferTx - this.peersPersist[peer.id].transferTxPrevious;
-      //     this.peersPersist[peer.id].transferTxPrevious = peer.transferTx;
-      //
-      //     this.peersPersist[peer.id].transferRxHistory.push(this.peersPersist[peer.id].transferRxCurrent);
-      //     this.peersPersist[peer.id].transferRxHistory.shift();
-      //
-      //     this.peersPersist[peer.id].transferTxHistory.push(this.peersPersist[peer.id].transferTxCurrent);
-      //     this.peersPersist[peer.id].transferTxHistory.shift();
-      //
-      //     peer.transferTxCurrent = this.peersPersist[peer.id].transferTxCurrent;
-      //     peer.transferTxSeries = [{
-      //       name: 'tx',
-      //       data: this.peersPersist[peer.id].transferTxHistory,
-      //     }];
-      //
-      //     peer.transferRxCurrent = this.peersPersist[peer.id].transferRxCurrent;
-      //     peer.transferRxSeries = [{
-      //       name: 'rx',
-      //       data: this.peersPersist[peer.id].transferRxHistory,
-      //     }];
-      //
-      //     this.peersPersist[peer.id].chartMax = Math.max(...this.peersPersist[peer.id].transferTxHistory, ...this.peersPersist[peer.id].transferRxHistory);
-      //
-      //     peer.chartOptions = this.peersPersist[peer.id].chartOptions;
-      //
-      //     if (peer.endpoint.startsWith('static')) {
-      //       staticPeersCount += 1;
-      //     } else if (peer.endpoint.startsWith('roaming')) {
-      //       roamingPeersCount += 1;
-      //     }
-      //
-      //     return peer;
-      //   });
-      // }).catch(err => {
-      //   if (err.toString() === 'TypeError: Load failed') {
-      //     this.webServerStatus = 'down';
-      //   } else {
-      //     console.log('getPeers error =>');
-      //     console.log(err);
-      //   }
-      // });
 
       this.staticPeersCount = staticPeersCount;
       this.roamingPeersCount = roamingPeersCount;
@@ -408,7 +339,7 @@ new Vue({
     handleAttachPeers(mode) {
       const checkboxArray = [];
       const peersArray = [];
-      for (const [peerId, peerDetails] of this.network.peers) {
+      for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
         if (peerDetails.endpoint.startsWith('static')) {
           checkboxArray.push(document.getElementById(`${peerId}_checkbox`));
           peersArray.push(peerId);
@@ -422,14 +353,14 @@ new Vue({
         this.peerCreateShowAdvance = false;
 
         for (const peerId of peersArray) {
-          if (this.network[peerId].endpoint.startsWith('static')) {
+          if (this.network.peers[peerId].endpoint.startsWith('static')) {
             document.getElementById(`${peerId}_checkbox`).checked = false;
-            document.getElementById(`${peerId}_ip_subnet`).value = `${this.network[peerId].address}/32`;
+            document.getElementById(`${peerId}_ip_subnet`).value = `${this.network.peers[peerId].address}/32`;
           }
         }
 
         // enable the root server as default
-        this.attachedPeers = [peersArray.at(0)];
+        this.attachedPeers = ['root'];
         document.getElementById('root_checkbox').checked = true;
         document.getElementById('selectall_checkbox').checked = checkboxArray.length === 1;
         document.getElementById('root_ip_subnet').value = this.peerCreate === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
@@ -466,7 +397,7 @@ new Vue({
       this.attachedPeers = attachedPeersArray;
 
       // check peer create eligibility
-      this.checkPeerCreateEligibility('peers');
+      this.checkPeerCreateEligibility('peer');
     },
     checkPeerCreateEligibility(mode) {
       const tailwindLightGreen = 'rgb(240 253 244)';
@@ -509,8 +440,8 @@ new Vue({
       // check all
       if (mode === 'all') {
         const modes = ['name', 'endpoint', 'peerCount', 'allowedIPs'];
-        for (let i = 0; i < mode.length; i++) {
-          this.checkPeerCreateEligibility(modes[i]);
+        for (const mode of modes) {
+          this.checkPeerCreateEligibility(mode);
         }
       }
 
