@@ -449,7 +449,7 @@ new Vue({
       this.peerCreateEligibility = this.peerCreateEligibilityName && (this.peerCreateEligibilityEndpoint || this.peerCreate === 'roaming') && this.peerCreateEligibilityPeers && this.peerCreateEligibilityAllowedIPs;
     },
     getConnectionId(peer1, peer2) {
-      if (peer1.localeCompare(peer2, 'en')) return `${peer1}*${peer2}`;
+      if (peer1.localeCompare(peer2, 'en') === 1) return `${peer1}*${peer2}`;
       return `${peer2}*${peer1}`;
     },
   },
