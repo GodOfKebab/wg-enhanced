@@ -427,7 +427,7 @@ new Vue({
 
       // check allowedIPs
       if (mode === 'allowedIPs') {
-        this.peerCreateEligibilityAllowedIPs = true;
+        this.peerCreateEligibilityAllowedIPs = this.attachedPeers.length > 0;
         for (const peerId of this.attachedPeers) {
           const allowedIPsEligibility = document.getElementById(`${peerId}_ip_subnet`).value.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
           this.peerCreateEligibilityAllowedIPs &&= allowedIPsEligibility;
