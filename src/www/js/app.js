@@ -34,7 +34,7 @@ new Vue({
     password: null,
     requiresPassword: null,
 
-    network: null,
+    network: { connections: null, peers: null },
 
     peersPersist: {},
     peerDeleteId: null,
