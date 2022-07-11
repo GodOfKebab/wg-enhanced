@@ -192,7 +192,6 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
         if (clientId == null) return;
 
         const clientConnectionId = this.getConnectionId('root', clientId);
-        console.log(clientConnectionId);
         if (!config.connections[clientConnectionId]) return;
 
         config.connections[clientConnectionId].latestHandshakeAt = latestHandshakeAt === '0'
