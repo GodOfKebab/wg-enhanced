@@ -89,9 +89,6 @@ module.exports = class Server {
       .get('/api/wireguard/network', Util.promisify(async req => {
         return WireGuard.getNetwork();
       }))
-      .get('/api/wireguard/peer', Util.promisify(async req => {
-        return WireGuard.getPeers();
-      }))
       .get('/api/wireguard/server/status', Util.promisify(async (req, res) => {
         res.header('Content-Type', 'application/json');
         res.send(JSON.stringify({ status: await WireGuard.getServerStatus() }));

@@ -203,68 +203,6 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
     return config;
   }
 
-  async getPeers() {
-    const config = await this.getConfig();
-    const peers = [];
-    for (const [peerId, peerDetails] of Object.entries(config.peers)) {
-      let isEnabled = true;
-      for (const [connectionPeers, connectionDetails] of Object.entries(config.connections)) {
-        if (!connectionPeers.includes(peerId)) continue;
-        isEnabled &&= connectionDetails.enabled;
-      }
-
-      peers.push({
-        id: peerId,
-        name: peerDetails.name,
-        enabled: isEnabled || peerDetails.endpoint.startsWith('static'),
-        address: peerDetails.address,
-        publicKey: peerDetails.publicKey,
-        createdAt: new Date(peerDetails.createdAt),
-        updatedAt: new Date(peerDetails.updatedAt),
-        endpoint: peerDetails.endpoint,
-        allowedIPs: null,
-
-        persistentKeepalive: null,
-        latestHandshakeAt: null,
-        transferRx: null,
-        transferTx: null,
-      });
-    }
-
-    // Loop WireGuard status
-    const dump = await Util.exec(`wg show ${WG_INTERFACE} dump`, {
-      log: false,
-    });
-    dump
-      .trim()
-      .split('\n')
-      .slice(1)
-      .forEach(line => {
-        const [
-          publicKey,
-          preSharedKey, // eslint-disable-line no-unused-vars
-          endpoint, // eslint-disable-line no-unused-vars
-          allowedIps, // eslint-disable-line no-unused-vars
-          latestHandshakeAt,
-          transferRx,
-          transferTx,
-          persistentKeepalive,
-        ] = line.split('\t');
-
-        const peer = peers.find(peer => peer.publicKey === publicKey);
-        if (!peer) return;
-
-        peer.latestHandshakeAt = latestHandshakeAt === '0'
-          ? null
-          : new Date(Number(`${latestHandshakeAt}000`));
-        peer.transferRx = Number(transferRx);
-        peer.transferTx = Number(transferTx);
-        peer.persistentKeepalive = persistentKeepalive;
-      });
-
-    return peers;
-  }
-
   async getPeer({ peerId }) {
     const config = await this.getConfig();
     const peer = config.peers[peerId];
@@ -332,23 +270,22 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
 
   async deletePeer({ peerId }) {
     const config = await this.getConfig();
+    if (!await this.getPeer({ peerId })) return;
 
-    if (config.peers[peerId]) {
-      delete config.peers[peerId];
-      for (const [connectionPeers] of Object.entries(config.connections)) {
-        if (connectionPeers.includes(peerId)) {
-          delete config.connections[connectionPeers];
-        }
+    for (const [connectionPeers] of Object.entries(config.connections)) {
+      if (connectionPeers.includes(peerId)) {
+        delete config.connections[connectionPeers];
       }
-      delete config.peers[peerId];
-      await this.saveConfig();
     }
+    delete config.peers[peerId];
+    await this.saveConfig();
 
   //  TODO: add the option to delete specific connections in the map
   }
 
   async enablePeer({ peerId }) {
     const config = await this.getConfig();
+    if (!await this.getPeer({ peerId })) return;
 
     for (const [connectionPeers, connectionDetails] of Object.entries(config.connections)) {
       if (!connectionPeers.includes(peerId)) continue;
@@ -363,6 +300,7 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
 
   async disablePeer({ peerId }) {
     const config = await this.getConfig();
+    if (!await this.getPeer({ peerId })) return;
 
     for (const [connectionPeers, connectionDetails] of Object.entries(config.connections)) {
       if (!connectionPeers.includes(peerId)) continue;
@@ -377,6 +315,7 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
 
   async updatePeerName({ peerId, name }) {
     const config = await this.getConfig();
+    if (!await this.getPeer({ peerId })) return;
 
     config.peers[peerId].name = name;
     config.peers[peerId].updatedAt = new Date();
@@ -386,6 +325,7 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
 
   async updatePeerAddress({ peerId, address }) {
     const config = await this.getConfig();
+    if (!await this.getPeer({ peerId })) return;
 
     if (!Util.isValidIPv4(address)) {
       throw new ServerError(`Invalid Address: ${address}`, 400);
