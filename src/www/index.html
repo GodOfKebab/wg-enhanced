@@ -90,7 +90,7 @@
         <div class="shadow-md rounded-lg bg-white overflow-hidden m-8">
 
           <!--          "Peers" + "Add a Peer" line -->
-          <div class="flex flex-row flex-auto items-center p-3 px-5 border border-b-2 border-gray-100">
+          <div class="flex flex-row flex-auto items-center p-3 px-5 border-b-2 border-gray-100">
             <div class="flex-grow">
               <p class="text-2xl font-medium">Static Peers</p>
             </div>
@@ -109,9 +109,8 @@
 
           <div>
             <!-- Peer -->
-            <div v-if="network.peers && staticPeersCount" v-for="(peerDetails, peerId) in network.peers"
-                 class="relative overflow-hidden border-b border-gray-100 border-solid">
-              <div v-if="peerDetails.endpoint.startsWith('static')">
+            <div v-if="network.peers && staticPeersCount" v-for="(peerDetails, peerId) in network.peers">
+              <div v-if="peerDetails.endpoint.startsWith('static')" class="relative overflow-hidden border-b border-gray-100 border-solid">
 
                 <!-- Chart -->
                 <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
@@ -328,7 +327,7 @@
         <div class="shadow-md rounded-lg bg-white overflow-hidden m-8">
 
 <!--          "Peers" + "Add a Peer" line -->
-          <div class="flex flex-row flex-auto items-center p-3 px-5 border border-b-2 border-gray-100">
+          <div class="flex flex-row flex-auto items-center p-3 px-5 border-b-2 border-gray-100">
             <div class="flex-grow">
               <p class="text-2xl font-medium">Roaming Peers</p>
             </div>
@@ -347,9 +346,8 @@
 
           <div>
             <!-- Peer -->
-            <div v-if="network.peers && roamingPeersCount" v-for="(peerDetails, peerId) in network.peers"
-              class="relative overflow-hidden border-b border-gray-100 border-solid">
-              <div v-if="peerDetails.endpoint.startsWith('roaming') ">
+            <div v-if="network.peers && staticPeersCount" v-for="(peerDetails, peerId) in network.peers">
+              <div v-if="peerDetails.endpoint.startsWith('roaming')" class="relative overflow-hidden border-b border-gray-100 border-solid">
 
                 <!-- Chart -->
                 <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
