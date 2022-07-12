@@ -49,8 +49,8 @@ new Vue({
     peerEditAddressId: null,
     peerQRId: null,
 
-    staticPeersCount: 0,
-    roamingPeersCount: 0,
+    staticPeers: {},
+    roamingPeers: {},
 
     webServerStatus: 'unknown',
     wireguardStatus: 'unknown',
@@ -155,10 +155,10 @@ new Vue({
       });
       if (this.wireguardStatus !== 'up') return;
 
-      let staticPeersCount = 0;
-      let roamingPeersCount = 0;
       // Get the network-wide config
       await this.api.getNetwork().then(network => {
+        const staticPeers = {};
+        const roamingPeers = {};
         this.network = network;
 
         // start append to network.connections
@@ -218,11 +218,13 @@ new Vue({
           }
 
           if (peerDetails.endpoint.startsWith('static')) {
-            staticPeersCount += 1;
+            staticPeers[peerId] = peerDetails;
           } else if (peerDetails.endpoint.startsWith('roaming')) {
-            roamingPeersCount += 1;
+            roamingPeers[peerId] = peerDetails;
           }
         }
+        this.staticPeers = staticPeers;
+        this.roamingPeers = roamingPeers;
         // end append to network.peers
       }).catch(err => {
         if (err.toString() === 'TypeError: Load failed') {
@@ -233,8 +235,6 @@ new Vue({
         }
       });
 
-      this.staticPeersCount = staticPeersCount;
-      this.roamingPeersCount = roamingPeersCount;
       console.log(JSON.stringify(this.network));
     },
     login(e) {

@@ -109,8 +109,8 @@
 
           <div>
             <!-- Peer -->
-            <div v-if="network.peers && staticPeersCount" v-for="(peerDetails, peerId) in network.peers">
-              <div v-if="peerDetails.endpoint.startsWith('static')" class="relative overflow-hidden border-b border-gray-100 border-solid">
+            <div v-if="Object.keys(staticPeers).length" v-for="(peerDetails, peerId) in staticPeers">
+              <div class="relative overflow-hidden border-b border-gray-100 border-solid">
 
                 <!-- Chart -->
                 <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
@@ -295,8 +295,8 @@
               </div>
             </div>
 
-            <div v-if="network.peers && staticPeersCount === 0">
-              <p class="text-center m-10 text-gray-400 text-sm">There are no peers yet.<br /><br />
+            <div v-if="Object.keys(staticPeers).length === 0">
+              <p class="text-center m-10 text-gray-400 text-sm">There are no static peers yet.<br /><br />
               <button @click="peerCreate = 'static'; handleAttachPeers('init');"
                       class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -346,8 +346,8 @@
 
           <div>
             <!-- Peer -->
-            <div v-if="network.peers && staticPeersCount" v-for="(peerDetails, peerId) in network.peers">
-              <div v-if="peerDetails.endpoint.startsWith('roaming')" class="relative overflow-hidden border-b border-gray-100 border-solid">
+            <div v-if="Object.keys(roamingPeers).length" v-for="(peerDetails, peerId) in roamingPeers">
+              <div class="relative overflow-hidden border-b border-gray-100 border-solid">
 
                 <!-- Chart -->
                 <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
@@ -531,8 +531,8 @@
               </div>
             </div>
 
-            <div v-if="network.peers && roamingPeersCount === 0">
-              <p class="text-center m-10 text-gray-400 text-sm">There are no peers yet.<br /><br />
+            <div v-if="Object.keys(roamingPeers).length === 0">
+              <p class="text-center m-10 text-gray-400 text-sm">There are no roaming peers yet.<br /><br />
               <button @click="peerCreate = 'roaming'; handleAttachPeers('init');"
                       class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -645,18 +645,16 @@
                             <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="selectall_checkbox" value="" @click="handleAttachPeers('all');" >
                             <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm" for="selectall_checkbox">Select All</label>
                           </div>
-                          <div class="flex grid grid-cols-2 gap-1 mt-1">
-                            <div v-show="network.peers && staticPeersCount" v-for="(peerDetails, peerId) in network.peers"
+                          <div class="flex grid grid-cols-2">
+                            <div v-show="Object.keys(staticPeers).length" v-for="(peerDetails, peerId) in staticPeers"
                                  class="relative overflow-hidden">
-                              <div v-show="peerDetails.endpoint.startsWith('static')">
-                                <div class="form-check truncate">
-                                  <label>
-                                    <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="`${peerId}_checkbox`" value="" @click="handleAttachPeers('individual')">
-                                    <span class="text-gray-800 cursor-pointer text-xs">
-                                      <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
-                                    </span>
-                                  </label>
-                                </div>
+                              <div class="form-check truncate">
+                                <label>
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="`${peerId}_checkbox`" value="" @click="handleAttachPeers('individual')">
+                                  <span class="text-gray-800 cursor-pointer text-xs">
+                                    <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
+                                  </span>
+                                </label>
                               </div>
                             </div>
                           </div>
