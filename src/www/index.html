@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <title>WireGuard</title>
@@ -823,7 +823,7 @@
                     <div v-if="peerConfigEdit" class="mt-2 w-full overflow-scroll h-96">
 
                      <!-- Peer config edit -->
-                      <div class="m-2 p-1 shadow-md border rounded bg-blue-50" id="networkRulesDiv">
+                      <div class="m-2 p-1 shadow-md border rounded bg-blue-50">
                         <div v-for="peerConfigKey in ['name', 'address', 'publicKey', 'privateKey', 'endpoint', 'createdAt', 'updatedAt']"
                              class="relative overflow-hidden">
                           <div class="flex grid grid-cols-3 gap-1">
@@ -866,7 +866,7 @@
                       </div>
                       <div v-for="connectionId in Object.keys(network.connections)" class="relative overflow-hidden">
                         <div v-if="connectionId.includes(peerConfigId)">
-                          <div class="m-2 p-1 shadow-md border rounded bg-blue-50" id="networkRulesDiv">
+                          <div class="m-2 p-1 shadow-md border rounded bg-blue-50">
                             <div class="truncate">
                               <div class="form-check mt-1">
                                 <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" :id="`${connectionId}_checkbox`" :checked="network.connections[connectionId]['enabled']">
