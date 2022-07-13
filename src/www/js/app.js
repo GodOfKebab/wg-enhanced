@@ -40,7 +40,7 @@ new Vue({
     peerDeleteId: null,
     peerCreate: null,
     peerConfigId: null,
-    peerConfigEdit: false,
+    peerConfigEdit: true,
     peerCreateName: '',
     peerCreateEndpoint: '',
     peerEditName: null,
