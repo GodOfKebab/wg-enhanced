@@ -847,6 +847,7 @@
                                 </div>
                                 <input v-if="network.peers[peerConfigId][peerConfigKey].startsWith('static')" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" :value="network.peers[peerConfigId][peerConfigKey].replace('static->', '')" >
                               </div>
+                              <span v-else-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mr-1 pl-1">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
                               <span v-else class="text-gray-800 text-xs mr-1 pl-1">{{ network.peers[peerConfigId][peerConfigKey] }}</span>
                             </div>
                           </div>
@@ -898,14 +899,14 @@
                             </div>
                             <div class="relative overflow-hidden text-gray-800 text-xs">
                               <div class="my-1 flex">
-                                <span class="flex-none"><strong>A</strong> will forward IP subnet(s)</span>
-                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 grow">
-                                <span class="flex-none"> to <strong>B</strong></span>
+                                <span class="flex-none"><strong>{{ network.peers[peerConfigId].name }}</strong> will forward IP subnet(s)</span>
+                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 grow" :value="connectionId.startsWith(peerConfigId) ? network.connections[connectionId]['allowedIPs:a->b'] : network.connections[connectionId]['allowedIPs:b->a']">
+                                <span class="flex-none"> to <strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong></span>
                               </div>
                               <div class="my-1 flex">
-                                <span class="flex-none"><strong>B</strong> will forward IP subnet(s)</span>
-                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 grow">
-                                <span class="flex-none"> to <strong>A</strong></span>
+                                <span class="flex-none"><strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong> will forward IP subnet(s)</span>
+                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 grow" :value="connectionId.startsWith(peerConfigId) ? network.connections[connectionId]['allowedIPs:b->a'] : network.connections[connectionId]['allowedIPs:a->b']">
+                                <span class="flex-none"> to <strong>{{ network.peers[peerConfigId].name }}</strong></span>
                               </div>
                             </div>
                           </div>
