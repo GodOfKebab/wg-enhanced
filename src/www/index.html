@@ -161,7 +161,7 @@
                              v-on:focusout="peerEditName = null; peerEditNameId = null;"
                              :ref="`peer-${peerId}-name`"
                              class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigEdit = true;"
+                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigEdit = true; peerConfigEditHandle('init').then();"
                               class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
@@ -387,7 +387,7 @@
                         v-on:focusout="peerEditName = null; peerEditNameId = null;"
                              :ref="`peer-${peerId}-name`"
                         class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigEdit = true"
+                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigEdit = true; peerConfigEditHandle('init').then();"
                         class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
@@ -834,18 +834,15 @@
                             </div>
 
                             <div class="truncate col-span-2">
-                              <input v-if="['name', 'address'].includes(peerConfigKey)"
-                                      class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" :value="network.peers[peerConfigId][peerConfigKey]" >
+                              <input v-if="peerConfigKey === 'name'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.name" id="peerConfigEditData.name" @change="peerConfigEditHandle('check-changes').then()">
+                              <input v-else-if="peerConfigKey === 'address'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.address" id="peerConfigEditData.address" @change="peerConfigEditHandle('check-changes').then()">
                               <div v-else-if="peerConfigKey === 'endpoint'">
-                                <div v-if="network.peers[peerConfigId][peerConfigKey].startsWith('static')" title="Toggle peer endpoint to 'roaming'"
-                                     class="inline-block align-middle shadow-md rounded-full w-5 h-3 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">
-                                  <div class="shadow-md rounded-full w-1 h-1 m-1 ml-3 bg-white"></div>
-                                </div>
-                                <div v-else title="Toggle peer endpoint to 'static'"
-                                     class="inline-block align-middle shadow-md rounded-full w-5 h-3 mr-0.25 bg-red-500 cursor-pointer hover:bg-red-400 transition-all">
-                                  <div class="shadow-md rounded-full w-1 h-1 m-1 bg-white"></div>
-                                </div>
-                                <input v-if="network.peers[peerConfigId][peerConfigKey].startsWith('static')" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" :value="network.peers[peerConfigId][peerConfigKey].replace('static->', '')" >
+                                <label for="peerConfigEditData.endpointToggle" class="inline-flex relative items-center cursor-pointer align-middle">
+                                  <input type="checkbox" class="sr-only peer" v-model="peerConfigEditData.endpointToggle" id="peerConfigEditData.endpointToggle" @change="peerConfigEditHandle('check-changes').then()">
+                                  <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
+                                </label>
+                                <label for="peerConfigEditData.endpoint"></label>
+                                <input v-show="peerConfigEditData.endpointToggle" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.endpoint" id="peerConfigEditData.endpoint" @change="peerConfigEditHandle('check-changes').then()">
                               </div>
                               <span v-else-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mr-1 pl-1">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
                               <span v-else class="text-gray-800 text-xs mr-1 pl-1">{{ network.peers[peerConfigId][peerConfigKey] }}</span>

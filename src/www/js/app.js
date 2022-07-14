@@ -49,6 +49,8 @@ new Vue({
     peerEditAddressId: null,
     peerQRId: null,
 
+    peerConfigEditData: {},
+
     staticPeers: {},
     roamingPeers: {},
 
@@ -451,6 +453,76 @@ new Vue({
     getConnectionId(peer1, peer2) {
       if (peer1.localeCompare(peer2, 'en') === 1) return `${peer1}*${peer2}`;
       return `${peer2}*${peer1}`;
+    },
+    async peerConfigEditHandle(mode) {
+      if (mode === 'init') {
+        this.peerConfigEditData.name = this.network.peers[this.peerConfigId]['name'];
+        this.peerConfigEditData.address = this.network.peers[this.peerConfigId]['address'];
+        this.peerConfigEditData.endpoint = this.network.peers[this.peerConfigId]['endpoint'].replace('static->', '').replace('roaming->', '');
+        this.peerConfigEditData.endpointToggle = this.network.peers[this.peerConfigId]['endpoint'].startsWith('static->');
+        return;
+      }
+
+      if (mode === 'check-changes') {
+        const tailwindLightGreen = 'rgb(240 253 244)';
+        const tailwindLightRed = 'rgb(254 242 242)';
+        const tailwindWhite = 'rgb(255 255 255)';
+
+        for (const peerConfigField of ['name', 'address', 'endpoint']) {
+          let assignedColor = tailwindWhite;
+          if (peerConfigField === 'endpoint') {
+            assignedColor = this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '') !== '' ? tailwindWhite : tailwindLightRed;
+            if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '')) {
+              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindLightGreen : tailwindLightRed;
+            }
+          } else if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
+            assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindLightGreen : tailwindLightRed;
+          }
+          try {
+            document.getElementById(`peerConfigEditData.${peerConfigField}`).style.backgroundColor = assignedColor;
+          } catch (e) {
+            console.log("bb");
+            await new Promise(r => setTimeout(r, 100));
+            await this.peerConfigEditHandle(mode);
+          }
+        }
+      }
+    },
+    checkField(fieldName, fieldVariable) {
+      // check name
+      if (fieldName === 'name') {
+        return fieldVariable.length > 0;
+      }
+
+      // TODO: change the hardcoded IP subnet
+      // TODO: check to see if a duplicate exists
+      if (fieldName === 'address') {
+        let addressCheck = true;
+        addressCheck &&= fieldVariable.startsWith('10.8.0.');
+        addressCheck &&= fieldVariable.replace('10.8.0.', '').match('^[0-9]*$');
+        addressCheck &&= parseInt(fieldVariable.replace('10.8.0.', ''), 10) >= 0 && parseInt(fieldVariable.replace('10.8.0.', ''), 10) <= 255;
+        return addressCheck;
+      }
+
+      // check endpoint
+      if (fieldName === 'endpoint') {
+        let endpointCheck = false;
+        endpointCheck = fieldVariable.replace('static->', '').match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
+        endpointCheck ||= fieldVariable.match('^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}:(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
+        return endpointCheck;
+      }
+
+      // check peer count
+      if (fieldName === 'peerCount') {
+        return this.attachedPeers.length > 0;
+      }
+
+      // check allowedIPs
+      if (fieldName === 'allowedIPs') {
+        return fieldVariable.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
+      }
+
+      return false;
     },
   },
   filters: {
