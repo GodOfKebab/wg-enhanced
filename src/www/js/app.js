@@ -49,7 +49,12 @@ new Vue({
     peerEditAddressId: null,
     peerQRId: null,
 
-    peerConfigEditData: {},
+    peerConfigEditData: {
+      name: '',
+      address: '',
+      endpoint: '',
+      endpointToggle: false,
+    },
 
     staticPeers: {},
     roamingPeers: {},
@@ -236,8 +241,6 @@ new Vue({
           console.log(err);
         }
       });
-
-      console.log(JSON.stringify(this.network));
     },
     login(e) {
       e.preventDefault();
@@ -481,7 +484,6 @@ new Vue({
           try {
             document.getElementById(`peerConfigEditData.${peerConfigField}`).style.backgroundColor = assignedColor;
           } catch (e) {
-            console.log("bb");
             await new Promise(r => setTimeout(r, 100));
             await this.peerConfigEditHandle(mode);
           }

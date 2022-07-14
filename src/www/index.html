@@ -841,7 +841,6 @@
                                   <input type="checkbox" class="sr-only peer" v-model="peerConfigEditData.endpointToggle" id="peerConfigEditData.endpointToggle" @change="peerConfigEditHandle('check-changes').then()">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <label for="peerConfigEditData.endpoint"></label>
                                 <input v-show="peerConfigEditData.endpointToggle" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.endpoint" id="peerConfigEditData.endpoint" @change="peerConfigEditHandle('check-changes').then()">
                               </div>
                               <span v-else-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mr-1 pl-1">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
