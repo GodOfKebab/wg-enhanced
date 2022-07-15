@@ -54,6 +54,8 @@ new Vue({
       address: '',
       endpoint: '',
       endpointToggle: false,
+      connectionIds: [],
+      isConnectionEnabled: [],
     },
 
     staticPeers: {},
@@ -463,6 +465,16 @@ new Vue({
         this.peerConfigEditData.address = this.network.peers[this.peerConfigId]['address'];
         this.peerConfigEditData.endpoint = this.network.peers[this.peerConfigId]['endpoint'].replace('static->', '').replace('roaming->', '');
         this.peerConfigEditData.endpointToggle = this.network.peers[this.peerConfigId]['endpoint'].startsWith('static->');
+
+        // store all the conections related to this peer
+        this.peerConfigEditData.connectionIds = [];
+        this.peerConfigEditData.isConnectionEnabled = [];
+        for (const connectionId of Object.keys(this.network.connections)) {
+          if (connectionId.includes(this.peerConfigId)) {
+            this.peerConfigEditData.connectionIds.push(connectionId);
+            this.peerConfigEditData.isConnectionEnabled.push(this.network.connections[connectionId]['enabled']);
+          }
+        }
         return;
       }
 
