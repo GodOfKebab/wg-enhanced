@@ -820,7 +820,7 @@
                     </div>
 
                     <!-- edit config -->
-                    <div v-if="peerConfigEdit" class="mt-2 w-full overflow-auto h-96">
+                    <div v-show="peerConfigEdit" class="mt-2 w-full overflow-auto h-96">
 
                      <!-- Peer config edit -->
                       <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto">
@@ -864,11 +864,11 @@
 
                       <!-- Peer's connections in boxes -->
                       <div v-for="[index, connectionId] in Object.entries(peerConfigEditData.connectionIds)" class="relative">
-                          <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap">
+                          <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :id="`peerConfigEditData.${connectionId}.enabled`" @change="peerConfigEditHandle('check-changes-connection').then()">
                             <div class=" mr-6">
                               <div class="form-check">
-                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" :id="`${connectionId}_enabled_checkbox`" v-model="peerConfigEditData.isConnectionEnabled[index]">
-                                <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm" :for="`${connectionId}_enabled_checkbox`">
+                                <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerConfigEditData.isConnectionEnabled[index]">
                                   <span class="text-gray-800 text-xs">
                                     <strong class="text-sm">{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong>
                                     {{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].address }}
@@ -888,7 +888,7 @@
                                   <div class="col-span-2 text-xs">
                                     <input v-if="connectionKey === 'persistentKeepalive'"
                                            class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
-                                           type="checkbox" :id="`${connectionId}_keepalive_checkbox`" :checked="network.connections[connectionId][connectionKey] === 'on'">
+                                           type="checkbox" v-model="peerConfigEditData.persistentKeepaliveData[index]">
                                     <span v-else class="text-gray-800 text-xs pr-1 align-middle">
                                       {{ network.connections[connectionId][connectionKey] }}
                                     </span>
@@ -896,14 +896,16 @@
                                 </div>
                               </div>
                               <div class="relative text-gray-800 text-xs mx-6">
-                                <div class="mt-1 flex">
+                                <div class="mt-1 flex items-center">
                                   <span class="flex-none"><strong>{{ network.peers[peerConfigId].name }}</strong> will forward IP subnet(s)</span>
-                                  <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 grow" :value="connectionId.startsWith(peerConfigId) ? network.connections[connectionId]['allowedIPs:a->b'] : network.connections[connectionId]['allowedIPs:b->a']">
+                                  <input v-if="connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerConfigEditData.allowedIPsAtoB[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`">
+                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerConfigEditData.allowedIPsBtoA[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`">
                                   <span class="flex-none pr-2"> to <strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong></span>
                                 </div>
-                                <div class=" flex">
+                                <div class="mt-1 flex">
                                   <span class="flex-none"><strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong> will forward IP subnet(s)</span>
-                                  <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 grow" :value="connectionId.startsWith(peerConfigId) ? network.connections[connectionId]['allowedIPs:b->a'] : network.connections[connectionId]['allowedIPs:a->b']">
+                                  <input v-if="!connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerConfigEditData.allowedIPsAtoB[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`">
+                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerConfigEditData.allowedIPsBtoA[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`">
                                   <span class="flex-none pr-2"> to <strong>{{ network.peers[peerConfigId].name }}</strong></span>
                                 </div>
                               </div>

@@ -56,6 +56,9 @@ new Vue({
       endpointToggle: false,
       connectionIds: [],
       isConnectionEnabled: [],
+      persistentKeepaliveData: [],
+      allowedIPsAtoB: [],
+      allowedIPsBtoA: [],
     },
 
     staticPeers: {},
@@ -460,6 +463,12 @@ new Vue({
       return `${peer2}*${peer1}`;
     },
     async peerConfigEditHandle(mode) {
+      const tailwindLightGreen = 'rgb(240 253 244)';
+      const tailwindDarkerGreen = 'rgb(187 247 208)';
+      const tailwindLightRed = 'rgb(254 242 242)';
+      const tailwindDarkerRed = 'rgb(254 202 202)';
+      const tailwindWhite = 'rgb(255 255 255)';
+
       if (mode === 'init') {
         this.peerConfigEditData.name = this.network.peers[this.peerConfigId]['name'];
         this.peerConfigEditData.address = this.network.peers[this.peerConfigId]['address'];
@@ -469,20 +478,35 @@ new Vue({
         // store all the conections related to this peer
         this.peerConfigEditData.connectionIds = [];
         this.peerConfigEditData.isConnectionEnabled = [];
+        this.peerConfigEditData.persistentKeepaliveData = [];
+        this.peerConfigEditData.allowedIPsAtoB = [];
+        this.peerConfigEditData.allowedIPsBtoA = [];
         for (const connectionId of Object.keys(this.network.connections)) {
           if (connectionId.includes(this.peerConfigId)) {
             this.peerConfigEditData.connectionIds.push(connectionId);
             this.peerConfigEditData.isConnectionEnabled.push(this.network.connections[connectionId]['enabled']);
+            this.peerConfigEditData.persistentKeepaliveData.push(this.network.connections[connectionId]['persistentKeepalive'] === 'on');
+            this.peerConfigEditData.allowedIPsAtoB.push(this.network.connections[connectionId]['allowedIPs:a->b']);
+            this.peerConfigEditData.allowedIPsBtoA.push(this.network.connections[connectionId]['allowedIPs:b->a']);
           }
+        }
+
+        try {
+          for (const connectionId of this.peerConfigEditData.connectionIds) {
+            if (this.network.connections[connectionId]['enabled']) {
+              document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindLightGreen;
+            } else {
+              document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindLightRed;
+            }
+          }
+        } catch (e) {
+          await new Promise(r => setTimeout(r, 100));
+          await this.peerConfigEditHandle(mode);
         }
         return;
       }
 
       if (mode === 'check-changes') {
-        const tailwindLightGreen = 'rgb(240 253 244)';
-        const tailwindLightRed = 'rgb(254 242 242)';
-        const tailwindWhite = 'rgb(255 255 255)';
-
         for (const peerConfigField of ['name', 'address', 'endpoint']) {
           let assignedColor = tailwindWhite;
           if (peerConfigField === 'endpoint') {
@@ -499,6 +523,28 @@ new Vue({
             await new Promise(r => setTimeout(r, 100));
             await this.peerConfigEditHandle(mode);
           }
+        }
+      }
+
+      if (mode === 'check-changes-connection') {
+        for (const [index, connectionId] of Object.entries(this.peerConfigEditData.connectionIds)) {
+          let assignedColor = tailwindLightGreen;
+          if (!this.peerConfigEditData.isConnectionEnabled[index]) {
+            assignedColor = tailwindLightRed;
+          }
+          document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = assignedColor;
+
+          assignedColor = tailwindWhite;
+          if (this.peerConfigEditData.allowedIPsAtoB[index] !== this.network.connections[connectionId]['allowedIPs:a->b']) {
+            assignedColor = this.checkField('allowedIPs', this.peerConfigEditData.allowedIPsAtoB[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
+          }
+          document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsAtoB`).style.backgroundColor = assignedColor;
+
+          assignedColor = tailwindWhite;
+          if (this.peerConfigEditData.allowedIPsBtoA[index] !== this.network.connections[connectionId]['allowedIPs:b->a']) {
+            assignedColor = this.checkField('allowedIPs', this.peerConfigEditData.allowedIPsBtoA[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
+          }
+          document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsBtoA`).style.backgroundColor = assignedColor;
         }
       }
     },
