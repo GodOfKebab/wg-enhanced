@@ -63,10 +63,6 @@ module.exports = class Util {
       console.log(`$ ${cmd}`);
     }
 
-    if (process.platform !== 'linux') {
-      return '';
-    }
-
     return new Promise((resolve, reject) => {
       childProcess.exec(cmd, {
         shell: 'bash',
