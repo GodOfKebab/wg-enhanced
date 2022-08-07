@@ -40,13 +40,15 @@ new Vue({
     peerDeleteId: null,
     peerCreate: null,
     peerConfigId: null,
-    peerConfigEdit: true,
+    peerConfigWindow: 'edit',
     peerCreateName: '',
     peerCreateEndpoint: '',
     peerEditName: null,
     peerEditNameId: null,
     peerEditAddress: null,
     peerEditAddressId: null,
+    peerEditDisableSaveChanges: false,
+    peerEditChangedFields: null,
     peerQRId: null,
 
     peerConfigEditData: {
@@ -506,47 +508,71 @@ new Vue({
         return;
       }
 
-      if (mode === 'check-changes') {
+      let errorNotFound = true;
+      const changedFields = {};
+      if (['check-changes', 'check-all'].includes(mode)) {
         for (const peerConfigField of ['name', 'address', 'endpoint']) {
           let assignedColor = tailwindWhite;
           if (peerConfigField === 'endpoint') {
             assignedColor = this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '') !== '' ? tailwindWhite : tailwindLightRed;
             if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '')) {
               assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindLightGreen : tailwindLightRed;
+              changedFields[peerConfigField] = this.peerConfigEditData[peerConfigField];
             }
           } else if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
             assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindLightGreen : tailwindLightRed;
+            changedFields[peerConfigField] = this.peerConfigEditData[peerConfigField];
           }
           try {
+            errorNotFound &= assignedColor !== tailwindLightRed;
             document.getElementById(`peerConfigEditData.${peerConfigField}`).style.backgroundColor = assignedColor;
           } catch (e) {
+            errorNotFound &= false;
             await new Promise(r => setTimeout(r, 100));
             await this.peerConfigEditHandle(mode);
           }
         }
       }
 
-      if (mode === 'check-changes-connection') {
+      const changedConnections = {};
+      if (['check-changes-connection', 'check-all'].includes(mode)) {
         for (const [index, connectionId] of Object.entries(this.peerConfigEditData.connectionIds)) {
+          const changedSubFields = {};
           let assignedColor = tailwindLightGreen;
           if (!this.peerConfigEditData.isConnectionEnabled[index]) {
             assignedColor = tailwindLightRed;
+          }
+          if (this.peerConfigEditData.isConnectionEnabled[index] !== this.network.connections[connectionId].enabled) {
+            changedSubFields['enabled'] = this.peerConfigEditData.isConnectionEnabled[index];
           }
           document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = assignedColor;
 
           assignedColor = tailwindWhite;
           if (this.peerConfigEditData.allowedIPsAtoB[index] !== this.network.connections[connectionId]['allowedIPs:a->b']) {
             assignedColor = this.checkField('allowedIPs', this.peerConfigEditData.allowedIPsAtoB[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
+            changedSubFields['allowedIPs:a->b'] = this.peerConfigEditData.allowedIPsAtoB[index];
           }
+          errorNotFound &= assignedColor !== tailwindDarkerRed;
           document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsAtoB`).style.backgroundColor = assignedColor;
 
           assignedColor = tailwindWhite;
           if (this.peerConfigEditData.allowedIPsBtoA[index] !== this.network.connections[connectionId]['allowedIPs:b->a']) {
             assignedColor = this.checkField('allowedIPs', this.peerConfigEditData.allowedIPsBtoA[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
+            changedSubFields['allowedIPs:b->a'] = this.peerConfigEditData.allowedIPsBtoA[index];
           }
+          errorNotFound &= assignedColor !== tailwindDarkerRed;
           document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsBtoA`).style.backgroundColor = assignedColor;
+
+          if (Object.keys(changedSubFields).length > 0) {
+            changedConnections[connectionId] = changedSubFields;
+          }
+        }
+        if (Object.keys(changedConnections).length > 0) {
+          changedFields['connections'] = changedConnections;
         }
       }
+      this.peerEditDisableSaveChanges = !errorNotFound;
+      return [changedFields, errorNotFound];
     },
     checkField(fieldName, fieldVariable) {
       // check name
@@ -583,6 +609,12 @@ new Vue({
       }
 
       return false;
+    },
+    async peerConfigEditSave() {
+      const [changedFields, errorNotFound] = await this.peerConfigEditHandle('check-all');
+      if (!errorNotFound) return;
+
+      this.peerEditChangedFields = changedFields;
     },
   },
   filters: {
