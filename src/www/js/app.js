@@ -34,7 +34,7 @@ new Vue({
     password: null,
     requiresPassword: null,
 
-    network: { connections: null, peers: null },
+    network: { peers: {}, connections: {} },
 
     peersPersist: {},
     peerDeleteId: null,
@@ -48,7 +48,9 @@ new Vue({
     peerEditAddress: null,
     peerEditAddressId: null,
     peerEditDisableSaveChanges: false,
-    peerEditChangedFields: null,
+    peerEditChangedFields: {},
+    peerEditOldConfig: { peers: {}, connections: {} },
+    peerEditNewConfig: { peers: {}, connections: {} },
     peerQRId: null,
 
     peerConfigEditData: {
@@ -509,7 +511,8 @@ new Vue({
       }
 
       let errorNotFound = true;
-      const changedFields = {};
+      const changedFields = { peers: {}, connections: {} };
+      changedFields.peers[this.peerConfigId] = {};
       if (['check-changes', 'check-all'].includes(mode)) {
         for (const peerConfigField of ['name', 'address', 'endpoint']) {
           let assignedColor = tailwindWhite;
@@ -517,11 +520,11 @@ new Vue({
             assignedColor = this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '') !== '' ? tailwindWhite : tailwindLightRed;
             if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '')) {
               assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindLightGreen : tailwindLightRed;
-              changedFields[peerConfigField] = this.peerConfigEditData[peerConfigField];
+              changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
             }
           } else if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
             assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindLightGreen : tailwindLightRed;
-            changedFields[peerConfigField] = this.peerConfigEditData[peerConfigField];
+            changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
           }
           try {
             errorNotFound &= assignedColor !== tailwindLightRed;
@@ -568,7 +571,7 @@ new Vue({
           }
         }
         if (Object.keys(changedConnections).length > 0) {
-          changedFields['connections'] = changedConnections;
+          changedFields.connections = changedConnections;
         }
       }
       this.peerEditDisableSaveChanges = !errorNotFound;
@@ -615,6 +618,35 @@ new Vue({
       if (!errorNotFound) return;
 
       this.peerEditChangedFields = changedFields;
+
+      this.peerEditOldConfig.peers[this.peerConfigId] = {
+        name: this.network.peers[this.peerConfigId].name,
+        address: this.network.peers[this.peerConfigId].address,
+        publicKey: this.network.peers[this.peerConfigId].publicKey,
+        privateKey: this.network.peers[this.peerConfigId].privateKey,
+        endpoint: this.network.peers[this.peerConfigId].endpoint,
+      };
+      this.peerEditOldConfig.connections = {};
+      for (const [connectionId, connection] of Object.entries(this.network.connections)) {
+        if (connectionId.includes(this.peerConfigId)) {
+          this.peerEditOldConfig.connections[connectionId] = {
+            preSharedKey: connection.preSharedKey,
+            enabled: connection.enabled,
+            'allowedIPs:a->b': connection['allowedIPs:a->b'],
+            'allowedIPs:b->a': connection['allowedIPs:b->a'],
+          };
+        }
+      }
+
+      this.peerEditNewConfig = JSON.parse(JSON.stringify(this.peerEditOldConfig)); // deep copy
+      for (const [field, value] of Object.entries(this.peerEditChangedFields.peers[this.peerConfigId])) {
+        this.peerEditNewConfig.peers[this.peerConfigId][field] = value;
+      }
+      for (const [connectionId, connection] of Object.entries(this.peerEditChangedFields.connections)) {
+        for (const [field, value] of Object.entries(connection)) {
+          this.peerEditNewConfig.connections[connectionId][field] = value;
+        }
+      }
     },
   },
   filters: {
