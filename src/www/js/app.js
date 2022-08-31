@@ -500,7 +500,7 @@ new Vue({
             if (this.network.connections[connectionId]['enabled']) {
               document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindLightGreen;
             } else {
-              document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindLightRed;
+              document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindDarkerRed;
             }
           }
         } catch (e) {
@@ -517,13 +517,13 @@ new Vue({
         for (const peerConfigField of ['name', 'address', 'endpoint']) {
           let assignedColor = tailwindWhite;
           if (peerConfigField === 'endpoint') {
-            assignedColor = this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '') !== '' ? tailwindWhite : tailwindLightRed;
+            assignedColor = this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '') !== '' ? tailwindWhite : tailwindDarkerRed;
             if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '')) {
-              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindLightGreen : tailwindLightRed;
+              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
               changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
             }
           } else if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
-            assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindLightGreen : tailwindLightRed;
+            assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
             changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
           }
           try {
@@ -541,7 +541,7 @@ new Vue({
       if (['check-changes-connection', 'check-all'].includes(mode)) {
         for (const [index, connectionId] of Object.entries(this.peerConfigEditData.connectionIds)) {
           const changedSubFields = {};
-          let assignedColor = tailwindLightGreen;
+          let assignedColor = tailwindDarkerGreen;
           if (!this.peerConfigEditData.isConnectionEnabled[index]) {
             assignedColor = tailwindLightRed;
           }
