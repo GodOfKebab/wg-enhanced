@@ -541,7 +541,7 @@ new Vue({
       if (['check-changes-connection', 'check-all'].includes(mode)) {
         for (const [index, connectionId] of Object.entries(this.peerConfigEditData.connectionIds)) {
           const changedSubFields = {};
-          let assignedColor = tailwindDarkerGreen;
+          let assignedColor = tailwindLightGreen;
           if (!this.peerConfigEditData.isConnectionEnabled[index]) {
             assignedColor = tailwindLightRed;
           }
