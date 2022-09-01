@@ -613,7 +613,7 @@ new Vue({
 
       return false;
     },
-    async peerConfigEditSave() {
+    async peerConfigEditUpdateConfirmation() {
       const [changedFields, errorNotFound] = await this.peerConfigEditHandle('check-all');
       if (!errorNotFound) return;
 
@@ -645,6 +645,21 @@ new Vue({
       for (const [connectionId, connection] of Object.entries(this.peerEditChangedFields.connections)) {
         for (const [field, value] of Object.entries(connection)) {
           this.peerEditNewConfig.connections[connectionId][field] = value;
+        }
+      }
+    },
+    async peerConfigEditApply() {
+      console.log('changes applied!');
+      for (const [field, value] of Object.entries(this.peerEditChangedFields.peers[this.peerConfigId])) {
+        switch (field) {
+          case 'name':
+            this.updatePeerName(this.peerConfigId, value);
+            break;
+          case 'address':
+            this.updatePeerAddress(this.peerConfigId, value);
+            break;
+          default:
+            break;
         }
       }
     },
