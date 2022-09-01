@@ -1031,7 +1031,20 @@
                     </div>
                     <!-- show config -->
                     <div class="mt-2">
-                      <span class="text-sm text-gray-500 whitespace-pre">{{ JSON.stringify(peerEditChangedFields, false, 2) }}</span>
+                      <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
+                        <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
+                          <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
+                          <div class="p-1">{{ JSON.stringify(peerEditChangedFields, false, 2) }}</div>
+                        </div>
+                        <div class="bg-red-100 rounded-md overflow-scroll">
+                          <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
+                          <div class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
+                        </div>
+                        <div class="bg-green-100 rounded-md overflow-scroll">
+                          <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
+                          <div class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

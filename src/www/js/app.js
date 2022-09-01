@@ -47,7 +47,7 @@ new Vue({
     peerEditNameId: null,
     peerEditAddress: null,
     peerEditAddressId: null,
-    peerEditDisableSaveChanges: false,
+    peerEditDisableSaveChanges: true,
     peerEditChangedFields: {},
     peerEditOldConfig: { peers: {}, connections: {} },
     peerEditNewConfig: { peers: {}, connections: {} },
@@ -513,7 +513,7 @@ new Vue({
       let errorNotFound = true;
       const changedFields = { peers: {}, connections: {} };
       changedFields.peers[this.peerConfigId] = {};
-      if (['check-changes', 'check-all'].includes(mode)) {
+      if (['check-changes', 'check-changes-connection', 'check-all'].includes(mode)) {
         for (const peerConfigField of ['name', 'address', 'endpoint']) {
           let assignedColor = tailwindWhite;
           if (peerConfigField === 'endpoint') {
@@ -527,7 +527,7 @@ new Vue({
             changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
           }
           try {
-            errorNotFound &= assignedColor !== tailwindLightRed;
+            errorNotFound &= assignedColor !== tailwindDarkerRed;
             document.getElementById(`peerConfigEditData.${peerConfigField}`).style.backgroundColor = assignedColor;
           } catch (e) {
             errorNotFound &= false;
@@ -538,7 +538,7 @@ new Vue({
       }
 
       const changedConnections = {};
-      if (['check-changes-connection', 'check-all'].includes(mode)) {
+      if (['check-changes', 'check-changes-connection', 'check-all'].includes(mode)) {
         for (const [index, connectionId] of Object.entries(this.peerConfigEditData.connectionIds)) {
           const changedSubFields = {};
           let assignedColor = tailwindLightGreen;
@@ -574,7 +574,7 @@ new Vue({
           changedFields.connections = changedConnections;
         }
       }
-      this.peerEditDisableSaveChanges = !errorNotFound;
+      this.peerEditDisableSaveChanges = !errorNotFound || (Object.keys(changedFields.peers[this.peerConfigId]).length + Object.keys(changedFields.connections).length === 0);
       return [changedFields, errorNotFound];
     },
     checkField(fieldName, fieldVariable) {
