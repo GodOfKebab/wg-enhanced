@@ -54,7 +54,8 @@ module.exports = class WireGuard {
                 publicKey,
                 createdAt: new Date(),
                 updatedAt: new Date(),
-                endpoint: `static->${WG_HOST}:${WG_PORT}`,
+                mobility: 'static',
+                endpoint: `${WG_HOST}:${WG_PORT}`,
               },
             },
           };
@@ -111,10 +112,10 @@ PostDown = ${WG_POST_DOWN}
       let allowedIPsThisServer = '';
       if (connectionId.split('*')[0] === 'root') {
         peerId = connectionId.split('*')[1];
-        allowedIPsThisServer = connectionDetails['allowedIPs:a->b'];
+        allowedIPsThisServer = connectionDetails.allowedIPsAtoB;
       } else {
         peerId = connectionId.split('*')[0];
-        allowedIPsThisServer = connectionDetails['allowedIPs:b->a'];
+        allowedIPsThisServer = connectionDetails.allowedIPsBtoA;
       }
 
       result += `
@@ -126,13 +127,35 @@ PresharedKey = ${connectionDetails.preSharedKey}
 AllowedIPs = ${allowedIPsThisServer}\n`;
 
       // Add the Endpoint line if known TODO: get roaming endpoints as well
-      if (config.peers[peerId].endpoint.split('->')[1] !== '') {
-        result += `Endpoint = ${config.peers[peerId].endpoint.split('->')[1]}\n`;
+      if (config.peers[peerId].mobility === 'static') {
+        result += `Endpoint = ${config.peers[peerId].endpoint}\n`;
       }
     }
 
     debug('Config saving...');
-    await fs.writeFile(path.join(WG_PATH, `${WG_INTERFACE}.json`), JSON.stringify(config, false, 2), {
+    const strippedConfig = { peers: {}, connections: {} };
+    for (const [peerId, peer] of Object.entries(config.peers)) {
+      strippedConfig.peers[peerId] = {
+        name: peer.name,
+        address: peer.address,
+        privateKey: peer.privateKey,
+        publicKey: peer.publicKey,
+        createdAt: peer.createdAt,
+        updatedAt: peer.updatedAt,
+        mobility: peer.mobility,
+        endpoint: peer.endpoint,
+      };
+    }
+    for (const [connectionId, connection] of Object.entries(config.connections)) {
+      strippedConfig.connections[connectionId] = {
+        preSharedKey: connection.preSharedKey,
+        enabled: connection.enabled,
+        allowedIPsAtoB: connection.allowedIPsAtoB,
+        allowedIPsBtoA: connection.allowedIPsBtoA,
+        persistentKeepalive: connection.persistentKeepalive,
+      };
+    }
+    await fs.writeFile(path.join(WG_PATH, `${WG_INTERFACE}.json`), JSON.stringify(strippedConfig, false, 2), {
       mode: 0o660,
     });
     await fs.writeFile(path.join(WG_PATH, `${WG_INTERFACE}.conf`), result, {
@@ -215,7 +238,7 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
     return peer;
   }
 
-  async createPeer({ name, endpoint, attachedPeers }) {
+  async createPeer({ name, mobility, endpoint, attachedPeers }) {
     if (!name) throw new Error('Missing: Name : str');
 
     if (endpoint) {
@@ -262,7 +285,8 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
       address,
       privateKey,
       publicKey,
-      endpoint: endpoint === '' ? 'roaming->' : `static->${endpoint}`,
+      mobility,
+      endpoint,
 
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -275,8 +299,8 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
       config.connections[connectionId] = {
         preSharedKey,
         enabled: true,
-        'allowedIPs:a->b': connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
-        'allowedIPs:b->a': !connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
+        allowedIPsAtoB: connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
+        allowedIPsBtoA: !connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
       };
     }
 

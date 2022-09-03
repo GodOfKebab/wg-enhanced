@@ -22,10 +22,10 @@ Address = ${peerConf.address}/24\n`;
       let allowedIPsThisPeer = '';
       if (connectionPeers.split('*')[0] === peerId) {
         otherPeerId = connectionPeers.split('*')[1];
-        allowedIPsThisPeer = connectionDetails['allowedIPs:a->b'];
+        allowedIPsThisPeer = connectionDetails.allowedIPsAtoB;
       } else {
         otherPeerId = connectionPeers.split('*')[0];
-        allowedIPsThisPeer = connectionDetails['allowedIPs:b->a'];
+        allowedIPsThisPeer = connectionDetails.allowedIPsBtoA;
       }
 
       conf += `
@@ -37,8 +37,8 @@ AllowedIPs = ${allowedIPsThisPeer}\n`;
 // PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}\n`;
 
       // Add the Endpoint line if known TODO: get roaming endpoints as well
-      if (network.peers[otherPeerId].endpoint.split('->')[1] !== '') {
-        conf += `Endpoint = ${network.peers[otherPeerId].endpoint.split('->')[1]}\n`;
+      if (network.peers[otherPeerId].mobilit === 'static') {
+        conf += `Endpoint = ${network.peers[otherPeerId].endpoint}\n`;
       }
     }
 

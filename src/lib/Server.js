@@ -86,16 +86,17 @@ module.exports = class Server {
 
         debug(`Deleted Session: ${sessionId}`);
       }))
-      .get('/api/wireguard/network', Util.promisify(async req => {
-        return WireGuard.getNetwork();
+      .get('/api/wireguard/network', Util.promisify(async (req, res) => {
+        res.header('Content-Type', 'application/json');
+        res.send(JSON.stringify(await WireGuard.getNetwork())); /// await WireGuard.getNetwork()
       }))
       .get('/api/wireguard/server/status', Util.promisify(async (req, res) => {
         res.header('Content-Type', 'application/json');
         res.send(JSON.stringify({ status: await WireGuard.getServerStatus() }));
       }))
       .post('/api/wireguard/peer', Util.promisify(async req => {
-        const { name, endpoint, attachedPeers } = req.body;
-        return WireGuard.createPeer({ name, endpoint, attachedPeers });
+        const { name, mobility, endpoint, attachedPeers } = req.body;
+        return WireGuard.createPeer({ name, mobility, endpoint, attachedPeers });
       }))
       .delete('/api/wireguard/peer/:peerId', Util.promisify(async req => {
         const { peerId } = req.params;

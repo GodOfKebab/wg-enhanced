@@ -56,8 +56,8 @@ new Vue({
     peerConfigEditData: {
       name: '',
       address: '',
+      mobility: '',
       endpoint: '',
-      endpointToggle: false,
       connectionIds: [],
       isConnectionEnabled: [],
       persistentKeepaliveData: [],
@@ -233,9 +233,9 @@ new Vue({
             this.network.peers[peerId].avatar = `https://www.gravatar.com/avatar/${md5(peerDetails.name)}?d=blank`;
           }
 
-          if (peerDetails.endpoint.startsWith('static')) {
+          if (peerDetails.mobility === 'static') {
             staticPeers[peerId] = peerDetails;
-          } else if (peerDetails.endpoint.startsWith('roaming')) {
+          } else if (peerDetails.mobility === 'roaming') {
             roamingPeers[peerId] = peerDetails;
           }
         }
@@ -287,11 +287,10 @@ new Vue({
           alert(err.message || err.toString());
         });
     },
-    createPeer(newPeerType) {
+    createPeer(mobility) {
       const name = this.peerCreateName;
       if (!name) return;
       const endpoint = this.peerCreateEndpoint;
-      if (!endpoint && newPeerType === 'static') return;
 
       const attachedPeersCompact = [];
 
@@ -301,7 +300,7 @@ new Vue({
           allowedIPs: document.getElementById(`${peerId}_ip_subnet`).value,
         });
       }
-      this.api.createPeer({ name, endpoint, attachedPeers: attachedPeersCompact })
+      this.api.createPeer({ name, mobility, endpoint, attachedPeers: attachedPeersCompact })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
@@ -476,8 +475,8 @@ new Vue({
       if (mode === 'init') {
         this.peerConfigEditData.name = this.network.peers[this.peerConfigId]['name'];
         this.peerConfigEditData.address = this.network.peers[this.peerConfigId]['address'];
-        this.peerConfigEditData.endpoint = this.network.peers[this.peerConfigId]['endpoint'].replace('static->', '').replace('roaming->', '');
-        this.peerConfigEditData.endpointToggle = this.network.peers[this.peerConfigId]['endpoint'].startsWith('static->');
+        this.peerConfigEditData.mobility = this.network.peers[this.peerConfigId]['mobility'];
+        this.peerConfigEditData.endpoint = this.network.peers[this.peerConfigId]['endpoint'];
 
         // store all the conections related to this peer
         this.peerConfigEditData.connectionIds = [];
@@ -490,8 +489,8 @@ new Vue({
             this.peerConfigEditData.connectionIds.push(connectionId);
             this.peerConfigEditData.isConnectionEnabled.push(this.network.connections[connectionId]['enabled']);
             this.peerConfigEditData.persistentKeepaliveData.push(this.network.connections[connectionId]['persistentKeepalive'] === 'on');
-            this.peerConfigEditData.allowedIPsAtoB.push(this.network.connections[connectionId]['allowedIPs:a->b']);
-            this.peerConfigEditData.allowedIPsBtoA.push(this.network.connections[connectionId]['allowedIPs:b->a']);
+            this.peerConfigEditData.allowedIPsAtoB.push(this.network.connections[connectionId].allowedIPsAtoB);
+            this.peerConfigEditData.allowedIPsBtoA.push(this.network.connections[connectionId].allowedIPsBtoA);
           }
         }
 
@@ -514,21 +513,17 @@ new Vue({
       const changedFields = { peers: {}, connections: {} };
       changedFields.peers[this.peerConfigId] = {};
       if (['check-changes', 'check-changes-connection', 'check-all'].includes(mode)) {
-        for (const peerConfigField of ['name', 'address', 'endpoint']) {
+        for (const peerConfigField of ['name', 'address', 'mobility', 'endpoint']) {
           let assignedColor = tailwindWhite;
-          if (peerConfigField === 'endpoint') {
-            assignedColor = this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '') !== '' ? tailwindWhite : tailwindDarkerRed;
-            if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField].replace('static->', '').replace('roaming->', '')) {
-              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
-              changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
-            }
-          } else if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
+          if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
             assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
             changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
           }
           try {
-            errorNotFound &= assignedColor !== tailwindDarkerRed;
-            document.getElementById(`peerConfigEditData.${peerConfigField}`).style.backgroundColor = assignedColor;
+            if (peerConfigField !== 'mobility') {
+              errorNotFound &= assignedColor !== tailwindDarkerRed;
+              document.getElementById(`peerConfigEditData.${peerConfigField}`).style.backgroundColor = assignedColor;
+            }
           } catch (e) {
             errorNotFound &= false;
             await new Promise(r => setTimeout(r, 100));
@@ -551,17 +546,17 @@ new Vue({
           document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = assignedColor;
 
           assignedColor = tailwindWhite;
-          if (this.peerConfigEditData.allowedIPsAtoB[index] !== this.network.connections[connectionId]['allowedIPs:a->b']) {
+          if (this.peerConfigEditData.allowedIPsAtoB[index] !== this.network.connections[connectionId].allowedIPsAtoB) {
             assignedColor = this.checkField('allowedIPs', this.peerConfigEditData.allowedIPsAtoB[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
-            changedSubFields['allowedIPs:a->b'] = this.peerConfigEditData.allowedIPsAtoB[index];
+            changedSubFields.allowedIPsAtoB = this.peerConfigEditData.allowedIPsAtoB[index];
           }
           errorNotFound &= assignedColor !== tailwindDarkerRed;
           document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsAtoB`).style.backgroundColor = assignedColor;
 
           assignedColor = tailwindWhite;
-          if (this.peerConfigEditData.allowedIPsBtoA[index] !== this.network.connections[connectionId]['allowedIPs:b->a']) {
+          if (this.peerConfigEditData.allowedIPsBtoA[index] !== this.network.connections[connectionId].allowedIPsBtoA) {
             assignedColor = this.checkField('allowedIPs', this.peerConfigEditData.allowedIPsBtoA[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
-            changedSubFields['allowedIPs:b->a'] = this.peerConfigEditData.allowedIPsBtoA[index];
+            changedSubFields.allowedIPsBtoA = this.peerConfigEditData.allowedIPsBtoA[index];
           }
           errorNotFound &= assignedColor !== tailwindDarkerRed;
           document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsBtoA`).style.backgroundColor = assignedColor;
@@ -593,10 +588,15 @@ new Vue({
         return addressCheck;
       }
 
+      // check mobility
+      if (fieldName === 'mobility') {
+        return fieldVariable === 'static' || fieldVariable === 'roaming';
+      }
+
       // check endpoint
       if (fieldName === 'endpoint') {
         let endpointCheck = false;
-        endpointCheck = fieldVariable.replace('static->', '').match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
+        endpointCheck = fieldVariable.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
         endpointCheck ||= fieldVariable.match('^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}:(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
         return endpointCheck;
       }
@@ -632,8 +632,8 @@ new Vue({
           this.peerEditOldConfig.connections[connectionId] = {
             preSharedKey: connection.preSharedKey,
             enabled: connection.enabled,
-            'allowedIPs:a->b': connection['allowedIPs:a->b'],
-            'allowedIPs:b->a': connection['allowedIPs:b->a'],
+            allowedIPsAtoB: connection.allowedIPsAtoB,
+            allowedIPsBtoA: connection.allowedIPsBtoA,
           };
         }
       }
