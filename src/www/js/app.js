@@ -624,6 +624,7 @@ new Vue({
         address: this.network.peers[this.peerConfigId].address,
         publicKey: this.network.peers[this.peerConfigId].publicKey,
         privateKey: this.network.peers[this.peerConfigId].privateKey,
+        mobility: this.network.peers[this.peerConfigId].mobility,
         endpoint: this.network.peers[this.peerConfigId].endpoint,
       };
       this.peerEditOldConfig.connections = {};
