@@ -132,6 +132,14 @@ class API {
     });
   }
 
+  async updateConnectionAllowedIPs({ connectionId, AtoB, BtoA }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/connection/${connectionId}/allowedIPs/`,
+      body: { AtoB, BtoA },
+    });
+  }
+
   async getWirGuardStatus() {
     return this.call({
       method: 'get',

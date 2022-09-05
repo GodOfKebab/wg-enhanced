@@ -334,6 +334,11 @@ new Vue({
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
+    updateConnectionAllowedIPs(connectionId, AtoB, BtoA) {
+      this.api.updateConnectionAllowedIPs({ connectionId, AtoB, BtoA })
+        .catch(err => alert(err.message || err.toString()))
+        .finally(() => this.refresh().catch(console.error));
+    },
     getPeerConf(peerId) {
       return this.wg.getPeerConfig(this.network, peerId);
     },
@@ -677,6 +682,24 @@ new Vue({
         }
       }
       if (mobilityValue || endpointValue) this.updatePeerEndpoint(this.peerConfigId, mobilityValue, endpointValue);
+
+      for (const [connectionId, connection] of Object.entries(this.peerEditChangedFields.connections)) {
+        let AtoBValue = null;
+        let BtoAValue = null;
+        for (const [field, value] of Object.entries(connection)) {
+          switch (field) {
+            case 'allowedIPsAtoB':
+              AtoBValue = value;
+              break;
+            case 'allowedIPsBtoA':
+              BtoAValue = value;
+              break;
+            default:
+              break;
+          }
+        }
+        if (AtoBValue || BtoAValue) this.updateConnectionAllowedIPs(connectionId, AtoBValue, BtoAValue);
+      }
     },
   },
   filters: {

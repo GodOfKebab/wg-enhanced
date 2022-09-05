@@ -238,6 +238,16 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
     return peer;
   }
 
+  async getConnection({ connectionId }) {
+    const config = await this.getConfig();
+    const connection = config.connections[connectionId];
+    if (!connection) {
+      throw new ServerError(`Connection Not Found: ${connectionId}`, 404);
+    }
+
+    return connection;
+  }
+
   async createPeer({ name, mobility, endpoint, attachedPeers }) {
     if (!name) throw new Error('Missing: Name : str');
 
@@ -392,6 +402,26 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
     if (mobility) config.peers[peerId].mobility = mobility;
     if (endpoint) config.peers[peerId].endpoint = endpoint;
     config.peers[peerId].updatedAt = new Date();
+
+    await this.saveConfig();
+  }
+
+  async updateClientAllowedIPs({ connectionId, AtoB, BtoA }) {
+    const config = await this.getConfig();
+    if (!await this.getConnection({ connectionId })) return;
+
+    if (AtoB !== null) {
+      const allowedIPsEligibility = AtoB.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
+      if (!allowedIPsEligibility) throw new Error(`allowedIPs couldn't be parsed: ${AtoB}`);
+      config.connections[connectionId].allowedIPsAtoB = AtoB;
+    }
+    if (BtoA !== null) {
+      const allowedIPsEligibility = BtoA.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
+      if (!allowedIPsEligibility) throw new Error(`allowedIPs couldn't be parsed: ${BtoA}`);
+      config.connections[connectionId].allowedIPsBtoA = BtoA;
+    }
+    // TODO: get peerIds and update them.
+    // config.peers[peerId].updatedAt = new Date();
 
     await this.saveConfig();
   }
