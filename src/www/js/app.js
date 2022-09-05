@@ -329,6 +329,11 @@ new Vue({
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
+    updatePeerEndpoint(peerId, mobility, endpoint) {
+      this.api.updatePeerEndpoint({ peerId, mobility, endpoint })
+        .catch(err => alert(err.message || err.toString()))
+        .finally(() => this.refresh().catch(console.error));
+    },
     getPeerConf(peerId) {
       return this.wg.getPeerConfig(this.network, peerId);
     },
@@ -651,6 +656,8 @@ new Vue({
     },
     async peerConfigEditApply() {
       console.log('changes applied!');
+      let mobilityValue = null;
+      let endpointValue = null;
       for (const [field, value] of Object.entries(this.peerEditChangedFields.peers[this.peerConfigId])) {
         switch (field) {
           case 'name':
@@ -659,10 +666,17 @@ new Vue({
           case 'address':
             this.updatePeerAddress(this.peerConfigId, value);
             break;
+          case 'mobility':
+            mobilityValue = value;
+            break;
+          case 'endpoint':
+            endpointValue = value;
+            break;
           default:
             break;
         }
       }
+      if (mobilityValue || endpointValue) this.updatePeerEndpoint(this.peerConfigId, mobilityValue, endpointValue);
     },
   },
   filters: {

@@ -126,6 +126,11 @@ module.exports = class Server {
         const { address } = req.body;
         return WireGuard.updatePeerAddress({ peerId, address });
       }))
+      .put('/api/wireguard/peer/:peerId/endpoint', Util.promisify(async req => {
+        const { peerId } = req.params;
+        const { mobility, endpoint } = req.body;
+        return WireGuard.updatePeerEndpoint({ peerId, mobility, endpoint });
+      }))
 
       .listen(PORT, () => {
         debug(`Listening on http://0.0.0.0:${PORT}`);

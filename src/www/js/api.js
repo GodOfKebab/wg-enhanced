@@ -124,6 +124,14 @@ class API {
     });
   }
 
+  async updatePeerEndpoint({ peerId, mobility, endpoint }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/peer/${peerId}/endpoint/`,
+      body: { mobility, endpoint },
+    });
+  }
+
   async getWirGuardStatus() {
     return this.call({
       method: 'get',
