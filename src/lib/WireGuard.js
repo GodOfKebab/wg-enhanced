@@ -124,7 +124,8 @@ PostDown = ${WG_POST_DOWN}
 [Peer]
 PublicKey = ${config.peers[peerId].publicKey}
 PresharedKey = ${connectionDetails.preSharedKey}
-AllowedIPs = ${allowedIPsThisServer}\n`;
+AllowedIPs = ${allowedIPsThisServer}
+PersistentKeepalive = ${connectionDetails.persistentKeepalive}\n`;
 
       // Add the Endpoint line if known TODO: get roaming endpoints as well
       if (config.peers[peerId].mobility === 'static') {
@@ -222,7 +223,7 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
           : new Date(Number(`${latestHandshakeAt}000`));
         config.connections[clientConnectionId].transferRx = Number(transferRx);
         config.connections[clientConnectionId].transferTx = Number(transferTx);
-        config.connections[clientConnectionId].persistentKeepalive = persistentKeepalive;
+        config.connections[clientConnectionId].persistentKeepalive = persistentKeepalive === 'off' ? 0 : persistentKeepalive;
       });
 
     return config;
@@ -311,6 +312,7 @@ AllowedIPs = ${allowedIPsThisServer}\n`;
         enabled: true,
         allowedIPsAtoB: connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
         allowedIPsBtoA: !connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
+        persistentKeepalive: attachedPeer.persistentKeepalive,
       };
     }
 

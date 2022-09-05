@@ -298,6 +298,7 @@ new Vue({
         attachedPeersCompact.push({
           peer: peerId,
           allowedIPs: document.getElementById(`${peerId}_ip_subnet`).value,
+          persistentKeepalive: 25, // TODO: remove hard coding
         });
       }
       this.api.createPeer({ name, mobility, endpoint, attachedPeers: attachedPeersCompact })
@@ -363,7 +364,7 @@ new Vue({
       const checkboxArray = [];
       const peersArray = [];
       for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
-        if (peerDetails.endpoint.startsWith('static')) {
+        if (peerDetails.mobility === 'static') {
           checkboxArray.push(document.getElementById(`${peerId}_checkbox`));
           peersArray.push(peerId);
         }
@@ -376,7 +377,7 @@ new Vue({
         this.peerCreateShowAdvance = false;
 
         for (const peerId of peersArray) {
-          if (this.network.peers[peerId].endpoint.startsWith('static')) {
+          if (this.network.peers[peerId].mobility === 'static') {
             document.getElementById(`${peerId}_checkbox`).checked = false;
             document.getElementById(`${peerId}_ip_subnet`).value = `${this.network.peers[peerId].address}/32`;
           }

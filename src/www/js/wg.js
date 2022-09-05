@@ -33,11 +33,11 @@ Address = ${peerConf.address}/24\n`;
 [Peer]
 PublicKey = ${network.peers[otherPeerId].publicKey}
 PresharedKey = ${connectionDetails.preSharedKey}
-AllowedIPs = ${allowedIPsThisPeer}\n`;
-// PersistentKeepalive = ${WG_PERSISTENT_KEEPALIVE}\n`;
+AllowedIPs = ${allowedIPsThisPeer}
+PersistentKeepalive = ${connectionDetails.persistentKeepalive}\n`;
 
       // Add the Endpoint line if known TODO: get roaming endpoints as well
-      if (network.peers[otherPeerId].mobilit === 'static') {
+      if (network.peers[otherPeerId].mobility === 'static') {
         conf += `Endpoint = ${network.peers[otherPeerId].endpoint}\n`;
       }
     }
