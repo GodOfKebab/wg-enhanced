@@ -8,7 +8,6 @@ class WireGuardHelper {
   static getPeerConfig(network, peerId) {
     const peer = network.peers[peerId];
 
-    // TODO: delete extra lines if DNS/MTU is/are disabled
     let conf = `[Interface]
 PrivateKey = ${peer.privateKey}
 Address = ${peer.address}/24
@@ -51,7 +50,7 @@ PersistentKeepalive = ${connectionDetails.persistentKeepalive}\n`;
     const peerConfigFileName = network.peers[peerId].name.replace(/[^a-zA-Z0-9_=+.-]/g, '-').replace(/(-{2,}|-$)/g, '-').replace(/-$/, '').substring(0, 32);
 
     const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(peerConfigFileContents));
+    element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(peerConfigFileContents)}`);
     element.setAttribute('download', `${peerConfigFileName}.conf`);
 
     element.style.display = 'none';
