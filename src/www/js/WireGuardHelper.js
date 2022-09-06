@@ -3,16 +3,17 @@
 
 'use strict';
 
-class WG {
+class WireGuardHelper {
 
-  getPeerConfig(network, peerId) {
-    const peerConf = network.peers[peerId];
+  static getPeerConfig(network, peerId) {
+    const peer = network.peers[peerId];
 
+    // TODO: delete extra lines if DNS/MTU is/are disabled
     let conf = `[Interface]
-PrivateKey = ${peerConf.privateKey}
-Address = ${peerConf.address}/24\n`;
-// ${WG_DEFAULT_DNS ? `DNS = ${WG_DEFAULT_DNS}` : ''}
-// ${WG_MTU ? `MTU = ${WG_MTU}` : ''}`;
+PrivateKey = ${peer.privateKey}
+Address = ${peer.address}/24
+ListenPort = ${peer.endpoint.toString().split(':')[1]}
+${peer.dns.enabled ? `DNS = ${peer.dns.ip}\n` : ''}${peer.mtu.enabled ? `MTU = ${peer.mtu.value}\n` : ''}`;
 
     for (const [connectionPeers, connectionDetails] of Object.entries(network.connections)) {
       if (!connectionPeers.includes(peerId)) continue;
@@ -45,8 +46,8 @@ PersistentKeepalive = ${connectionDetails.persistentKeepalive}\n`;
     return conf;
   }
 
-  downloadPeerConfig(network, peerId) {
-    const peerConfigFileContents = this.getPeerConfig(network, peerId);
+  static downloadPeerConfig(network, peerId) {
+    const peerConfigFileContents = WireGuardHelper.getPeerConfig(network, peerId);
     const peerConfigFileName = network.peers[peerId].name.replace(/[^a-zA-Z0-9_=+.-]/g, '-').replace(/(-{2,}|-$)/g, '-').replace(/-$/, '').substring(0, 32);
 
     const element = document.createElement('a');
@@ -62,3 +63,5 @@ PersistentKeepalive = ${connectionDetails.persistentKeepalive}\n`;
   }
 
 }
+
+module.exports = WireGuardHelper;

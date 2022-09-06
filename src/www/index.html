@@ -628,6 +628,46 @@
                       </button>
 
                       <div v-show="peerCreateShowAdvance === true">
+                        <div class="m-2 p-1 shadow-md border rounded" id="peerConfigDiv" @click="checkPeerCreateEligibility('DNSMTU')">
+                          <div class="text-gray-800">
+                            Configure DNS and MTU:
+                          </div>
+                          <div class="flex grid grid-cols-2">
+                            <div class="truncate mr-2">
+                              <div class="form-check truncate">
+                                <label>
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="dns_checkbox" @click="checkPeerCreateEligibility('DNSMTU')">
+                                  <span class="text-gray-800 cursor-pointer text-xs">
+                                    <strong class="text-sm">DNS: </strong>
+                                  </span>
+                                </label>
+                                <input list="inputDNSList" name="inputDNS" id="inputDNS" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerCreateDNS" @change="checkPeerCreateEligibility('DNSMTU')" @keyup="checkPeerCreateEligibility('DNSMTU')" >
+                                <datalist id="inputDNSList">
+                                  <option :value="network.peers.root.address">
+                                    Forward all DNS related traffic to {{network.peers.root.address}}
+                                  </option>
+                                </datalist>
+                              </div>
+                            </div>
+                            <div class="truncate mr-2">
+                              <div class="form-check truncate">
+                                <label>
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="mtu_checkbox" @click="handleAttachPeers('DNSMTU')">
+                                  <span class="text-gray-800 cursor-pointer text-xs">
+                                    <strong class="text-sm">MTU: </strong>
+                                  </span>
+                                </label>
+                                <input list="inputMTUList" name="inputMTUList" id="inputMTU" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerCreateMTU" @change="checkPeerCreateEligibility('DNSMTU')" @keyup="checkPeerCreateEligibility('DNSMTU')" >
+                                <datalist id="inputMTUList">
+                                  <option :value="1420">
+                                    TODO
+                                  </option>
+                                </datalist>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
                         <div class="m-2 p-1 shadow-md border rounded" id="attachPeersDiv" @click="checkPeerCreateEligibility('peerCount')">
                           <div class="text-gray-800">
                             Attach to these static peers:
@@ -650,6 +690,7 @@
                             </div>
                           </div>
                         </div>
+
                         <div class="m-2 p-1 shadow-md border rounded" id="networkRulesDiv">
                           <div class="text-gray-800">
                             Network rules here...
@@ -1198,7 +1239,7 @@
   <script src="./js/vendor/vue-apexcharts.min.js"></script>
   <script src="./js/vendor/md5.min.js"></script>
   <script src="./js/vendor/timeago.min.js"></script>
-  <script src="./js/wg.js"></script>
+  <script src="js/WireGuardHelper.js"></script>
   <script src="./js/api.js"></script>
   <script src="./js/app.js"></script>
   <script src="./js/vendor/qrcode.js"></script>
