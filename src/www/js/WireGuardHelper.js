@@ -11,8 +11,9 @@ class WireGuardHelper {
     let conf = `[Interface]
 PrivateKey = ${peer.privateKey}
 Address = ${peer.address}/24
-ListenPort = ${peer.endpoint.toString().split(':')[1]}
-${peer.dns.enabled ? `DNS = ${peer.dns.ip}\n` : ''}${peer.mtu.enabled ? `MTU = ${peer.mtu.value}\n` : ''}`;
+${peer.mobility === 'static' ? `ListenPort = ${peer.endpoint.toString().split(':')[1]}` : 'DEL'}
+${peer.dns.enabled ? `DNS = ${peer.dns.ip}` : 'DEL'}
+${peer.mtu.enabled ? `MTU = ${peer.mtu.value}` : 'DEL'}\n`.replaceAll('DEL\n', '');
 
     for (const [connectionPeers, connectionDetails] of Object.entries(network.connections)) {
       if (!connectionPeers.includes(peerId)) continue;

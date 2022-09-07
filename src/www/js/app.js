@@ -534,6 +534,8 @@ new Vue({
         this.peerConfigEditData.address = this.network.peers[this.peerConfigId]['address'];
         this.peerConfigEditData.mobility = this.network.peers[this.peerConfigId]['mobility'];
         this.peerConfigEditData.endpoint = this.network.peers[this.peerConfigId]['endpoint'];
+        this.peerConfigEditData.dns = this.network.peers[this.peerConfigId]['dns'];
+        this.peerConfigEditData.mtu = this.network.peers[this.peerConfigId]['mtu'];
 
         // store all the conections related to this peer
         this.peerConfigEditData.connectionIds = [];
@@ -683,6 +685,8 @@ new Vue({
         privateKey: this.network.peers[this.peerConfigId].privateKey,
         mobility: this.network.peers[this.peerConfigId].mobility,
         endpoint: this.network.peers[this.peerConfigId].endpoint,
+        dns: this.network.peers[this.peerConfigId].dns,
+        mtu: this.network.peers[this.peerConfigId].mtu,
       };
       this.peerEditOldConfig.connections = {};
       for (const [connectionId, connection] of Object.entries(this.network.connections)) {
