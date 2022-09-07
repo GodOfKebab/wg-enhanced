@@ -60,6 +60,8 @@ new Vue({
       address: '',
       mobility: '',
       endpoint: '',
+      dns: { enabled: null, ip: '' },
+      mtu: { enabled: null, value: '' },
       connectionIds: [],
       isConnectionEnabled: [],
       persistentKeepaliveData: [],
@@ -534,8 +536,10 @@ new Vue({
         this.peerConfigEditData.address = this.network.peers[this.peerConfigId]['address'];
         this.peerConfigEditData.mobility = this.network.peers[this.peerConfigId]['mobility'];
         this.peerConfigEditData.endpoint = this.network.peers[this.peerConfigId]['endpoint'];
-        this.peerConfigEditData.dns = this.network.peers[this.peerConfigId]['dns'];
-        this.peerConfigEditData.mtu = this.network.peers[this.peerConfigId]['mtu'];
+        this.peerConfigEditData.dns.enabled = this.network.peers[this.peerConfigId]['dns'].enabled;
+        this.peerConfigEditData.dns.ip = this.network.peers[this.peerConfigId]['dns'].ip;
+        this.peerConfigEditData.mtu.enabled = this.network.peers[this.peerConfigId]['mtu'].enabled;
+        this.peerConfigEditData.mtu.value = this.network.peers[this.peerConfigId]['mtu'].value;
 
         // store all the conections related to this peer
         this.peerConfigEditData.connectionIds = [];
@@ -572,11 +576,39 @@ new Vue({
       const changedFields = { peers: {}, connections: {} };
       changedFields.peers[this.peerConfigId] = {};
       if (['check-changes', 'check-changes-connection', 'check-all'].includes(mode)) {
-        for (const peerConfigField of ['name', 'address', 'mobility', 'endpoint']) {
+        for (const peerConfigField of ['name', 'address', 'mobility', 'endpoint', 'dns', 'mtu']) {
           let assignedColor = tailwindWhite;
-          if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
-            assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
-            changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
+          if (peerConfigField === 'dns') {
+            const changedDNSFields = {};
+            if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled) {
+              changedDNSFields['enabled'] = this.peerConfigEditData[peerConfigField].enabled;
+            }
+            if (this.peerConfigEditData[peerConfigField].ip !== this.network.peers[this.peerConfigId][peerConfigField].ip) {
+              changedDNSFields['ip'] = this.peerConfigEditData[peerConfigField].ip;
+            }
+            if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled
+              || this.peerConfigEditData[peerConfigField].ip !== this.network.peers[this.peerConfigId][peerConfigField].ip) {
+              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
+              changedFields.peers[this.peerConfigId][peerConfigField] = changedDNSFields;
+            }
+          } else if (peerConfigField === 'mtu') {
+            const changedMTUFields = {};
+            if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled) {
+              changedMTUFields['enabled'] = this.peerConfigEditData[peerConfigField].enabled;
+            }
+            if (this.peerConfigEditData[peerConfigField].value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
+              changedMTUFields['value'] = this.peerConfigEditData[peerConfigField].value;
+            }
+            if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled
+                || this.peerConfigEditData[peerConfigField].value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
+              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
+              changedFields.peers[this.peerConfigId][peerConfigField] = changedMTUFields;
+            }
+          } else {
+            if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
+              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
+              changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
+            }
           }
           try {
             if (peerConfigField !== 'mobility') {
@@ -585,6 +617,7 @@ new Vue({
             }
           } catch (e) {
             errorNotFound &= false;
+            console.log('edit error!');
             await new Promise(r => setTimeout(r, 100));
             await this.peerConfigEditHandle(mode);
           }
@@ -670,6 +703,30 @@ new Vue({
         return fieldVariable.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
       }
 
+      // check dns
+      if (fieldName === 'dns') {
+        const ipmatch = fieldVariable.ip.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$');
+        if (!fieldVariable.enabled) {
+          if (fieldVariable.ip.length > 0) {
+            return ipmatch;
+          }
+          return true;
+        }
+        return ipmatch;
+      }
+
+      // check allowedIPs
+      if (fieldName === 'mtu') {
+        const valmatch = fieldVariable.value > 0 && fieldVariable.value < 65536;
+        if (!fieldVariable.enabled) {
+          if (fieldVariable.value.length > 0) {
+            return valmatch;
+          }
+          return true;
+        }
+        return valmatch;
+      }
+
       return false;
     },
     async peerConfigEditUpdateConfirmation() {
@@ -702,7 +759,13 @@ new Vue({
 
       this.peerEditNewConfig = JSON.parse(JSON.stringify(this.peerEditOldConfig)); // deep copy
       for (const [field, value] of Object.entries(this.peerEditChangedFields.peers[this.peerConfigId])) {
-        this.peerEditNewConfig.peers[this.peerConfigId][field] = value;
+        if (field === 'dns' || field === 'mtu') {
+          for (const [fieldDNSMTU, valueDNSMTU] of Object.entries(value)) {
+            this.peerEditNewConfig.peers[this.peerConfigId][field][fieldDNSMTU] = valueDNSMTU;
+          }
+        } else {
+          this.peerEditNewConfig.peers[this.peerConfigId][field] = value;
+        }
       }
       for (const [connectionId, connection] of Object.entries(this.peerEditChangedFields.connections)) {
         for (const [field, value] of Object.entries(connection)) {
