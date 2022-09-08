@@ -989,7 +989,9 @@
                       <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
                         <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                          <div v-if="!peerChanged" class="p-1">{}</div>
+                          <div v-if="!peerChangedPeer && !peerChangedConnections" class="p-1">{}</div>
+                          <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFields.peers }, false, 2) }}</div>
+                          <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFields.connections }, false, 2) }}</div>
                           <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFields, false, 2) }}</div>
                         </div>
                         <div class="bg-red-100 rounded-md overflow-scroll">
@@ -1090,7 +1092,10 @@
                       <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
                         <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                          <div class="p-1">{{ JSON.stringify(peerEditChangedFields, false, 2) }}</div>
+                          <div v-if="!peerChangedPeer && !peerChangedConnections" class="p-1">{}</div>
+                          <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFields.peers }, false, 2) }}</div>
+                          <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFields.connections }, false, 2) }}</div>
+                          <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFields, false, 2) }}</div>
                         </div>
                         <div class="bg-red-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>

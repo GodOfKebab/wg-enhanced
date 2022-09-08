@@ -50,7 +50,8 @@ new Vue({
     peerEditAddress: null,
     peerEditAddressId: null,
     peerEditDisableSaveChanges: true,
-    peerChanged: false,
+    peerChangedPeer: false,
+    peerChangedConnections: false,
     peerEditChangedFields: {},
     peerEditOldConfig: { peers: {}, connections: {} },
     peerEditNewConfig: { peers: {}, connections: {} },
@@ -657,8 +658,9 @@ new Vue({
           changedFields.connections = changedConnections;
         }
       }
-      this.peerChanged = !(Object.keys(changedFields.peers[this.peerConfigId]).length + Object.keys(changedFields.connections).length === 0);
-      this.peerEditDisableSaveChanges = !errorNotFound || !this.peerChanged;
+      this.peerChangedPeer = Object.keys(changedFields.peers[this.peerConfigId]).length > 0;
+      this.peerChangedConnections = Object.keys(changedFields.connections).length > 0;
+      this.peerEditDisableSaveChanges = !errorNotFound || !(this.peerChangedPeer || this.peerChangedConnections);
       return [changedFields, errorNotFound];
     },
     async peerConfigEditUpdateConfirmation() {
