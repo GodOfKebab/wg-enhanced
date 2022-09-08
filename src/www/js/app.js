@@ -349,6 +349,16 @@ new Vue({
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
+    updatePeerDNS(peerId, dns) {
+      this.api.updatePeerDNS({ peerId, dns })
+        .catch(err => alert(err.message || err.toString()))
+        .finally(() => this.refresh().catch(console.error));
+    },
+    updatePeerMTU(peerId, mtu) {
+      this.api.updatePeerMTU({ peerId, mtu })
+        .catch(err => alert(err.message || err.toString()))
+        .finally(() => this.refresh().catch(console.error));
+    },
     updateConnectionAllowedIPs(connectionId, AtoB, BtoA) {
       this.api.updateConnectionAllowedIPs({ connectionId, AtoB, BtoA })
         .catch(err => alert(err.message || err.toString()))
@@ -451,14 +461,13 @@ new Vue({
 
       // check name
       if (mode === 'name') {
-        this.peerCreateEligibilityName = this.peerCreateName.length > 0;
+        this.peerCreateEligibilityName = WireGuardHelper.checkField('name', this.peerCreateName);
         document.getElementById('peerCreateName').style.backgroundColor = this.peerCreateEligibilityName ? tailwindLightGreen : tailwindLightRed;
       }
 
       // check endpoint
       if (mode === 'endpoint') {
-        this.peerCreateEligibilityEndpoint = this.peerCreateEndpoint.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
-        this.peerCreateEligibilityEndpoint ||= this.peerCreateEndpoint.match('^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}:(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
+        this.peerCreateEligibilityEndpoint = WireGuardHelper.checkField('endpoint', this.peerCreateName);
         document.getElementById('peerCreateEndpoint').style.backgroundColor = this.peerCreateEligibilityEndpoint ? tailwindLightGreen : tailwindLightRed;
       }
 
@@ -468,7 +477,7 @@ new Vue({
         let peerCreateEligibilityMTU = true;
         if (document.getElementById('dns_checkbox').checked) {
           document.getElementById('inputDNS').disabled = false;
-          peerCreateEligibilityDNS &&= this.peerCreateDNS.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$');
+          peerCreateEligibilityDNS &&= WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateDNS });
           document.getElementById('inputDNS').style.backgroundColor = peerCreateEligibilityDNS ? tailwindDarkerGreen : tailwindDarkerRed;
         } else {
           document.getElementById('inputDNS').disabled = true;
@@ -476,7 +485,7 @@ new Vue({
         }
         if (document.getElementById('mtu_checkbox').checked) {
           document.getElementById('inputMTU').disabled = false;
-          peerCreateEligibilityMTU &&= this.peerCreateMTU > 0 && this.peerCreateMTU < 65536;
+          peerCreateEligibilityMTU &&= WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateMTU });
           document.getElementById('inputMTU').style.backgroundColor = peerCreateEligibilityMTU ? tailwindDarkerGreen : tailwindDarkerRed;
         } else {
           document.getElementById('inputMTU').disabled = true;
@@ -500,13 +509,12 @@ new Vue({
 
       // check allowedIPs
       if (mode === 'allowedIPs') {
-        this.peerCreateEligibilityAllowedIPs = this.attachedPeers.length > 0;
+        this.peerCreateEligibilityAllowedIPs = WireGuardHelper.checkField('peerCount', this.attachedPeers);
         for (const peerId of this.attachedPeers) {
-          const allowedIPsEligibility = document.getElementById(`${peerId}_ip_subnet`).value.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
+          const allowedIPsEligibility = WireGuardHelper.checkField('peerCount', document.getElementById(`${peerId}_ip_subnet`).value);
           this.peerCreateEligibilityAllowedIPs &&= allowedIPsEligibility;
           document.getElementById(`${peerId}_ip_subnet`).style.backgroundColor = allowedIPsEligibility ? tailwindDarkerGreen : tailwindDarkerRed;
         }
-
         document.getElementById('networkRulesDiv').style.backgroundColor = this.peerCreateEligibilityAllowedIPs ? tailwindLightGreen : tailwindLightRed;
       }
 
@@ -522,8 +530,7 @@ new Vue({
       this.peerCreateEligibility = this.peerCreateEligibilityName && (this.peerCreateEligibilityEndpoint || this.peerCreate === 'roaming') && this.peerCreateEligibilityDNSMTU && this.peerCreateEligibilityPeers && this.peerCreateEligibilityAllowedIPs;
     },
     getConnectionId(peer1, peer2) {
-      if (peer1.localeCompare(peer2, 'en') === 1) return `${peer1}*${peer2}`;
-      return `${peer2}*${peer1}`;
+      return WireGuardHelper.getConnectionId(peer1, peer2);
     },
     async peerConfigEditHandle(mode) {
       const tailwindLightGreen = 'rgb(240 253 244)';
@@ -589,12 +596,12 @@ new Vue({
             }
             if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled
               || this.peerConfigEditData[peerConfigField].value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
-              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
+              assignedColor = WireGuardHelper.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
               changedFields.peers[this.peerConfigId][peerConfigField] = changedDNSMTUFields;
             }
           } else {
             if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
-              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
+              assignedColor = WireGuardHelper.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
               changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
             }
           }
@@ -628,7 +635,7 @@ new Vue({
 
           assignedColor = tailwindWhite;
           if (this.peerConfigEditData.allowedIPsAtoB[index] !== this.network.connections[connectionId].allowedIPsAtoB) {
-            assignedColor = this.checkField('allowedIPs', this.peerConfigEditData.allowedIPsAtoB[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
+            assignedColor = WireGuardHelper.checkField('allowedIPs', this.peerConfigEditData.allowedIPsAtoB[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
             changedSubFields.allowedIPsAtoB = this.peerConfigEditData.allowedIPsAtoB[index];
           }
           errorNotFound &= assignedColor !== tailwindDarkerRed;
@@ -636,7 +643,7 @@ new Vue({
 
           assignedColor = tailwindWhite;
           if (this.peerConfigEditData.allowedIPsBtoA[index] !== this.network.connections[connectionId].allowedIPsBtoA) {
-            assignedColor = this.checkField('allowedIPs', this.peerConfigEditData.allowedIPsBtoA[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
+            assignedColor = WireGuardHelper.checkField('allowedIPs', this.peerConfigEditData.allowedIPsBtoA[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
             changedSubFields.allowedIPsBtoA = this.peerConfigEditData.allowedIPsBtoA[index];
           }
           errorNotFound &= assignedColor !== tailwindDarkerRed;
@@ -653,71 +660,6 @@ new Vue({
       this.peerChanged = !(Object.keys(changedFields.peers[this.peerConfigId]).length + Object.keys(changedFields.connections).length === 0);
       this.peerEditDisableSaveChanges = !errorNotFound || !this.peerChanged;
       return [changedFields, errorNotFound];
-    },
-    checkField(fieldName, fieldVariable) {
-      // check name
-      if (fieldName === 'name') {
-        return fieldVariable.length > 0;
-      }
-
-      // TODO: change the hardcoded IP subnet
-      // TODO: check to see if a duplicate exists
-      if (fieldName === 'address') {
-        let addressCheck = true;
-        addressCheck &&= fieldVariable.startsWith('10.8.0.');
-        addressCheck &&= fieldVariable.replace('10.8.0.', '').match('^[0-9]*$');
-        addressCheck &&= parseInt(fieldVariable.replace('10.8.0.', ''), 10) >= 0 && parseInt(fieldVariable.replace('10.8.0.', ''), 10) <= 255;
-        return addressCheck;
-      }
-
-      // check mobility
-      if (fieldName === 'mobility') {
-        return fieldVariable === 'static' || fieldVariable === 'roaming';
-      }
-
-      // check endpoint
-      if (fieldName === 'endpoint') {
-        let endpointCheck = false;
-        endpointCheck = fieldVariable.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
-        endpointCheck ||= fieldVariable.match('^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}:(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
-        return endpointCheck;
-      }
-
-      // check peer count
-      if (fieldName === 'peerCount') {
-        return this.attachedPeers.length > 0;
-      }
-
-      // check allowedIPs
-      if (fieldName === 'allowedIPs') {
-        return fieldVariable.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
-      }
-
-      // check dns
-      if (fieldName === 'dns') {
-        const ipmatch = fieldVariable.value.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$');
-        if (!fieldVariable.enabled) {
-          if (fieldVariable.value.length > 0) {
-            return ipmatch;
-          }
-          return true;
-        }
-        return ipmatch;
-      }
-
-      // check allowedIPs
-      if (fieldName === 'mtu') {
-        const valmatch = fieldVariable.value > 0 && fieldVariable.value < 65536;
-        if (!fieldVariable.enabled) {
-          if (fieldVariable.value.length > 0) {
-            return valmatch;
-          }
-          return true;
-        }
-        return valmatch;
-      }
-
-      return false;
     },
     async peerConfigEditUpdateConfirmation() {
       const [changedFields, errorNotFound] = await this.peerConfigEditHandle('check-all');
@@ -780,6 +722,12 @@ new Vue({
             break;
           case 'endpoint':
             endpointValue = value;
+            break;
+          case 'dns':
+            this.updatePeerDNS(this.peerConfigId, value);
+            break;
+          case 'mtu':
+            this.updatePeerMTU(this.peerConfigId, value);
             break;
           default:
             break;

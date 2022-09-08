@@ -132,6 +132,22 @@ class API {
     });
   }
 
+  async updatePeerDNS({ peerId, dns }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/peer/${peerId}/dns/`,
+      body: { dns },
+    });
+  }
+
+  async updatePeerMTU({ peerId, mtu }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/peer/${peerId}/mtu/`,
+      body: { mtu },
+    });
+  }
+
   async updateConnectionAllowedIPs({ connectionId, AtoB, BtoA }) {
     return this.call({
       method: 'put',

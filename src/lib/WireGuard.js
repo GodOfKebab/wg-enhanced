@@ -141,11 +141,6 @@ module.exports = class WireGuard {
     debug('Config synced.');
   }
 
-  getConnectionId(peer1, peer2) {
-    if (peer1.localeCompare(peer2, 'en') === 1) return `${peer1}*${peer2}`;
-    return `${peer2}*${peer1}`;
-  }
-
   async getNetwork() {
     const config = await this.getConfig();
 
@@ -185,7 +180,7 @@ module.exports = class WireGuard {
         }
         if (clientId == null) return;
 
-        const clientConnectionId = this.getConnectionId('root', clientId);
+        const clientConnectionId = WireGuardHelper.getConnectionId('root', clientId);
         if (!config.connections[clientConnectionId]) return;
 
         config.connections[clientConnectionId].latestHandshakeAt = latestHandshakeAt === '0'
@@ -225,9 +220,7 @@ module.exports = class WireGuard {
     if (!name) throw new Error('Missing: Name : str');
 
     if (endpoint) {
-      let peerCreateEligibilityEndpoint = endpoint.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
-      peerCreateEligibilityEndpoint ||= endpoint.match('^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}:(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
-      if (!peerCreateEligibilityEndpoint) throw new Error('Couldn\'t parse: Endpoint : str (in the format x.x.x.x:x)');
+      if (!WireGuardHelper.checkField('endpoint', endpoint)) throw new Error('Couldn\'t parse: Endpoint : str (in the format x.x.x.x:x)');
     }
 
     if (!attachedPeers) throw new Error('Missing: attachedPeers : array ([peerId: str, allowedIPs: str (in the format x.x.x.x/32)])');
@@ -235,8 +228,7 @@ module.exports = class WireGuard {
     for (const attachedPeer of attachedPeers) {
       if (!attachedPeer.peer || !attachedPeer.allowedIPs) throw new Error('Couldn\'t parse: attachedPeers : array ([{peerId: str, allowedIPs: str (in the format x.x.x.x/32)}, ...])');
       if (!await this.getPeer({ peerId: attachedPeer.peer })) throw new Error(`attachedPeer doesn't exist: ${attachedPeer.peer}`);
-      const allowedIPsEligibility = attachedPeer.allowedIPs.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
-      if (!allowedIPsEligibility) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPs}`);
+      if (!WireGuardHelper.checkField('allowedIPs', attachedPeer.allowedIPs)) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPs}`);
     }
 
     const config = await this.getConfig();
@@ -257,17 +249,10 @@ module.exports = class WireGuard {
       }
     }
 
-    if (!address) {
-      throw new Error('Maximum number of peers reached.');
-    }
+    if (!address) throw new Error('Maximum number of peers reached.');
 
-    let checkDNSMTU = dns.enabled === true || dns.enabled === false || mtu.enabled === true || mtu.enabled === false;
-    checkDNSMTU &&= !(dns.enabled === true && !dns.value.toString().match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'));
-    checkDNSMTU &&= !(mtu.enabled === true && !(mtu.value > 0 && mtu.value < 65536));
-
-    if (!checkDNSMTU) {
-      throw new Error('DNS/MTU error.');
-    }
+    if (!WireGuardHelper.checkField('dns', dns)) throw new Error('DNS error.');
+    if (!WireGuardHelper.checkField('mtu', dns)) throw new Error('MTU error.');
 
     // Create Peer
     const peerId = uuid.v4();
@@ -286,7 +271,7 @@ module.exports = class WireGuard {
 
     // create the connections
     for (const attachedPeer of attachedPeers) {
-      const connectionId = this.getConnectionId(peerId, attachedPeer.peer);
+      const connectionId = WireGuardHelper.getConnectionId(peerId, attachedPeer.peer);
       const preSharedKey = await Util.exec('wg genpsk');
       config.connections[connectionId] = {
         preSharedKey,
@@ -375,9 +360,7 @@ module.exports = class WireGuard {
     if (!await this.getPeer({ peerId })) return;
 
     if (endpoint) {
-      let peerCreateEligibilityEndpoint = endpoint.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?):(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
-      peerCreateEligibilityEndpoint ||= endpoint.match('^(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}:(0|6[0-5][0-5][0-3][0-5]|[1-5][0-9][0-9][0-9][0-9]|[1-9][0-9]{0,3})$');
-      if (!peerCreateEligibilityEndpoint) throw new Error('Couldn\'t parse: Endpoint : str (in the format x.x.x.x:x or example.com:x)');
+      if (!WireGuardHelper.checkField('endpoint', endpoint)) throw new Error('Couldn\'t parse: Endpoint : str (in the format x.x.x.x:x or example.com:x)');
     }
 
     if (mobility === 'static' && !(endpoint || config.peers[peerId].endpoint)) throw new Error('Can\'t set the mobility to \'static\' with no endpoint!');
@@ -389,18 +372,46 @@ module.exports = class WireGuard {
     await this.saveConfig();
   }
 
+  async updatePeerDNS({ peerId, dns }) {
+    const config = await this.getConfig();
+    if (!await this.getPeer({ peerId })) return;
+
+    if (!('enabled' in dns)) dns.enabled = config.peers[peerId].dns.enabled;
+    if (!('value' in dns)) dns.value = config.peers[peerId].dns.value;
+
+    if (!WireGuardHelper.checkField('dns', dns)) throw new Error('DNS error.');
+
+    config.peers[peerId].dns = dns;
+    config.peers[peerId].updatedAt = new Date();
+
+    await this.saveConfig();
+  }
+
+  async updatePeerMTU({ peerId, mtu }) {
+    const config = await this.getConfig();
+    if (!await this.getPeer({ peerId })) return;
+
+    if (!('enabled' in mtu)) mtu.enabled = config.peers[peerId].mtu.enabled;
+    if (!('value' in mtu)) mtu.value = config.peers[peerId].mtu.value;
+
+    if (!WireGuardHelper.checkField('mtu', mtu)) throw new Error('MTU error.');
+
+    config.peers[peerId].mtu = mtu;
+    config.peers[peerId].updatedAt = new Date();
+
+    await this.saveConfig();
+  }
+
   async updateClientAllowedIPs({ connectionId, AtoB, BtoA }) {
     const config = await this.getConfig();
     if (!await this.getConnection({ connectionId })) return;
 
     if (AtoB !== null) {
-      const allowedIPsEligibility = AtoB.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
-      if (!allowedIPsEligibility) throw new Error(`allowedIPs couldn't be parsed: ${AtoB}`);
+      if (!WireGuardHelper.checkField('allowedIPs', AtoB)) throw new Error(`allowedIPs couldn't be parsed: ${AtoB}`);
       config.connections[connectionId].allowedIPsAtoB = AtoB;
     }
     if (BtoA !== null) {
-      const allowedIPsEligibility = BtoA.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|[0-9])))*$');
-      if (!allowedIPsEligibility) throw new Error(`allowedIPs couldn't be parsed: ${BtoA}`);
+      if (!WireGuardHelper.checkField('allowedIPs', BtoA)) throw new Error(`allowedIPs couldn't be parsed: ${BtoA}`);
       config.connections[connectionId].allowedIPsBtoA = BtoA;
     }
     // TODO: get peerIds and update them.

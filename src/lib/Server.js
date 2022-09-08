@@ -131,6 +131,16 @@ module.exports = class Server {
         const { mobility, endpoint } = req.body;
         return WireGuard.updatePeerEndpoint({ peerId, mobility, endpoint });
       }))
+      .put('/api/wireguard/peer/:peerId/dns', Util.promisify(async req => {
+        const { peerId } = req.params;
+        const { dns } = req.body;
+        return WireGuard.updatePeerDNS({ peerId, dns });
+      }))
+      .put('/api/wireguard/peer/:peerId/mtu', Util.promisify(async req => {
+        const { peerId } = req.params;
+        const { mtu } = req.body;
+        return WireGuard.updatePeerMTU({ peerId, mtu });
+      }))
       .put('/api/wireguard/connection/:connectionId/allowedIPs', Util.promisify(async req => {
         const { connectionId } = req.params;
         const { AtoB, BtoA } = req.body;
