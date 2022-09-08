@@ -167,7 +167,7 @@
                              v-on:focusout="peerEditName = null; peerEditNameId = null;"
                              :ref="`peer-${peerId}-name`"
                              class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigWindow = 'edit'; peerConfigEditHandle('init').then();"
+                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigWindow = 'edit'; peerConfigEditHandle('init').then(); peerConfigEditUpdateConfirmation();"
                               class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
@@ -392,7 +392,7 @@
                         v-on:focusout="peerEditName = null; peerEditNameId = null;"
                              :ref="`peer-${peerId}-name`"
                         class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigWindow = 'edit'; peerConfigEditHandle('init').then();"
+                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigWindow = 'edit'; peerConfigEditHandle('init').then(); peerConfigEditUpdateConfirmation();"
                         class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
@@ -904,14 +904,14 @@
                                   <input type="checkbox" class="sr-only peer" id="peerConfigEditData.dnsToggle" @change="peerConfigEditData.dns.enabled = !peerConfigEditData.dns.enabled; peerConfigEditHandle('check-changes').then()" :checked="peerConfigEditData.dns.enabled">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input v-show="peerConfigEditData.dns.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.dns.ip" id="peerConfigEditData.dns" @change="peerConfigEditHandle('check-changes').then()">
+                                <input list="inputDNSList" v-show="peerConfigEditData.dns.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.dns.value" id="peerConfigEditData.dns" placeholder="click to see recommendations" @change="peerConfigEditHandle('check-changes').then()">
                               </div>
                               <div v-else-if="peerConfigKey === 'mtu'">
                                 <label for="peerConfigEditData.mtuToggle" class="inline-flex relative items-center cursor-pointer align-middle">
                                   <input type="checkbox" class="sr-only peer" id="peerConfigEditData.mtuToggle" @change="peerConfigEditData.mtu.enabled = !peerConfigEditData.mtu.enabled; peerConfigEditHandle('check-changes').then()" :checked="peerConfigEditData.mtu.enabled">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input v-show="peerConfigEditData.mtu.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.mtu.value" id="peerConfigEditData.mtu" @change="peerConfigEditHandle('check-changes').then()">
+                                <input list="inputMTUList" v-show="peerConfigEditData.mtu.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.mtu.value" id="peerConfigEditData.mtu" placeholder="click to see recommendations" @change="peerConfigEditHandle('check-changes').then()">
                               </div>
                               <span v-else-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mr-1 pl-1">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
                               <span v-else class="text-gray-800 text-xs mr-1 pl-1">{{ network.peers[peerConfigId][peerConfigKey] }}</span>
@@ -989,7 +989,8 @@
                       <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
                         <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                          <div class="p-1">{{ JSON.stringify(peerEditChangedFields, false, 2) }}</div>
+                          <div v-if="!peerChanged" class="p-1">{}</div>
+                          <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFields, false, 2) }}</div>
                         </div>
                         <div class="bg-red-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>

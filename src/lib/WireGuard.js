@@ -60,7 +60,7 @@ module.exports = class WireGuard {
                 endpoint: `${WG_HOST}:${WG_PORT}`,
                 dns: {
                   enabled: false,
-                  ip: '',
+                  value: '',
                 },
                 mtu: {
                   enabled: false,
@@ -262,7 +262,7 @@ module.exports = class WireGuard {
     }
 
     let checkDNSMTU = dns.enabled === true || dns.enabled === false || mtu.enabled === true || mtu.enabled === false;
-    checkDNSMTU &&= !(dns.enabled === true && !dns.ip.toString().match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'));
+    checkDNSMTU &&= !(dns.enabled === true && !dns.value.toString().match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'));
     checkDNSMTU &&= !(mtu.enabled === true && !(mtu.value > 0 && mtu.value < 65536));
 
     if (!checkDNSMTU) {
@@ -280,7 +280,6 @@ module.exports = class WireGuard {
       endpoint,
       dns,
       mtu,
-
       createdAt: new Date(),
       updatedAt: new Date(),
     };

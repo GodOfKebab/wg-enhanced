@@ -50,6 +50,7 @@ new Vue({
     peerEditAddress: null,
     peerEditAddressId: null,
     peerEditDisableSaveChanges: true,
+    peerChanged: false,
     peerEditChangedFields: {},
     peerEditOldConfig: { peers: {}, connections: {} },
     peerEditNewConfig: { peers: {}, connections: {} },
@@ -60,7 +61,7 @@ new Vue({
       address: '',
       mobility: '',
       endpoint: '',
-      dns: { enabled: null, ip: '' },
+      dns: { enabled: null, value: '' },
       mtu: { enabled: null, value: '' },
       connectionIds: [],
       isConnectionEnabled: [],
@@ -308,7 +309,7 @@ new Vue({
       }
       const dns = {
         enabled: document.getElementById('dns_checkbox').checked,
-        ip: document.getElementById('dns_checkbox').checked ? this.peerCreateDNS : '',
+        value: document.getElementById('dns_checkbox').checked ? this.peerCreateDNS : '',
       };
       const mtu = {
         enabled: document.getElementById('mtu_checkbox').checked,
@@ -537,7 +538,7 @@ new Vue({
         this.peerConfigEditData.mobility = this.network.peers[this.peerConfigId]['mobility'];
         this.peerConfigEditData.endpoint = this.network.peers[this.peerConfigId]['endpoint'];
         this.peerConfigEditData.dns.enabled = this.network.peers[this.peerConfigId]['dns'].enabled;
-        this.peerConfigEditData.dns.ip = this.network.peers[this.peerConfigId]['dns'].ip;
+        this.peerConfigEditData.dns.value = this.network.peers[this.peerConfigId]['dns'].value;
         this.peerConfigEditData.mtu.enabled = this.network.peers[this.peerConfigId]['mtu'].enabled;
         this.peerConfigEditData.mtu.value = this.network.peers[this.peerConfigId]['mtu'].value;
 
@@ -578,31 +579,18 @@ new Vue({
       if (['check-changes', 'check-changes-connection', 'check-all'].includes(mode)) {
         for (const peerConfigField of ['name', 'address', 'mobility', 'endpoint', 'dns', 'mtu']) {
           let assignedColor = tailwindWhite;
-          if (peerConfigField === 'dns') {
-            const changedDNSFields = {};
+          if (peerConfigField === 'dns' || peerConfigField === 'mtu') {
+            const changedDNSMTUFields = {};
             if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled) {
-              changedDNSFields['enabled'] = this.peerConfigEditData[peerConfigField].enabled;
-            }
-            if (this.peerConfigEditData[peerConfigField].ip !== this.network.peers[this.peerConfigId][peerConfigField].ip) {
-              changedDNSFields['ip'] = this.peerConfigEditData[peerConfigField].ip;
-            }
-            if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled
-              || this.peerConfigEditData[peerConfigField].ip !== this.network.peers[this.peerConfigId][peerConfigField].ip) {
-              assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
-              changedFields.peers[this.peerConfigId][peerConfigField] = changedDNSFields;
-            }
-          } else if (peerConfigField === 'mtu') {
-            const changedMTUFields = {};
-            if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled) {
-              changedMTUFields['enabled'] = this.peerConfigEditData[peerConfigField].enabled;
+              changedDNSMTUFields['enabled'] = this.peerConfigEditData[peerConfigField].enabled;
             }
             if (this.peerConfigEditData[peerConfigField].value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
-              changedMTUFields['value'] = this.peerConfigEditData[peerConfigField].value;
+              changedDNSMTUFields['value'] = this.peerConfigEditData[peerConfigField].value;
             }
             if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled
-                || this.peerConfigEditData[peerConfigField].value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
+              || this.peerConfigEditData[peerConfigField].value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
               assignedColor = this.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
-              changedFields.peers[this.peerConfigId][peerConfigField] = changedMTUFields;
+              changedFields.peers[this.peerConfigId][peerConfigField] = changedDNSMTUFields;
             }
           } else {
             if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
@@ -618,6 +606,7 @@ new Vue({
           } catch (e) {
             errorNotFound &= false;
             console.log('edit error!');
+            console.log(e);
             await new Promise(r => setTimeout(r, 100));
             await this.peerConfigEditHandle(mode);
           }
@@ -661,7 +650,8 @@ new Vue({
           changedFields.connections = changedConnections;
         }
       }
-      this.peerEditDisableSaveChanges = !errorNotFound || (Object.keys(changedFields.peers[this.peerConfigId]).length + Object.keys(changedFields.connections).length === 0);
+      this.peerChanged = !(Object.keys(changedFields.peers[this.peerConfigId]).length + Object.keys(changedFields.connections).length === 0);
+      this.peerEditDisableSaveChanges = !errorNotFound || !this.peerChanged;
       return [changedFields, errorNotFound];
     },
     checkField(fieldName, fieldVariable) {
@@ -705,9 +695,9 @@ new Vue({
 
       // check dns
       if (fieldName === 'dns') {
-        const ipmatch = fieldVariable.ip.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$');
+        const ipmatch = fieldVariable.value.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$');
         if (!fieldVariable.enabled) {
-          if (fieldVariable.ip.length > 0) {
+          if (fieldVariable.value.length > 0) {
             return ipmatch;
           }
           return true;
