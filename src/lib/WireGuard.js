@@ -26,6 +26,10 @@ const {
 
 module.exports = class WireGuard {
 
+  constructor() {
+    this.preambles = [];
+  }
+
   async getConfig() {
     if (!this.__configPromise) {
       this.__configPromise = Promise.resolve().then(async () => {
@@ -214,6 +218,38 @@ module.exports = class WireGuard {
     return connection;
   }
 
+  async peerCreatePreamble() {
+    const config = await this.getConfig();
+
+    const preamble = {
+      peerId: null,
+      address: null,
+      expiration: null,
+    };
+
+    this.preambles = this.preambles.filter(r => r.expiration > (new Date()).getTime());
+    this.preambles = this.preambles.filter(r => Object.keys(config.peers).every(p => p !== r.peerId));
+    if (this.preambles.length >= 100) throw new Error('No address can be reserved.');
+
+    // Calculate next IP
+    for (let i = 2; i < 255; i++) {
+      const testAddress = WG_DEFAULT_ADDRESS.replace('x', i);
+      const peer = Object.values(config.peers).find(p => p.address === testAddress);
+
+      if (!peer && this.preambles.every(p => p.address !== testAddress)) {
+        preamble.address = testAddress;
+        break;
+      }
+    }
+    if (!preamble.address) throw new Error('Maximum number of peers reached.');
+
+    preamble.peerId = uuid.v4();
+    preamble.expiration = (new Date()).getTime() + 5 * 60 * 1000;
+    this.preambles.push(preamble);
+
+    return preamble;
+  }
+
   async createPeer({
     name, mobility, dns, mtu, endpoint, attachedPeers,
   }) {
@@ -236,26 +272,11 @@ module.exports = class WireGuard {
     const privateKey = await Util.exec('wg genkey');
     const publicKey = await Util.exec(`echo ${privateKey} | wg pubkey`);
 
-    // Calculate next IP
-    let address;
-    for (let i = 2; i < 255; i++) {
-      const peer = Object.values(config.peers).find(peer => {
-        return peer.address === WG_DEFAULT_ADDRESS.replace('x', i);
-      });
-
-      if (!peer) {
-        address = WG_DEFAULT_ADDRESS.replace('x', i);
-        break;
-      }
-    }
-
-    if (!address) throw new Error('Maximum number of peers reached.');
-
     if (!WireGuardHelper.checkField('dns', dns)) throw new Error('DNS error.');
     if (!WireGuardHelper.checkField('mtu', dns)) throw new Error('MTU error.');
 
+    const { peerId, address } = await this.peerCreatePreamble();
     // Create Peer
-    const peerId = uuid.v4();
     config.peers[peerId] = {
       name,
       address,

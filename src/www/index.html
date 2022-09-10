@@ -727,7 +727,7 @@
                               <div class="relative text-gray-800 text-xs mx-6">
                                 <div class="mt-1 flex items-center">
                                   <span class="flex-none"><strong>{{ peerCreateData.name }}</strong> will forward IP subnet(s)</span>
-                                  <input class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" :id="`peerCreateData.${peerId}.allowedIPsNewToOld`" @change="checkPeerCreateEligibility('allowedIPs')">
+                                  <input class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" :id="`peerCreateData.${peerId}.allowedIPsNewToOld`" v-model="peerCreateData.allowedIPsNewToOld[peerId]" @change="checkPeerCreateEligibility('allowedIPs')">
                                   <datalist :id="`${peerId}_ip_subnets_new_to_old`">
                                     <option :value="peer.address + '/32'">
                                       Forward all {{peer.address}} related traffic to {{peer.address}}

@@ -71,7 +71,7 @@ new Vue({
       attachedPeers: [],
       isConnectionEnabled: [],
       persistentKeepaliveData: [],
-      allowedIPsNewToOld: [],
+      allowedIPsNewToOld: {},
       allowedIPsOldToNew: [],
     },
     peerConfigEditData: {
@@ -312,7 +312,7 @@ new Vue({
       for (const peerId of this.peerCreateData.attachedPeers) {
         attachedPeersCompact.push({
           peer: peerId,
-          allowedIPs: this.peerCreateData.allowedIPsNewToOld,
+          allowedIPs: this.peerCreateData.allowedIPsNewToOld[peerId],
           persistentKeepalive: 25, // TODO: remove hard coding
         });
       }
