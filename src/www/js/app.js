@@ -53,6 +53,7 @@ new Vue({
     peerQRId: null,
 
     peerCreateData: {
+      peerId: '',
       name: '',
       address: '',
       mobility: '',
@@ -324,7 +325,10 @@ new Vue({
         enabled: document.getElementById('mtu_checkbox').checked,
         value: document.getElementById('mtu_checkbox').checked ? this.peerCreateData.mtu.value : '',
       };
-      this.api.createPeer({ name, mobility, dns, mtu, endpoint, attachedPeers: attachedPeersCompact })
+      const { peerId, address } = this.peerCreateData;
+      this.api.createPeer({
+        peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers: attachedPeersCompact,
+      })
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
@@ -393,14 +397,14 @@ new Vue({
       }
       this.wireguardToggleTo = null;
     },
-    handleAttachPeers(mode) {
+    async handleAttachPeers(mode) {
       const checkboxArraySelection = [];
       const checkboxArrayEnabled = [];
       const peersArray = [];
       for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
         if (peerDetails.mobility === 'static') {
           checkboxArraySelection.push(document.getElementById(`${peerId}_checkbox`));
-          checkboxArrayEnabled.push(document.getElementById(`peerCreateData.${peerId}.enabled`))
+          checkboxArrayEnabled.push(document.getElementById(`peerCreateData.${peerId}.enabled`));
           peersArray.push(peerId);
         }
       }
@@ -411,11 +415,16 @@ new Vue({
         this.peerCreateData.endpoint = '';
         this.peerCreateData.showAdvance = false;
 
+        const { peerId, address } = await this.api.preamblePeer({ });
+
+        this.peerCreateData.peerId = peerId;
+        this.peerCreateData.address = address;
+
         for (const peerId of peersArray) {
           if (this.network.peers[peerId].mobility === 'static') {
             document.getElementById(`${peerId}_checkbox`).checked = false;
-            document.getElementById(`peerCreateData.${peerId}.allowedIPsNewToOld`).value = '0.0.0.0/0';
-            document.getElementById(`peerCreateData.${peerId}.allowedIPsOldToNew`).value = 'new-ip';
+            document.getElementById(`peerCreateData.${peerId}.allowedIPsNewToOld`).value = this.peerCreateData.mobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
+            document.getElementById(`peerCreateData.${peerId}.allowedIPsOldToNew`).value = `${this.peerCreateData.address}/32`;
           }
         }
 
@@ -429,7 +438,6 @@ new Vue({
         document.getElementById('root_checkbox').checked = true;
         document.getElementById('peerCreateData.root.enabled').checked = true;
         document.getElementById('selectall_checkbox').checked = checkboxArraySelection.length === 1;
-        // document.getElementById('root_ip_subnet').value = this.peerCreate === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
 
         this.checkPeerCreateEligibility('all');
         return;
@@ -615,11 +623,9 @@ new Vue({
               assignedColor = WireGuardHelper.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
               changedFields.peers[this.peerConfigId][peerConfigField] = changedDNSMTUFields;
             }
-          } else {
-            if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
-              assignedColor = WireGuardHelper.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
-              changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
-            }
+          } else if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
+            assignedColor = WireGuardHelper.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
+            changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
           }
           try {
             if (peerConfigField !== 'mobility') {
@@ -797,29 +803,29 @@ new Vue({
       });
     }, 1000);
 
-    Promise.resolve().then(async () => {
-      const currentRelease = await this.api.getRelease();
-      const latestRelease = await fetch('https://weejewel.github.io/wg-easy/changelog.json')
-        .then(res => res.json())
-        .then(releases => {
-          const releasesArray = Object.entries(releases).map(([version, changelog]) => ({
-            version: parseInt(version, 10),
-            changelog,
-          }));
-          releasesArray.sort((a, b) => {
-            return b.version - a.version;
-          });
-
-          return releasesArray[0];
-        });
-
-      console.log(`Current Release: ${currentRelease}`);
-      console.log(`Latest Release: ${latestRelease.version}`);
-
-      if (currentRelease >= latestRelease.version) return;
-
-      this.currentRelease = currentRelease;
-      this.latestRelease = latestRelease;
-    }).catch(console.error);
+    // Promise.resolve().then(async () => {
+    //   const currentRelease = await this.api.getRelease();
+    //   const latestRelease = await fetch('https://weejewel.github.io/wg-easy/changelog.json')
+    //     .then(res => res.json())
+    //     .then(releases => {
+    //       const releasesArray = Object.entries(releases).map(([version, changelog]) => ({
+    //         version: parseInt(version, 10),
+    //         changelog,
+    //       }));
+    //       releasesArray.sort((a, b) => {
+    //         return b.version - a.version;
+    //       });
+    //
+    //       return releasesArray[0];
+    //     });
+    //
+    //   console.log(`Current Release: ${currentRelease}`);
+    //   console.log(`Latest Release: ${latestRelease.version}`);
+    //
+    //   if (currentRelease >= latestRelease.version) return;
+    //
+    //   this.currentRelease = currentRelease;
+    //   this.latestRelease = latestRelease;
+    // }).catch(console.error);
   },
 });

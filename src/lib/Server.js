@@ -94,13 +94,13 @@ module.exports = class Server {
         res.header('Content-Type', 'application/json');
         res.send(JSON.stringify({ status: await WireGuard.getServerStatus() }));
       }))
-      .get('/api/wireguard/peer/preamble', Util.promisify(async (req, res) => {
+      .get('/api/wireguard/peer/preamble/:peerId/:address', Util.promisify(async (req, res) => {
         res.header('Content-Type', 'application/json');
         res.send(JSON.stringify(await WireGuard.peerCreatePreamble()));
       }))
-      .post('/api/wireguard/peer', Util.promisify(async req => {
-        const { name, mobility, dns, mtu, endpoint, attachedPeers } = req.body;
-        return WireGuard.createPeer({ name, mobility, dns, mtu, endpoint, attachedPeers });
+      .post('/api/wireguard/peer/', Util.promisify(async req => {
+        const { peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers } = req.body;
+        return WireGuard.createPeer({ peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers });
       }))
       .delete('/api/wireguard/peer/:peerId', Util.promisify(async req => {
         const { peerId } = req.params;

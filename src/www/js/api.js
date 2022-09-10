@@ -79,11 +79,18 @@ class API {
     })));
   }
 
-  async createPeer({ name, mobility, dns, mtu, endpoint, attachedPeers }) {
+  async preamblePeer({ peerId, address }) {
+    return this.call({
+      method: 'get',
+      path: `/wireguard/peer/preamble/:${peerId}/:${address}`,
+    });
+  }
+
+  async createPeer({ peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers }) {
     return this.call({
       method: 'post',
       path: '/wireguard/peer',
-      body: { name, mobility, dns, mtu, endpoint, attachedPeers },
+      body: { peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers },
     });
   }
 

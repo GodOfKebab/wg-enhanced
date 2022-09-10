@@ -628,6 +628,12 @@
                       </button>
 
                       <div v-show="peerCreateData.showAdvance === true">
+<!--                        TODO: work on styling/coloring-->
+                        <div class="m-2 p-1 shadow-md border rounded bg-gray-200">
+                          <div class="text-gray-800">
+                            Reserved address: <strong>{{ peerCreateData.address }}</strong>
+                          </div>
+                        </div>
                         <div class="m-2 p-1 shadow-md border rounded" id="peerConfigDiv" @click="checkPeerCreateEligibility('DNSMTU')">
                           <div class="text-gray-800">
                             Configure DNS and MTU:
@@ -636,7 +642,7 @@
                             <div class="truncate mr-2">
                               <div class="form-check truncate">
                                 <label>
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="dns_checkbox" @click="checkPeerCreateEligibility('DNSMTU')" v-model.trim="peerCreateData.dns.enabled">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="dns_checkbox" @click="checkPeerCreateEligibility('DNSMTU')" v-model.trim.lazy="peerCreateData.dns.enabled">
                                   <span class="text-gray-800 cursor-pointer text-xs">
                                     <strong class="text-sm">DNS: </strong>
                                   </span>
@@ -652,7 +658,7 @@
                             <div class="truncate mr-2">
                               <div class="form-check truncate">
                                 <label>
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="mtu_checkbox" @click="handleAttachPeers('DNSMTU')" v-model.trim="peerCreateData.mtu.enabled">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="mtu_checkbox" v-model.trim.lazy="peerCreateData.mtu.enabled">
                                   <span class="text-gray-800 cursor-pointer text-xs">
                                     <strong class="text-sm">MTU: </strong>
                                   </span>
@@ -692,7 +698,7 @@
                         </div>
 
                         <!-- Peer's connections in boxes Object.entries(Object.fromEntries(Object.entries(network.peers).filter(([peerId,peer]) => peer.mobility === 'static'))) Object.entries(network.peers) -->
-                        <div v-for="[peerId, peer] in Object.entries(Object.fromEntries(Object.entries(network.peers).filter(([_,p]) => p.mobility === 'static')))" class="relative">
+                        <div v-for="[peerId, peer] in Object.entries(staticPeers)" class="relative">
                           <div v-show="peerCreateData.attachedPeers.includes(peerId)" class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :id="`peerCreateData.${peerId}.island`">
                             <div class=" mr-6">
                               <div class="form-check">
@@ -727,7 +733,7 @@
                               <div class="relative text-gray-800 text-xs mx-6">
                                 <div class="mt-1 flex items-center">
                                   <span class="flex-none"><strong>{{ peerCreateData.name }}</strong> will forward IP subnet(s)</span>
-                                  <input class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" :id="`peerCreateData.${peerId}.allowedIPsNewToOld`" v-model="peerCreateData.allowedIPsNewToOld[peerId]" @change="checkPeerCreateEligibility('allowedIPs')">
+                                  <input class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" :id="`peerCreateData.${peerId}.allowedIPsNewToOld`" @change="checkPeerCreateEligibility('allowedIPs')">
                                   <datalist :id="`${peerId}_ip_subnets_new_to_old`">
                                     <option :value="peer.address + '/32'">
                                       Forward all {{peer.address}} related traffic to {{peer.address}}
@@ -975,7 +981,7 @@
                             <div class=" mr-6">
                               <div class="form-check">
                                 <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerConfigEditData.isConnectionEnabled[index]">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model.lazy="peerConfigEditData.isConnectionEnabled[index]">
                                   <span class="text-gray-800 text-xs">
                                     <strong class="text-sm">{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong>
                                     {{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].address }}

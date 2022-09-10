@@ -251,7 +251,7 @@ module.exports = class WireGuard {
   }
 
   async createPeer({
-    name, mobility, dns, mtu, endpoint, attachedPeers,
+    peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers,
   }) {
     if (!name) throw new Error('Missing: Name : str');
 
@@ -275,7 +275,12 @@ module.exports = class WireGuard {
     if (!WireGuardHelper.checkField('dns', dns)) throw new Error('DNS error.');
     if (!WireGuardHelper.checkField('mtu', dns)) throw new Error('MTU error.');
 
-    const { peerId, address } = await this.peerCreatePreamble();
+    // TODO: add check for incoming id and address
+    if (peerId === null || address === null) {
+      const { p, a } = await this.peerCreatePreamble();
+      peerId = p;
+      address = a;
+    }
     // Create Peer
     config.peers[peerId] = {
       name,
