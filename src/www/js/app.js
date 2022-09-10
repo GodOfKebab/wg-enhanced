@@ -70,10 +70,10 @@ new Vue({
       dns: { enabled: null, value: '' },
       mtu: { enabled: null, value: '' },
       attachedPeers: [],
-      isConnectionEnabled: [],
-      persistentKeepaliveData: [],
+      isConnectionEnabled: {},
+      persistentKeepaliveData: {},
       allowedIPsNewToOld: {},
-      allowedIPsOldToNew: [],
+      allowedIPsOldToNew: {},
     },
     peerConfigEditData: {
       name: '',
@@ -435,6 +435,7 @@ new Vue({
 
         // enable the root server as default
         this.peerCreateData.attachedPeers = ['root'];
+        this.peerCreateData.isConnectionEnabled['root'] = true;
         document.getElementById('root_checkbox').checked = true;
         document.getElementById('peerCreateData.root.enabled').checked = true;
         document.getElementById('selectall_checkbox').checked = checkboxArraySelection.length === 1;
@@ -470,6 +471,18 @@ new Vue({
         }
       }
       this.peerCreateData.attachedPeers = attachedPeersArray;
+
+      if (mode === 'connectionEnable') {
+        const tailwindLightGreen = 'rgb(240 253 244)';
+        const tailwindLightRed = 'rgb(254 242 242)';
+        for (const [peerId, conn] of Object.entries(this.peerCreateData.isConnectionEnabled)) {
+          if (conn) {
+            document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = tailwindLightGreen;
+          } else {
+            document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = tailwindLightRed;
+          }
+        }
+      }
 
       // check peer create eligibility
       this.checkPeerCreateEligibility('peer');
@@ -594,7 +607,7 @@ new Vue({
             if (this.network.connections[connectionId]['enabled']) {
               document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindLightGreen;
             } else {
-              document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindDarkerRed;
+              document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindLightRed;
             }
           }
         } catch (e) {

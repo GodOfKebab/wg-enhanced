@@ -703,7 +703,7 @@
                             <div class=" mr-6">
                               <div class="form-check">
                                 <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" :id="`peerCreateData.${peerId}.enabled`">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" :id="`peerCreateData.${peerId}.enabled`" v-model="peerCreateData.isConnectionEnabled[peerId]" @change="handleAttachPeers('connectionEnable')">
                                   <span class="text-gray-800 text-xs">
                                     <strong class="text-sm">{{ network.peers[peerId].name }}</strong>
                                     {{ network.peers[peerId].address }}
@@ -712,7 +712,7 @@
                                 </label>
                               </div>
                             </div>
-                            <div v-show="true">
+                            <div v-show="peerCreateData.isConnectionEnabled[peerId]">
                               <div v-for="connectionKey in ['persistentKeepalive']" class="relative">
                                 <div class="flex grid grid-cols-3 gap-1 text-xs mx-6">
                                   <div class="col-span-1 text-xs">
