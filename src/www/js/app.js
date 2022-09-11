@@ -69,7 +69,7 @@ new Vue({
       },
       dns: { enabled: null, value: '' },
       mtu: { enabled: null, value: '' },
-      attachedPeers: [],
+      attachedPeerIds: [],
       isConnectionEnabled: {},
       persistentKeepaliveData: {},
       allowedIPsNewToOld: {},
@@ -310,7 +310,7 @@ new Vue({
 
       const attachedPeersCompact = [];
 
-      for (const peerId of this.peerCreateData.attachedPeers) {
+      for (const peerId of this.peerCreateData.attachedPeerIds) {
         attachedPeersCompact.push({
           peer: peerId,
           allowedIPs: this.peerCreateData.allowedIPsNewToOld[peerId],
@@ -398,15 +398,11 @@ new Vue({
       this.wireguardToggleTo = null;
     },
     async handleAttachPeers(mode) {
-      const checkboxArraySelection = [];
-      const checkboxArrayEnabled = [];
-      const peersArray = [];
-      for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
-        if (peerDetails.mobility === 'static') {
-          checkboxArraySelection.push(document.getElementById(`${peerId}_checkbox`));
-          checkboxArrayEnabled.push(document.getElementById(`peerCreateData.${peerId}.enabled`));
-          peersArray.push(peerId);
-        }
+      const checkboxDictSelection = {};
+      const checkboxDictEnabled = {};
+      for (const peerId of Object.keys(this.staticPeers)) {
+        checkboxDictSelection[peerId] = document.getElementById(`${peerId}_checkbox`);
+        checkboxDictEnabled[peerId] = document.getElementById(`peerCreateData.${peerId}.enabled`);
       }
 
       // run when show advance is clicked
@@ -420,25 +416,23 @@ new Vue({
         this.peerCreateData.peerId = peerId;
         this.peerCreateData.address = address;
 
-        for (const peerId of peersArray) {
-          if (this.network.peers[peerId].mobility === 'static') {
-            document.getElementById(`${peerId}_checkbox`).checked = false;
-            document.getElementById(`peerCreateData.${peerId}.allowedIPsNewToOld`).value = this.peerCreateData.mobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
-            document.getElementById(`peerCreateData.${peerId}.allowedIPsOldToNew`).value = `${this.peerCreateData.address}/32`;
-          }
+        for (const peerId of Object.keys(this.staticPeers)) {
+          document.getElementById(`${peerId}_checkbox`).checked = false;
+          this.peerCreateData.allowedIPsNewToOld[peerId] = this.peerCreateData.mobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
+          this.peerCreateData.allowedIPsOldToNew[peerId] = `${this.peerCreateData.address}/32`;
         }
 
+        this.peerCreateData.dns.enabled = false;
+        this.peerCreateData.mtu.enabled = false;
         this.peerCreateData.dns.value = '';
         this.peerCreateData.mtu.value = '';
-        document.getElementById('dns_checkbox').checked = false;
-        document.getElementById('mtu_checkbox').checked = false;
 
         // enable the root server as default
-        this.peerCreateData.attachedPeers = ['root'];
+        this.peerCreateData.attachedPeerIds = ['root'];
         this.peerCreateData.isConnectionEnabled['root'] = true;
         document.getElementById('root_checkbox').checked = true;
         document.getElementById('peerCreateData.root.enabled').checked = true;
-        document.getElementById('selectall_checkbox').checked = checkboxArraySelection.length === 1;
+        document.getElementById('selectall_checkbox').checked = checkboxDictSelection.length === 1;
 
         this.checkPeerCreateEligibility('all');
         return;
@@ -447,30 +441,30 @@ new Vue({
       // run when select all is clicked
       let allChecked = true;
       if (mode === 'all') {
-        for (let i = 0; i < checkboxArraySelection.length; i++) {
-          allChecked &= checkboxArraySelection.at(i).checked;
+        for (const checkboxId of Object.keys(checkboxDictSelection)) {
+          allChecked &= checkboxDictSelection[checkboxId].checked;
         }
-        for (let i = 0; i < checkboxArraySelection.length; i++) {
-          checkboxArraySelection.at(i).checked = !allChecked;
-          checkboxArrayEnabled.at(i).checked = !allChecked;
+        for (const checkboxId of Object.keys(checkboxDictSelection)) {
+          checkboxDictSelection[checkboxId].checked = !allChecked;
+          checkboxDictEnabled[checkboxId].checked = !allChecked;
         }
       }
 
       // run when individual peer boxes are clicked
       if (mode === 'individual') {
-        for (let i = 0; i < checkboxArraySelection.length; i++) {
-          allChecked &= checkboxArraySelection.at(i).checked;
+        for (const checkboxId of Object.keys(checkboxDictSelection)) {
+          allChecked &= checkboxDictSelection[checkboxId].checked;
         }
         document.getElementById('selectall_checkbox').checked = allChecked;
       }
 
       const attachedPeersArray = [];
-      for (let i = 0; i < checkboxArraySelection.length; i++) {
-        if (checkboxArraySelection.at(i).checked) {
-          attachedPeersArray.push(peersArray.at(i));
+      for (const checkboxId of Object.keys(checkboxDictSelection)) {
+        if (checkboxDictSelection[checkboxId].checked) {
+          attachedPeersArray.push(checkboxDictSelection[checkboxId].id.replace('_checkbox', ''));
         }
       }
-      this.peerCreateData.attachedPeers = attachedPeersArray;
+      this.peerCreateData.attachedPeerIds = attachedPeersArray;
 
       if (mode === 'connectionEnable') {
         const tailwindLightGreen = 'rgb(240 253 244)';
@@ -536,22 +530,22 @@ new Vue({
 
       // check peer count
       if (mode === 'peerCount') {
-        this.peerCreateData.eligibility.peers = this.peerCreateData.attachedPeers.length > 0;
+        this.peerCreateData.eligibility.peers = this.peerCreateData.attachedPeerIds.length > 0;
         document.getElementById('attachPeersDiv').style.backgroundColor = this.peerCreateData.eligibility.peers ? tailwindLightGreen : tailwindLightRed;
         this.checkPeerCreateEligibility('allowedIPs');
       }
 
       // check allowedIPs
       if (mode === 'allowedIPs') {
-        this.peerCreateData.eligibility.allowedIPs = WireGuardHelper.checkField('peerCount', this.peerCreateData.attachedPeers);
-        for (const peerId of this.peerCreateData.attachedPeers) {
+        this.peerCreateData.eligibility.allowedIPs = WireGuardHelper.checkField('peerCount', this.peerCreateData.attachedPeerIds);
+        for (const peerId of this.peerCreateData.attachedPeerIds) {
           const allowedIPsEligibilityNO = WireGuardHelper.checkField('allowedIPs', document.getElementById(`peerCreateData.${peerId}.allowedIPsNewToOld`).value);
           this.peerCreateData.eligibility.allowedIPs &&= allowedIPsEligibilityNO;
           document.getElementById(`peerCreateData.${peerId}.allowedIPsNewToOld`).style.backgroundColor = allowedIPsEligibilityNO ? tailwindDarkerGreen : tailwindDarkerRed;
           const allowedIPsEligibilityON = WireGuardHelper.checkField('allowedIPs', document.getElementById(`peerCreateData.${peerId}.allowedIPsOldToNew`).value);
           this.peerCreateData.eligibility.allowedIPs &&= allowedIPsEligibilityON;
           document.getElementById(`peerCreateData.${peerId}.allowedIPsOldToNew`).style.backgroundColor = allowedIPsEligibilityON ? tailwindDarkerGreen : tailwindDarkerRed;
-          document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = this.peerCreateData.eligibility.allowedIPs ? tailwindLightGreen : tailwindLightRed;
+          document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = allowedIPsEligibilityNO && allowedIPsEligibilityON ? tailwindLightGreen : tailwindLightRed;
         }
       }
 
