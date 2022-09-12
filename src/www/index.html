@@ -109,7 +109,7 @@
               <p class="text-2xl font-medium">Static Peers</p>
             </div>
             <div class="flex-shrink-0">
-              <button @click="peerCreateData.mobility = 'static'; handleAttachPeers('init');"
+              <button @click="handleAttachPeers('init'); peerCreateData.mobility = 'static';"
                       class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
@@ -308,7 +308,7 @@
             </div>
             <div v-else-if="Object.keys(staticPeers).length === 0">
               <p class="text-center m-10 text-gray-400 text-sm">There are no static peers yet.<br /><br />
-              <button @click="peerCreateData.mobility = 'static'; handleAttachPeers('init');"
+              <button @click="handleAttachPeers('init'); peerCreateData.mobility = 'static';"
                       class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
@@ -334,7 +334,7 @@
               <p class="text-2xl font-medium">Roaming Peers</p>
             </div>
             <div class="flex-shrink-0">
-              <button @click="peerCreateData.mobility = 'roaming'; handleAttachPeers('init');"
+              <button @click="handleAttachPeers('init'); peerCreateData.mobility = 'roaming';"
                 class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
@@ -533,7 +533,7 @@
             </div>
             <div v-else-if="Object.keys(roamingPeers).length === 0">
               <p class="text-center m-10 text-gray-400 text-sm">There are no roaming peers yet.<br /><br />
-              <button @click="peerCreateData.mobility = 'roaming'; handleAttachPeers('init');"
+              <button @click="handleAttachPeers('init'); peerCreateData.mobility = 'roaming';"
                       class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
@@ -679,7 +679,7 @@
                             Attach to these static peers:
                           </div>
                           <div class="form-check mt-1">
-                            <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="selectall_checkbox" value="" @click="handleAttachPeers('all');" >
+                            <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="selectall_checkbox" v-model="peerCreateSelectAll">
                             <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm" for="selectall_checkbox">Select All</label>
                           </div>
                           <div class="flex grid grid-cols-2">
@@ -687,7 +687,7 @@
                                  class="relative overflow-hidden">
                               <div class="form-check truncate">
                                 <label>
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-bind:id="`${peerId}_checkbox`" @click="handleAttachPeers('individual'); peerCreateData.isConnectionEnabled[peerId] = document.getElementById(`${peerId}_checkbox`).checked">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerCreateData.attachedPeerIds" :value="peerId">
                                   <span class="text-gray-800 cursor-pointer text-xs">
                                     <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
                                   </span>
@@ -698,12 +698,12 @@
                         </div>
 
                         <!-- Peer's connections in boxes Object.entries(Object.fromEntries(Object.entries(network.peers).filter(([peerId,peer]) => peer.mobility === 'static'))) Object.entries(network.peers) -->
-                        <div v-for="[peerId, peer] in Object.entries(staticPeers)" class="relative">
-                          <div v-show="peerCreateData.attachedPeerIds.includes(peerId)" class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :id="`peerCreateData.${peerId}.island`">
+                        <div v-for="peerId in peerCreateData.attachedPeerIds" class="relative">
+                          <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :id="`peerCreateData.${peerId}.island`" :class="[peerCreateData.isConnectionEnabled[peerId] ? 'bg-green-50' : 'bg-red-50']">
                             <div class=" mr-6">
                               <div class="form-check">
                                 <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" :id="`peerCreateData.${peerId}.enabled`" v-model="peerCreateData.isConnectionEnabled[peerId]" @change="handleAttachPeers('connectionEnable')">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" :id="`peerCreateData.${peerId}.enabled`" v-model="peerCreateData.isConnectionEnabled[peerId]">
                                   <span class="text-gray-800 text-xs">
                                     <strong class="text-sm">{{ network.peers[peerId].name }}</strong>
                                     {{ network.peers[peerId].address }}
@@ -735,14 +735,14 @@
                                   <span class="flex-none"><strong>{{ peerCreateData.name }}</strong> will forward IP subnet(s)</span>
                                   <input class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" :id="`peerCreateData.${peerId}.allowedIPsNewToOld`" @change="checkPeerCreateEligibility('allowedIPs')" v-model="peerCreateData.allowedIPsNewToOld[peerId]">
                                   <datalist :id="`${peerId}_ip_subnets_new_to_old`">
-                                    <option :value="peer.address + '/32'">
-                                      Forward all {{peer.address}} related traffic to {{peer.address}}
+                                    <option :value="network.peers[peerId].address + '/32'">
+                                      Forward all {{network.peers[peerId].address}} related traffic to {{network.peers[peerId].address}}
                                     </option>
-                                    <option :value="peer.address.slice(0, -1) + '0/24'">
-                                      Forward all {{peer.address.slice(0, -1) + '0-255'}} related traffic to {{peer.address}}
+                                    <option :value="network.peers[peerId].address.slice(0, -1) + '0/24'">
+                                      Forward all {{network.peers[peerId].address.slice(0, -1) + '0-255'}} related traffic to {{network.peers[peerId].address}}
                                     </option>
                                     <option value="0.0.0.0/0">
-                                      Forward all IPv4 traffic to {{peer.address}}
+                                      Forward all IPv4 traffic to {{network.peers[peerId].address}}
                                     </option>
                                   </datalist>
                                   <span class="flex-none pr-2"> to <strong>{{ network.peers[peerId].name }}</strong></span>
@@ -752,14 +752,14 @@
                                   <input class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" :id="`peerCreateData.${peerId}.allowedIPsOldToNew`" @change="checkPeerCreateEligibility('allowedIPs')" v-model="peerCreateData.allowedIPsOldToNew[peerId]">
 <!--                                  TODO: guess the ips before creation and update-->
                                   <datalist :id="`${peerId}_ip_subnets_old_to_new`">
-                                    <option :value="peer.address + '/32'">
-                                      Forward all {{peer.address}} related traffic to {{peer.address}}
+                                    <option :value="network.peers[peerId].address + '/32'">
+                                      Forward all {{network.peers[peerId].address}} related traffic to {{network.peers[peerId].address}}
                                     </option>
-                                    <option :value="peer.address.slice(0, -1) + '0/24'">
-                                      Forward all {{peer.address.slice(0, -1) + '0-255'}} related traffic to {{peer.address}}
+                                    <option :value="network.peers[peerId].address.slice(0, -1) + '0/24'">
+                                      Forward all {{network.peers[peerId].address.slice(0, -1) + '0-255'}} related traffic to {{network.peers[peerId].address}}
                                     </option>
                                     <option value="0.0.0.0/0">
-                                      Forward all IPv4 traffic to {{peer.address}}
+                                      Forward all IPv4 traffic to {{network.peers[peerId].address}}
                                     </option>
                                   </datalist>
                                   <span class="flex-none pr-2"> to <strong>{{ peerCreateData.name }}</strong></span>

@@ -52,29 +52,7 @@ new Vue({
     peerEditNewConfig: { peers: {}, connections: {} },
     peerQRId: null,
 
-    peerCreateData: {
-      peerId: '',
-      name: '',
-      address: '',
-      mobility: '',
-      endpoint: '',
-      showAdvance: false,
-      eligibility: {
-        overall: false,
-        name: false,
-        endpoint: false,
-        DNSMTU: false,
-        peers: false,
-        allowedIPs: false,
-      },
-      dns: { enabled: null, value: '' },
-      mtu: { enabled: null, value: '' },
-      attachedPeerIds: [],
-      isConnectionEnabled: {},
-      persistentKeepaliveData: {},
-      allowedIPsNewToOld: {},
-      allowedIPsOldToNew: {},
-    },
+    peerCreateData: null,
     peerConfigEditData: {
       name: '',
       address: '',
@@ -397,19 +375,50 @@ new Vue({
       }
       this.wireguardToggleTo = null;
     },
+    initializeVariables() {
+      this.peerCreateDataReset();
+    },
+    peerCreateDataReset() {
+      this.peerCreateData = {
+        peerId: '',
+        name: '',
+        address: '',
+        mobility: '',
+        endpoint: '',
+        showAdvance: false,
+        eligibility: {
+          overall: false,
+          name: false,
+          endpoint: false,
+          DNSMTU: false,
+          peers: false,
+          allowedIPs: false,
+          allowedIPsNO: {},
+          allowedIPsON: {},
+        },
+        dns: { enabled: null, value: '' },
+        mtu: { enabled: null, value: '' },
+        attachedPeerIds: [],
+        isConnectionEnabled: {},
+        persistentKeepaliveData: {},
+        allowedIPsNewToOld: {},
+        allowedIPsOldToNew: {},
+      };
+    },
     async handleAttachPeers(mode) {
-      const tailwindLightGreen = 'rgb(240 253 244)';
-      const tailwindLightRed = 'rgb(254 242 242)';
+      // const tailwindLightGreen = 'rgb(240 253 244)';
+      // const tailwindLightRed = 'rgb(254 242 242)';
 
-      const checkboxDictSelection = {};
-      const checkboxDictEnabled = {};
-      for (const peerId of Object.keys(this.staticPeers)) {
-        checkboxDictSelection[peerId] = document.getElementById(`${peerId}_checkbox`);
-        checkboxDictEnabled[peerId] = document.getElementById(`peerCreateData.${peerId}.enabled`);
-      }
+      // const checkboxDictSelection = {};
+      // const checkboxDictEnabled = {};
+      // for (const peerId of Object.keys(this.staticPeers)) {
+      //   checkboxDictSelection[peerId] = document.getElementById(`${peerId}_checkbox`);
+      //   checkboxDictEnabled[peerId] = document.getElementById(`peerCreateData.${peerId}.enabled`);
+      // }
 
       // run when show advance is clicked
       if (mode === 'init') {
+        this.peerCreateDataReset();
         this.peerCreateData.name = '';
         this.peerCreateData.endpoint = '';
         this.peerCreateData.showAdvance = false;
@@ -420,7 +429,7 @@ new Vue({
         this.peerCreateData.address = address;
 
         for (const peerId of Object.keys(this.staticPeers)) {
-          document.getElementById(`${peerId}_checkbox`).checked = false;
+          // document.getElementById(`${peerId}_checkbox`).checked = false;
           this.peerCreateData.allowedIPsNewToOld[peerId] = this.peerCreateData.mobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
           this.peerCreateData.allowedIPsOldToNew[peerId] = `${this.peerCreateData.address}/32`;
         }
@@ -433,52 +442,52 @@ new Vue({
         // enable the root server as default
         this.peerCreateData.attachedPeerIds = ['root'];
         this.peerCreateData.isConnectionEnabled['root'] = true;
-        document.getElementById('root_checkbox').checked = true;
-        document.getElementById('peerCreateData.root.enabled').checked = true;
-        document.getElementById('selectall_checkbox').checked = checkboxDictSelection.length === 1;
-        document.getElementById('peerCreateData.root.island').style.backgroundColor = tailwindLightGreen;
+        // document.getElementById('root_checkbox').checked = true;
+        // document.getElementById('peerCreateData.root.enabled').checked = true;
+        // document.getElementById('selectall_checkbox').checked = checkboxDictSelection.length === 1;
+        // document.getElementById('peerCreateData.root.island').style.backgroundColor = tailwindLightGreen;
 
         this.checkPeerCreateEligibility('all');
         return;
       }
 
       // run when select all is clicked
-      let allChecked = true;
-      if (mode === 'all') {
-        for (const checkboxId of Object.keys(checkboxDictSelection)) {
-          allChecked &= checkboxDictSelection[checkboxId].checked;
-        }
-        for (const checkboxId of Object.keys(checkboxDictSelection)) {
-          checkboxDictSelection[checkboxId].checked = !allChecked;
-          checkboxDictEnabled[checkboxId].checked = !allChecked;
-        }
-      }
+      // let allChecked = true;
+      // if (mode === 'all') {
+      //   for (const checkboxId of Object.keys(checkboxDictSelection)) {
+      //     allChecked &= checkboxDictSelection[checkboxId].checked;
+      //   }
+      //   for (const checkboxId of Object.keys(checkboxDictSelection)) {
+      //     checkboxDictSelection[checkboxId].checked = !allChecked;
+      //     checkboxDictEnabled[checkboxId].checked = !allChecked;
+      //   }
+      // }
+      //
+      // // run when individual peer boxes are clicked
+      // if (mode === 'individual') {
+      //   for (const checkboxId of Object.keys(checkboxDictSelection)) {
+      //     allChecked &= checkboxDictSelection[checkboxId].checked;
+      //   }
+      //   document.getElementById('selectall_checkbox').checked = allChecked;
+      // }
 
-      // run when individual peer boxes are clicked
-      if (mode === 'individual') {
-        for (const checkboxId of Object.keys(checkboxDictSelection)) {
-          allChecked &= checkboxDictSelection[checkboxId].checked;
-        }
-        document.getElementById('selectall_checkbox').checked = allChecked;
-      }
+      // const attachedPeersArray = [];
+      // for (const checkboxId of Object.keys(checkboxDictSelection)) {
+      //   if (checkboxDictSelection[checkboxId].checked) {
+      //     attachedPeersArray.push(checkboxDictSelection[checkboxId].id.replace('_checkbox', ''));
+      //   }
+      // }
+      // this.peerCreateData.attachedPeerIds = attachedPeersArray;
 
-      const attachedPeersArray = [];
-      for (const checkboxId of Object.keys(checkboxDictSelection)) {
-        if (checkboxDictSelection[checkboxId].checked) {
-          attachedPeersArray.push(checkboxDictSelection[checkboxId].id.replace('_checkbox', ''));
-        }
-      }
-      this.peerCreateData.attachedPeerIds = attachedPeersArray;
-
-      if (mode === 'connectionEnable') {
-        for (const [peerId, conn] of Object.entries(this.peerCreateData.isConnectionEnabled)) {
-          if (conn) {
-            document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = tailwindLightGreen;
-          } else {
-            document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = tailwindLightRed;
-          }
-        }
-      }
+      // if (mode === 'connectionEnable') {
+      //   for (const [peerId, conn] of Object.entries(this.peerCreateData.isConnectionEnabled)) {
+      //     if (conn) {
+      //       document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = tailwindLightGreen;
+      //     } else {
+      //       document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = tailwindLightRed;
+      //     }
+      //   }
+      // }
 
       // check peer create eligibility
       this.checkPeerCreateEligibility('peer');
@@ -547,7 +556,7 @@ new Vue({
           const allowedIPsEligibilityON = WireGuardHelper.checkField('allowedIPs', this.peerCreateData.allowedIPsOldToNew[peerId]);
           this.peerCreateData.eligibility.allowedIPs &&= allowedIPsEligibilityON;
           document.getElementById(`peerCreateData.${peerId}.allowedIPsOldToNew`).style.backgroundColor = allowedIPsEligibilityON ? tailwindDarkerGreen : tailwindDarkerRed;
-          document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = allowedIPsEligibilityNO && allowedIPsEligibilityON ? tailwindLightGreen : tailwindLightRed;
+          // document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = allowedIPsEligibilityNO && allowedIPsEligibilityON ? tailwindLightGreen : tailwindLightRed;
         }
       }
 
@@ -786,6 +795,24 @@ new Vue({
       }
     },
   },
+  computed: {
+    peerCreateSelectAll: {
+      get() {
+        return this.staticPeers ? this.staticPeers.length === this.peerCreateData.attachedPeerIds.length : false;
+      },
+      set(value) {
+        const attached = [];
+
+        if (value) {
+          Object.keys(this.staticPeers).forEach(peerId => {
+            attached.push(peerId);
+          });
+        }
+
+        this.peerCreateData.attachedPeerIds = attached;
+      },
+    },
+  },
   filters: {
     bytes,
     timeago: value => {
@@ -794,6 +821,7 @@ new Vue({
   },
   mounted() {
     this.api = new API();
+    this.initializeVariables();
     this.api.getSession()
       .then(session => {
         this.authenticated = session.authenticated;
