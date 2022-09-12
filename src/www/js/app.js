@@ -398,6 +398,9 @@ new Vue({
       this.wireguardToggleTo = null;
     },
     async handleAttachPeers(mode) {
+      const tailwindLightGreen = 'rgb(240 253 244)';
+      const tailwindLightRed = 'rgb(254 242 242)';
+
       const checkboxDictSelection = {};
       const checkboxDictEnabled = {};
       for (const peerId of Object.keys(this.staticPeers)) {
@@ -433,6 +436,7 @@ new Vue({
         document.getElementById('root_checkbox').checked = true;
         document.getElementById('peerCreateData.root.enabled').checked = true;
         document.getElementById('selectall_checkbox').checked = checkboxDictSelection.length === 1;
+        document.getElementById('peerCreateData.root.island').style.backgroundColor = tailwindLightGreen;
 
         this.checkPeerCreateEligibility('all');
         return;
@@ -467,8 +471,6 @@ new Vue({
       this.peerCreateData.attachedPeerIds = attachedPeersArray;
 
       if (mode === 'connectionEnable') {
-        const tailwindLightGreen = 'rgb(240 253 244)';
-        const tailwindLightRed = 'rgb(254 242 242)';
         for (const [peerId, conn] of Object.entries(this.peerCreateData.isConnectionEnabled)) {
           if (conn) {
             document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = tailwindLightGreen;
@@ -539,10 +541,10 @@ new Vue({
       if (mode === 'allowedIPs') {
         this.peerCreateData.eligibility.allowedIPs = WireGuardHelper.checkField('peerCount', this.peerCreateData.attachedPeerIds);
         for (const peerId of this.peerCreateData.attachedPeerIds) {
-          const allowedIPsEligibilityNO = WireGuardHelper.checkField('allowedIPs', document.getElementById(`peerCreateData.${peerId}.allowedIPsNewToOld`).value);
+          const allowedIPsEligibilityNO = WireGuardHelper.checkField('allowedIPs', this.peerCreateData.allowedIPsNewToOld[peerId]);
           this.peerCreateData.eligibility.allowedIPs &&= allowedIPsEligibilityNO;
           document.getElementById(`peerCreateData.${peerId}.allowedIPsNewToOld`).style.backgroundColor = allowedIPsEligibilityNO ? tailwindDarkerGreen : tailwindDarkerRed;
-          const allowedIPsEligibilityON = WireGuardHelper.checkField('allowedIPs', document.getElementById(`peerCreateData.${peerId}.allowedIPsOldToNew`).value);
+          const allowedIPsEligibilityON = WireGuardHelper.checkField('allowedIPs', this.peerCreateData.allowedIPsOldToNew[peerId]);
           this.peerCreateData.eligibility.allowedIPs &&= allowedIPsEligibilityON;
           document.getElementById(`peerCreateData.${peerId}.allowedIPsOldToNew`).style.backgroundColor = allowedIPsEligibilityON ? tailwindDarkerGreen : tailwindDarkerRed;
           document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = allowedIPsEligibilityNO && allowedIPsEligibilityON ? tailwindLightGreen : tailwindLightRed;
