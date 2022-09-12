@@ -23,6 +23,7 @@ function bytes(bytes, decimals, kib, maxunit) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
+// Vue.config.debug = true; Vue.config.devtools = true;
 new Vue({
   el: '#app',
   components: {
@@ -806,6 +807,9 @@ new Vue({
         if (value) {
           Object.keys(this.staticPeers).forEach(peerId => {
             attached.push(peerId);
+            if (!(peerId in this.peerCreateData.attachedPeerIds)) {
+              this.peerCreateData.isConnectionEnabled[peerId] = true;
+            }
           });
         }
 
