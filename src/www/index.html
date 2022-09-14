@@ -611,13 +611,13 @@
                     <div class="mt-2">
                       <p class="text-sm text-gray-500">
                         <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                               type="text" v-model.trim="peerCreateData.name" placeholder="Name" id="peerCreateName" @change="checkPeerCreateEligibility('name')" @keyup="checkPeerCreateEligibility('name')" />
+                               type="text" v-model.trim="peerCreateData.name" placeholder="Name" :class="[peerCreateEligibilityName ? 'bg-green-50' : 'bg-red-50']"/>
                       </p>
                     </div>
                     <div v-show="peerCreateData.mobility === 'static'" class="mt-2">
                       <p class="text-sm text-gray-500">
                         <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                               type="text" v-model.trim="peerCreateData.endpoint" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)" id="peerCreateEndpoint" @change="checkPeerCreateEligibility('endpoint')" @keyup="checkPeerCreateEligibility('endpoint')" />
+                               type="text" v-model.trim="peerCreateData.endpoint" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)" :class="[peerCreateEligibilityEndpoint ? 'bg-green-50' : 'bg-red-50']" />
                       </p>
                     </div>
                     <div class="mt-2">
@@ -629,12 +629,12 @@
 
                       <div v-show="peerCreateData.showAdvance === true">
 <!--                        TODO: work on styling/coloring-->
-                        <div class="m-2 p-1 shadow-md border rounded bg-gray-200">
+                        <div class="m-2 p-1 shadow-md border rounded bg-gray-100">
                           <div class="text-gray-800">
                             Reserved address: <strong>{{ peerCreateData.address }}</strong>
                           </div>
                         </div>
-                        <div class="m-2 p-1 shadow-md border rounded" id="peerConfigDiv" @click="checkPeerCreateEligibility('DNSMTU')">
+                        <div class="m-2 p-1 shadow-md border rounded" :class="[peerCreateData.dns.enabled || peerCreateData.mtu.enabled ? ((peerCreateData.dns.enabled && !peerCreateEligibilityDNS) || (peerCreateData.mtu.enabled && !peerCreateEligibilityMTU) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100']">
                           <div class="text-gray-800">
                             Configure DNS and MTU:
                           </div>
@@ -642,12 +642,12 @@
                             <div class="truncate mr-2">
                               <div class="form-check truncate">
                                 <label>
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" id="dns_checkbox" @click="checkPeerCreateEligibility('DNSMTU')" v-model="peerCreateData.dns.enabled">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerCreateData.dns.enabled">
                                   <span class="text-gray-800 cursor-pointer text-xs">
                                     <strong class="text-sm">DNS: </strong>
                                   </span>
                                 </label>
-                                <input list="inputDNSList" name="inputDNS" id="inputDNS" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerCreateData.dns.value" @change="checkPeerCreateEligibility('DNSMTU')" @keyup="checkPeerCreateEligibility('DNSMTU')" >
+                                <input list="inputDNSList" name="inputDNS" id="inputDNS" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerCreateData.dns.value" :disabled="!peerCreateData.dns.enabled" :class="[peerCreateEligibilityDNS ? 'enabled:bg-green-100' : 'enabled:bg-red-100']">
                                 <datalist id="inputDNSList">
                                   <option :value="network.peers.root.address">
                                     Forward all DNS related traffic to {{network.peers.root.address}}
@@ -663,7 +663,7 @@
                                     <strong class="text-sm">MTU: </strong>
                                   </span>
                                 </label>
-                                <input list="inputMTUList" name="inputMTUList" id="inputMTU" class="text-gray-800 text-xs mr-1 rounded-md pl-1" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerCreateData.mtu.value" @change="checkPeerCreateEligibility('DNSMTU')" @keyup="checkPeerCreateEligibility('DNSMTU')" >
+                                <input list="inputMTUList" name="inputMTUList" id="inputMTU" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerCreateData.mtu.value" :disabled="!peerCreateData.mtu.enabled" :class="[peerCreateEligibilityMTU ? 'enabled:bg-green-100' : 'enabled:bg-red-100']">
                                 <datalist id="inputMTUList">
                                   <option :value="1420">
                                     TODO
@@ -674,7 +674,7 @@
                           </div>
                         </div>
 
-                        <div class="m-2 p-1 shadow-md border rounded" id="attachPeersDiv" @click="checkPeerCreateEligibility('peerCount')">
+                        <div class="m-2 p-1 shadow-md border rounded" id="attachPeersDiv" @click="checkPeerCreateEligibility('peerCount')" :class="[this.peerCreateData.eligibility.peers ? 'bg-green-50' : 'bg-red-50']">
                           <div class="text-gray-800">
                             Attach to these static peers:
                           </div>

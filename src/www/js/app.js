@@ -543,7 +543,6 @@ new Vue({
       // check peer count
       if (mode === 'peerCount') {
         this.peerCreateData.eligibility.peers = this.peerCreateData.attachedPeerIds.length > 0;
-        document.getElementById('attachPeersDiv').style.backgroundColor = this.peerCreateData.eligibility.peers ? tailwindLightGreen : tailwindLightRed;
         this.checkPeerCreateEligibility('allowedIPs');
       }
 
@@ -814,6 +813,26 @@ new Vue({
         }
 
         this.peerCreateData.attachedPeerIds = attached;
+      },
+    },
+    peerCreateEligibilityName: {
+      get() {
+        return WireGuardHelper.checkField('name', this.peerCreateData.name);
+      },
+    },
+    peerCreateEligibilityEndpoint: {
+      get() {
+        return WireGuardHelper.checkField('endpoint', this.peerCreateData.endpoint);
+      },
+    },
+    peerCreateEligibilityDNS: {
+      get() {
+        return WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateData.dns.value });
+      },
+    },
+    peerCreateEligibilityMTU: {
+      get() {
+        return WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerCreateData.mtu.value });
       },
     },
   },
