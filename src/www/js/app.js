@@ -711,7 +711,7 @@ new Vue({
     peerCreateEligibilityOverall: {
       get() {
         return this.peerCreateEligibilityName
-            && this.peerCreateEligibilityEndpoint
+            && !(this.peerCreateMobility === 'static' && !this.peerCreateEligibilityEndpoint)
             && !(this.peerCreateDNS.enabled && !this.peerCreateEligibilityDNS)
             && !(this.peerCreateMTU.enabled && !this.peerCreateEligibilityMTU)
             && this.peerCreateEligibilityPeerCount
