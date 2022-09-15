@@ -53,7 +53,21 @@ new Vue({
     peerEditNewConfig: { peers: {}, connections: {} },
     peerQRId: null,
 
-    peerCreateData: null,
+    peerCreatePeerId: '',
+    peerCreateName: '',
+    peerCreateAddress: '',
+    peerCreateMobility: '',
+    peerCreateEndpoint: '',
+    peerCreateShowAdvance: '',
+    peerCreateDNS: { enabled: null, value: '' },
+    peerCreateMTU: { enabled: null, value: '' },
+    peerCreateAttachedPeerIds: [],
+    peerCreateIsConnectionEnabled: {},
+    peerCreatePersistentKeepaliveData: {},
+    peerCreateAllowedIPsNewToOld: {},
+    peerCreateAllowedIPsOldToNew: {},
+    peerCreateEligibilityAllowedIPsONRefresh: 0,
+    peerCreateEligibilityAllowedIPsNORefresh: 0,
     peerConfigEditData: {
       name: '',
       address: '',
@@ -283,28 +297,29 @@ new Vue({
         });
     },
     createPeer(mobility) {
-      const { name } = this.peerCreateData;
+      const name = this.peerCreateName;
       if (!name) return;
-      const { endpoint } = this.peerCreateData;
+      const endpoint = this.peerCreateEndpoint;
 
       const attachedPeersCompact = [];
 
-      for (const peerId of this.peerCreateData.attachedPeerIds) {
+      for (const peerId of this.peerCreateAttachedPeerIds) {
         attachedPeersCompact.push({
           peer: peerId,
-          allowedIPs: this.peerCreateData.allowedIPsNewToOld[peerId],
+          allowedIPs: this.peerCreateAllowedIPsNewToOld[peerId],
           persistentKeepalive: 25, // TODO: remove hard coding
         });
       }
       const dns = {
         enabled: document.getElementById('dns_checkbox').checked,
-        value: document.getElementById('dns_checkbox').checked ? this.peerCreateData.dns.value : '',
+        value: document.getElementById('dns_checkbox').checked ? this.peerCreateDNS.value : '',
       };
       const mtu = {
         enabled: document.getElementById('mtu_checkbox').checked,
-        value: document.getElementById('mtu_checkbox').checked ? this.peerCreateData.mtu.value : '',
+        value: document.getElementById('mtu_checkbox').checked ? this.peerCreateMTU.value : '',
       };
-      const { peerId, address } = this.peerCreateData;
+      const peerId = this.peerCreatePeerId;
+      const address = this.peerCreateAddress;
       this.api.createPeer({
         peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers: attachedPeersCompact,
       })
@@ -376,200 +391,33 @@ new Vue({
       }
       this.wireguardToggleTo = null;
     },
-    initializeVariables() {
-      this.peerCreateDataReset();
-    },
-    peerCreateDataReset() {
-      this.peerCreateData = {
-        peerId: '',
-        name: '',
-        address: '',
-        mobility: '',
-        endpoint: '',
-        showAdvance: false,
-        eligibility: {
-          overall: false,
-          name: false,
-          endpoint: false,
-          DNSMTU: false,
-          peers: false,
-          allowedIPs: false,
-          allowedIPsNO: {},
-          allowedIPsON: {},
-        },
-        dns: { enabled: null, value: '' },
-        mtu: { enabled: null, value: '' },
-        attachedPeerIds: [],
-        isConnectionEnabled: {},
-        persistentKeepaliveData: {},
-        allowedIPsNewToOld: {},
-        allowedIPsOldToNew: {},
-      };
-    },
     async handleAttachPeers(mode) {
-      // const tailwindLightGreen = 'rgb(240 253 244)';
-      // const tailwindLightRed = 'rgb(254 242 242)';
-
-      // const checkboxDictSelection = {};
-      // const checkboxDictEnabled = {};
-      // for (const peerId of Object.keys(this.staticPeers)) {
-      //   checkboxDictSelection[peerId] = document.getElementById(`${peerId}_checkbox`);
-      //   checkboxDictEnabled[peerId] = document.getElementById(`peerCreateData.${peerId}.enabled`);
-      // }
-
       // run when show advance is clicked
       if (mode === 'init') {
-        this.peerCreateDataReset();
-        this.peerCreateData.name = '';
-        this.peerCreateData.endpoint = '';
-        this.peerCreateData.showAdvance = false;
+        this.peerCreateName = '';
+        this.peerCreateEndpoint = '';
+        this.peerCreateShowAdvance = false;
 
         const { peerId, address } = await this.api.preamblePeer({ });
 
-        this.peerCreateData.peerId = peerId;
-        this.peerCreateData.address = address;
+        this.peerCreatePeerId = peerId;
+        this.peerCreateAddress = address;
 
         for (const peerId of Object.keys(this.staticPeers)) {
           // document.getElementById(`${peerId}_checkbox`).checked = false;
-          this.peerCreateData.allowedIPsNewToOld[peerId] = this.peerCreateData.mobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
-          this.peerCreateData.allowedIPsOldToNew[peerId] = `${this.peerCreateData.address}/32`;
+          this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
+          this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
         }
 
-        this.peerCreateData.dns.enabled = false;
-        this.peerCreateData.mtu.enabled = false;
-        this.peerCreateData.dns.value = '';
-        this.peerCreateData.mtu.value = '';
+        this.peerCreateDNS.enabled = false;
+        this.peerCreateMTU.enabled = false;
+        this.peerCreateDNS.value = '';
+        this.peerCreateMTU.value = '';
 
         // enable the root server as default
-        this.peerCreateData.attachedPeerIds = ['root'];
-        this.peerCreateData.isConnectionEnabled['root'] = true;
-        // document.getElementById('root_checkbox').checked = true;
-        // document.getElementById('peerCreateData.root.enabled').checked = true;
-        // document.getElementById('selectall_checkbox').checked = checkboxDictSelection.length === 1;
-        // document.getElementById('peerCreateData.root.island').style.backgroundColor = tailwindLightGreen;
-
-        this.checkPeerCreateEligibility('all');
-        return;
+        this.peerCreateAttachedPeerIds = ['root'];
+        this.peerCreateIsConnectionEnabled['root'] = true;
       }
-
-      // run when select all is clicked
-      // let allChecked = true;
-      // if (mode === 'all') {
-      //   for (const checkboxId of Object.keys(checkboxDictSelection)) {
-      //     allChecked &= checkboxDictSelection[checkboxId].checked;
-      //   }
-      //   for (const checkboxId of Object.keys(checkboxDictSelection)) {
-      //     checkboxDictSelection[checkboxId].checked = !allChecked;
-      //     checkboxDictEnabled[checkboxId].checked = !allChecked;
-      //   }
-      // }
-      //
-      // // run when individual peer boxes are clicked
-      // if (mode === 'individual') {
-      //   for (const checkboxId of Object.keys(checkboxDictSelection)) {
-      //     allChecked &= checkboxDictSelection[checkboxId].checked;
-      //   }
-      //   document.getElementById('selectall_checkbox').checked = allChecked;
-      // }
-
-      // const attachedPeersArray = [];
-      // for (const checkboxId of Object.keys(checkboxDictSelection)) {
-      //   if (checkboxDictSelection[checkboxId].checked) {
-      //     attachedPeersArray.push(checkboxDictSelection[checkboxId].id.replace('_checkbox', ''));
-      //   }
-      // }
-      // this.peerCreateData.attachedPeerIds = attachedPeersArray;
-
-      // if (mode === 'connectionEnable') {
-      //   for (const [peerId, conn] of Object.entries(this.peerCreateData.isConnectionEnabled)) {
-      //     if (conn) {
-      //       document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = tailwindLightGreen;
-      //     } else {
-      //       document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = tailwindLightRed;
-      //     }
-      //   }
-      // }
-
-      // check peer create eligibility
-      this.checkPeerCreateEligibility('peer');
-    },
-    checkPeerCreateEligibility(mode) {
-      const tailwindLightGreen = 'rgb(240 253 244)';
-      const tailwindDarkerGreen = 'rgb(187 247 208)';
-      const tailwindLightRed = 'rgb(254 242 242)';
-      const tailwindDarkerRed = 'rgb(254 202 202)';
-
-      // check name
-      if (mode === 'name') {
-        this.peerCreateData.eligibility.name = WireGuardHelper.checkField('name', this.peerCreateData.name);
-        document.getElementById('peerCreateName').style.backgroundColor = this.peerCreateData.eligibility.name ? tailwindLightGreen : tailwindLightRed;
-      }
-
-      // check endpoint
-      if (mode === 'endpoint') {
-        this.peerCreateData.eligibility.endpoint = WireGuardHelper.checkField('endpoint', this.peerCreateData.endpoint);
-        document.getElementById('peerCreateEndpoint').style.backgroundColor = this.peerCreateData.eligibility.endpoint ? tailwindLightGreen : tailwindLightRed;
-      }
-
-      // check endpoint
-      if (mode === 'DNSMTU') {
-        let peerCreateEligibilityDNS = true;
-        let peerCreateEligibilityMTU = true;
-        if (document.getElementById('dns_checkbox').checked) {
-          document.getElementById('inputDNS').disabled = false;
-          peerCreateEligibilityDNS &&= WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateData.dns.value });
-          document.getElementById('inputDNS').style.backgroundColor = peerCreateEligibilityDNS ? tailwindDarkerGreen : tailwindDarkerRed;
-        } else {
-          document.getElementById('inputDNS').disabled = true;
-          document.getElementById('inputDNS').style.backgroundColor = 'rgb(230 230 230)'; // TODO: update with the tailwind bg
-        }
-        if (document.getElementById('mtu_checkbox').checked) {
-          document.getElementById('inputMTU').disabled = false;
-          peerCreateEligibilityMTU &&= WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateData.mtu.value });
-          document.getElementById('inputMTU').style.backgroundColor = peerCreateEligibilityMTU ? tailwindDarkerGreen : tailwindDarkerRed;
-        } else {
-          document.getElementById('inputMTU').disabled = true;
-          document.getElementById('inputMTU').style.backgroundColor = 'rgb(230 230 230)'; // TODO: update with the tailwind bg
-        }
-        this.peerCreateData.eligibility.DNSMTU = peerCreateEligibilityDNS && peerCreateEligibilityMTU;
-        if (!document.getElementById('dns_checkbox').checked
-            && !document.getElementById('mtu_checkbox').checked) {
-          document.getElementById('peerConfigDiv').style.backgroundColor = 'rgb(230 230 230)'; // TODO: update with the tailwind bg
-        } else {
-          document.getElementById('peerConfigDiv').style.backgroundColor = this.peerCreateData.eligibility.DNSMTU ? tailwindLightGreen : tailwindLightRed;
-        }
-      }
-
-      // check peer count
-      if (mode === 'peerCount') {
-        this.peerCreateData.eligibility.peers = this.peerCreateData.attachedPeerIds.length > 0;
-        this.checkPeerCreateEligibility('allowedIPs');
-      }
-
-      // check allowedIPs
-      if (mode === 'allowedIPs') {
-        this.peerCreateData.eligibility.allowedIPs = WireGuardHelper.checkField('peerCount', this.peerCreateData.attachedPeerIds);
-        for (const peerId of this.peerCreateData.attachedPeerIds) {
-          const allowedIPsEligibilityNO = WireGuardHelper.checkField('allowedIPs', this.peerCreateData.allowedIPsNewToOld[peerId]);
-          this.peerCreateData.eligibility.allowedIPs &&= allowedIPsEligibilityNO;
-          document.getElementById(`peerCreateData.${peerId}.allowedIPsNewToOld`).style.backgroundColor = allowedIPsEligibilityNO ? tailwindDarkerGreen : tailwindDarkerRed;
-          const allowedIPsEligibilityON = WireGuardHelper.checkField('allowedIPs', this.peerCreateData.allowedIPsOldToNew[peerId]);
-          this.peerCreateData.eligibility.allowedIPs &&= allowedIPsEligibilityON;
-          document.getElementById(`peerCreateData.${peerId}.allowedIPsOldToNew`).style.backgroundColor = allowedIPsEligibilityON ? tailwindDarkerGreen : tailwindDarkerRed;
-          // document.getElementById(`peerCreateData.${peerId}.island`).style.backgroundColor = allowedIPsEligibilityNO && allowedIPsEligibilityON ? tailwindLightGreen : tailwindLightRed;
-        }
-      }
-
-      // check all
-      if (mode === 'all') {
-        const modes = ['name', 'endpoint', 'DNSMTU', 'peerCount', 'allowedIPs'];
-        for (const mode of modes) {
-          this.checkPeerCreateEligibility(mode);
-        }
-      }
-
-      // final AND check
-      this.peerCreateData.eligibility.overall = this.peerCreateData.eligibility.name && (this.peerCreateData.eligibility.endpoint || this.peerCreateData.mobility === 'roaming') && this.peerCreateData.eligibility.DNSMTU && this.peerCreateData.eligibility.peers && this.peerCreateData.eligibility.allowedIPs;
     },
     getConnectionId(peer1, peer2) {
       return WireGuardHelper.getConnectionId(peer1, peer2);
@@ -798,7 +646,7 @@ new Vue({
   computed: {
     peerCreateSelectAll: {
       get() {
-        return this.staticPeers ? this.staticPeers.length === this.peerCreateData.attachedPeerIds.length : false;
+        return this.staticPeers ? this.staticPeers.length === this.peerCreateAttachedPeerIds.length : false;
       },
       set(value) {
         const attached = [];
@@ -806,33 +654,69 @@ new Vue({
         if (value) {
           Object.keys(this.staticPeers).forEach(peerId => {
             attached.push(peerId);
-            if (!(peerId in this.peerCreateData.attachedPeerIds)) {
-              this.peerCreateData.isConnectionEnabled[peerId] = true;
+            if (!(peerId in this.peerCreateAttachedPeerIds)) {
+              this.peerCreateIsConnectionEnabled[peerId] = true;
             }
           });
         }
 
-        this.peerCreateData.attachedPeerIds = attached;
+        this.peerCreateAttachedPeerIds = attached;
       },
     },
     peerCreateEligibilityName: {
       get() {
-        return WireGuardHelper.checkField('name', this.peerCreateData.name);
+        return WireGuardHelper.checkField('name', this.peerCreateName);
       },
     },
     peerCreateEligibilityEndpoint: {
       get() {
-        return WireGuardHelper.checkField('endpoint', this.peerCreateData.endpoint);
+        return WireGuardHelper.checkField('endpoint', this.peerCreateEndpoint);
       },
     },
     peerCreateEligibilityDNS: {
       get() {
-        return WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateData.dns.value });
+        return WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateDNS.value });
       },
     },
     peerCreateEligibilityMTU: {
       get() {
-        return WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerCreateData.mtu.value });
+        return WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerCreateMTU.value });
+      },
+    },
+    peerCreateEligibilityPeerCount: {
+      get() {
+        return WireGuardHelper.checkField('peerCount', this.peerCreateAttachedPeerIds);
+      },
+    },
+    peerCreateEligibilityAllowedIPsON: {
+      get() {
+        this.peerCreateEligibilityAllowedIPsONRefresh -= 1;
+        const allowedIPsON = {};
+        for (const peerId of this.peerCreateAttachedPeerIds) {
+          allowedIPsON[peerId] = WireGuardHelper.checkField('allowedIPs', this.peerCreateAllowedIPsOldToNew[peerId]);
+        }
+        return allowedIPsON;
+      },
+    },
+    peerCreateEligibilityAllowedIPsNO: {
+      get() {
+        this.peerCreateEligibilityAllowedIPsNORefresh -= 1;
+        const allowedIPsNO = {};
+        for (const peerId of this.peerCreateAttachedPeerIds) {
+          allowedIPsNO[peerId] = WireGuardHelper.checkField('allowedIPs', this.peerCreateAllowedIPsNewToOld[peerId]);
+        }
+        return allowedIPsNO;
+      },
+    },
+    peerCreateEligibilityOverall: {
+      get() {
+        return this.peerCreateEligibilityName
+            && this.peerCreateEligibilityEndpoint
+            && !(this.peerCreateDNS.enabled && !this.peerCreateEligibilityDNS)
+            && !(this.peerCreateMTU.enabled && !this.peerCreateEligibilityMTU)
+            && this.peerCreateEligibilityPeerCount
+            && this.peerCreateEligibilityAllowedIPsON
+            && this.peerCreateEligibilityAllowedIPsNO;
       },
     },
   },
@@ -844,7 +728,6 @@ new Vue({
   },
   mounted() {
     this.api = new API();
-    this.initializeVariables();
     this.api.getSession()
       .then(session => {
         this.authenticated = session.authenticated;
