@@ -604,8 +604,8 @@
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                   </div>
-                  <div class="flex-grow mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-headline">
+                  <div class="flex-grow mt-3 text-center sm:mt-0 sm:ml-2 sm:text-left">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">
                       New Peer
                     </h3>
                     <div class="mt-2">
@@ -622,19 +622,19 @@
                     </div>
                     <div class="mt-2">
                       <button type="button" @click="peerCreateShowAdvance = !peerCreateShowAdvance;">
-                        <span class="text-sm text-gray-500 hover:underline">Advance settings</span>
+                        <span class="text-sm text-gray-500 hover:underline">Advanced settings</span>
                         <span v-show="peerCreateShowAdvance === true" class="text-sm text-gray-500 hover:underline">&#x25B2;</span>
                         <span v-show="peerCreateShowAdvance === false" class="text-sm text-gray-500 hover:underline">&#x25BC;</span>
                       </button>
 
-                      <div v-show="peerCreateShowAdvance === true">
+                      <div v-show="peerCreateShowAdvance === true" class="max-h-48 w-[26rem] pr-2 overflow-auto">
 <!--                        TODO: work on styling/coloring-->
-                        <div class="m-2 p-1 shadow-md border rounded bg-gray-100">
+                        <div class="my-2 p-1 shadow-md border rounded bg-gray-100">
                           <div class="text-gray-800">
                             Reserved address: <strong>{{ peerCreateAddress }}</strong>
                           </div>
                         </div>
-                        <div class="m-2 p-1 shadow-md border rounded" :class="[peerCreateDNS.enabled || peerCreateMTU.enabled ? ((peerCreateDNS.enabled && !peerCreateEligibilityDNS) || (peerCreateMTU.enabled && !peerCreateEligibilityMTU) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100']">
+                        <div class="my-2 p-1 shadow-md border rounded" :class="[peerCreateDNS.enabled || peerCreateMTU.enabled ? ((peerCreateDNS.enabled && !peerCreateEligibilityDNS) || (peerCreateMTU.enabled && !peerCreateEligibilityMTU) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100']">
                           <div class="text-gray-800">
                             Configure DNS and MTU:
                           </div>
@@ -674,7 +674,7 @@
                           </div>
                         </div>
 
-                        <div class="m-2 p-1 shadow-md border rounded" id="attachPeersDiv" :class="[peerCreateEligibilityPeerCount ? 'bg-green-50' : 'bg-red-50']">
+                        <div class="my-2 p-1 shadow-md border rounded" id="attachPeersDiv" :class="[peerCreateEligibilityPeerCount ? 'bg-green-50' : 'bg-red-50']">
                           <div class="text-gray-800">
                             Attach to these static peers:
                           </div>
@@ -699,7 +699,7 @@
 
                         <!-- Peer's connections in boxes Object.entries(Object.fromEntries(Object.entries(network.peers).filter(([peerId,peer]) => peer.mobility === 'static'))) Object.entries(network.peers) -->
                         <div v-for="peerId in peerCreateAttachedPeerIds" class="relative">
-                          <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :class="[peerCreateIsConnectionEnabled[peerId] ? 'bg-green-50' : 'bg-red-50']">
+                          <div class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :class="[peerCreateIsConnectionEnabled[peerId] ? 'bg-green-50' : 'bg-red-50']">
                             <div class=" mr-6">
                               <div class="form-check">
                                 <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">

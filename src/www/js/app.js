@@ -715,8 +715,8 @@ new Vue({
             && !(this.peerCreateDNS.enabled && !this.peerCreateEligibilityDNS)
             && !(this.peerCreateMTU.enabled && !this.peerCreateEligibilityMTU)
             && this.peerCreateEligibilityPeerCount
-            && this.peerCreateEligibilityAllowedIPsON
-            && this.peerCreateEligibilityAllowedIPsNO;
+            && Object.values(this.peerCreateEligibilityAllowedIPsON).every(ip => ip)
+            && Object.values(this.peerCreateEligibilityAllowedIPsNO).every(ip => ip);
       },
     },
   },
