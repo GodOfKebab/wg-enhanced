@@ -162,17 +162,17 @@
                     <div class="text-gray-700 group" :title="'Created at ' + dateTime(new Date(peerDetails.createdAt))">
 
                       <!-- Show -->
-                      <input v-if="peerEditNameId === peerId" v-model="peerEditName"
-                             v-on:keyup.enter="updatePeerName(peerId, peerEditName); peerEditName = null; peerEditNameId = null;"
-                             v-on:focusout="peerEditName = null; peerEditNameId = null;"
+                      <input v-if="peerQuickEditNameId === peerId" v-model="peerQuickEditName"
+                             v-on:keyup.enter="updatePeerName(peerId, peerQuickEditName); peerQuickEditName = null; peerQuickEditNameId = null;"
+                             v-on:focusout="peerQuickEditName = null; peerQuickEditNameId = null;"
                              :ref="`peer-${peerId}-name`"
                              class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigWindow = 'edit'; peerConfigEditHandle('init').then(); peerConfigEditUpdateConfirmation();"
+                      <button v-show="peerQuickEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigWindow = 'edit'; peerConfigEditHandle('init').then(); peerConfigEditUpdateConfirmation();"
                               class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
-                      <span v-if="peerEditNameId !== peerId"
-                            @click="peerEditName = peerDetails.name; peerEditNameId = peerId; setTimeout(() => $refs[`peer-${peerId}-name`][0].select(), 1);"
+                      <span v-if="peerQuickEditNameId !== peerId"
+                            @click="peerQuickEditName = peerDetails.name; peerQuickEditNameId = peerId; setTimeout(() => $refs[`peer-${peerId}-name`][0].select(), 1);"
                             class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none" viewBox="0 0 24 24"
@@ -190,17 +190,17 @@
                       <span class="group">
 
                         <!-- Show -->
-                        <input v-show="peerEditAddressId === peerId" v-model="peerEditAddress"
-                               v-on:keyup.enter="updatePeerAddress(peerId, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
-                               v-on:focusout="peerEditAddress = null; peerEditAddressId = null;"
+                        <input v-show="peerQuickEditAddressId === peerId" v-model="peerQuickEditAddress"
+                               v-on:keyup.enter="updatePeerAddress(peerId, peerQuickEditAddress); peerQuickEditAddress = null; peerQuickEditAddressId = null;"
+                               v-on:focusout="peerQuickEditAddress = null; peerQuickEditAddressId = null;"
                                :ref="`peer-${peerId}-address`"
                                class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
-                        <span v-show="peerEditAddressId !== peerId"
+                        <span v-show="peerQuickEditAddressId !== peerId"
                               class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.address}}</span>
 
                         <!-- Edit -->
-                        <span v-show="peerEditAddressId !== peerId"
-                              @click="peerEditAddress = peerDetails.address; peerEditAddressId = peerId; setTimeout(() => $refs[`peer-${peerId}-address`][0].select(), 1);"
+                        <span v-show="peerQuickEditAddressId !== peerId"
+                              @click="peerQuickEditAddress = peerDetails.address; peerQuickEditAddressId = peerId; setTimeout(() => $refs[`peer-${peerId}-address`][0].select(), 1);"
                               class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg"
                                class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none"
@@ -387,17 +387,17 @@
                     <div class="text-gray-700 group" :title="'Created at ' + dateTime(new Date(peerDetails.createdAt))">
 
                       <!-- Show -->
-                      <input v-show="peerEditNameId === peerId" v-model="peerEditName"
-                        v-on:keyup.enter="updatePeerName(peerId, peerEditName); peerEditName = null; peerEditNameId = null;"
-                        v-on:focusout="peerEditName = null; peerEditNameId = null;"
+                      <input v-show="peerQuickEditNameId === peerId" v-model="peerQuickEditName"
+                             v-on:keyup.enter="updatePeerName(peerId, peerQuickEditName); peerQuickEditName = null; peerQuickEditNameId = null;"
+                             v-on:focusout="peerQuickEditName = null; peerQuickEditNameId = null;"
                              :ref="`peer-${peerId}-name`"
-                        class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                      <button v-show="peerEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigWindow = 'edit'; peerConfigEditHandle('init').then(); peerConfigEditUpdateConfirmation();"
-                        class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
+                             class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
+                      <button v-show="peerQuickEditNameId !== peerId" @click="peerConfigId = peerId; peerConfigWindow = 'edit'; peerConfigEditHandle('init').then(); peerConfigEditUpdateConfirmation();"
+                              class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
                       <!-- Edit -->
-                      <span v-show="peerEditNameId !== peerId"
-                        @click="peerEditName = peerDetails.name; peerEditNameId = peerId; setTimeout(() => $refs[`peer-${peerId}-name`][0].select(), 1);"
+                      <span v-show="peerQuickEditNameId !== peerId"
+                        @click="peerQuickEditName = peerDetails.name; peerQuickEditNameId = peerId; setTimeout(() => $refs[`peer-${peerId}-name`][0].select(), 1);"
                         class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg"
                           class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none" viewBox="0 0 24 24"
@@ -415,17 +415,17 @@
                       <span class="group">
 
                         <!-- Show -->
-                        <input v-show="peerEditAddressId === peerId" v-model="peerEditAddress"
-                          v-on:keyup.enter="updatePeerAddress(peerId, peerEditAddress); peerEditAddress = null; peerEditAddressId = null;"
-                          v-on:focusout="peerEditAddress = null; peerEditAddressId = null;"
-                          :ref="`peer-${peerId}-address`"
-                          class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
-                        <span v-show="peerEditAddressId !== peerId"
+                        <input v-show="peerQuickEditAddressId === peerId" v-model="peerQuickEditAddress"
+                               v-on:keyup.enter="updatePeerAddress(peerId, peerQuickEditAddress); peerQuickEditAddress = null; peerQuickEditAddressId = null;"
+                               v-on:focusout="peerQuickEditAddress = null; peerQuickEditAddressId = null;"
+                               :ref="`peer-${peerId}-address`"
+                               class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
+                        <span v-show="peerQuickEditAddressId !== peerId"
                           class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.address}}</span>
 
                         <!-- Edit -->
-                        <span v-show="peerEditAddressId !== peerId"
-                          @click="peerEditAddress = peerDetails.address; peerEditAddressId = peerId; setTimeout(() => $refs[`peer-${peerId}-address`][0].select(), 1);"
+                        <span v-show="peerQuickEditAddressId !== peerId"
+                          @click="peerQuickEditAddress = peerDetails.address; peerQuickEditAddressId = peerId; setTimeout(() => $refs[`peer-${peerId}-address`][0].select(), 1);"
                           class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none"
@@ -750,7 +750,6 @@
                                 <div class="mt-1 flex">
                                   <span class="flex-none"><strong>{{ network.peers[peerId].name }}</strong> will forward IP subnet(s)</span>
                                   <input class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" :id="`peerCreateData.${peerId}.allowedIPsOldToNew`" v-model="peerCreateAllowedIPsOldToNew[peerId]" :class="[peerCreateEligibilityAllowedIPsON[peerId] ? 'bg-green-100' : 'bg-red-100']" @change="peerCreateEligibilityAllowedIPsONRefresh++">
-<!--                                  TODO: guess the ips before creation and update-->
                                   <datalist :id="`${peerId}_ip_subnets_old_to_new`">
                                     <option :value="network.peers[peerId].address + '/32'">
                                       Forward all {{network.peers[peerId].address}} related traffic to {{network.peers[peerId].address}}
@@ -782,7 +781,7 @@
                     class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-gray-200 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm cursor-not-allowed">
                     Create
                   </button>
-                  <button type="button" @click="peerCreateMobility = null"
+                  <button type="button" @click="peerCreateMobility = ''"
                     class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                     Cancel
                   </button>
@@ -934,28 +933,28 @@
                             </div>
 
                             <div class="col-span-2 text-sm">
-                              <input v-if="peerConfigKey === 'name'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.name" id="peerConfigEditData.name" @change="peerConfigEditHandle('check-changes').then()">
-                              <input v-else-if="peerConfigKey === 'address'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.address" id="peerConfigEditData.address" @change="peerConfigEditHandle('check-changes').then()">
+                              <input v-if="peerConfigKey === 'name'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditName" id="peerConfigEditData.name" @change="peerConfigEditHandle('check-changes').then()">
+                              <input v-else-if="peerConfigKey === 'address'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditAddress" id="peerConfigEditData.address" @change="peerConfigEditHandle('check-changes').then()">
                               <div v-else-if="peerConfigKey === 'endpoint'">
                                 <label for="peerConfigEditData.endpointToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.endpointToggle" @change="peerConfigEditData.mobility = peerConfigEditData.mobility === 'static' ? 'roaming' : 'static'; peerConfigEditHandle('check-changes').then()" :checked="peerConfigEditData.mobility === 'static'">
+                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.endpointToggle" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static'; peerConfigEditHandle('check-changes').then()" :checked="peerEditMobility === 'static'">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input v-show="peerConfigEditData.mobility === 'static'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.endpoint" id="peerConfigEditData.endpoint" @change="peerConfigEditHandle('check-changes').then()">
+                                <input v-show="peerEditMobility === 'static'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditEndpoint" id="peerConfigEditData.endpoint" @change="peerConfigEditHandle('check-changes').then()">
                               </div>
                               <div v-else-if="peerConfigKey === 'dns'">
                                 <label for="peerConfigEditData.dnsToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.dnsToggle" @change="peerConfigEditData.dns.enabled = !peerConfigEditData.dns.enabled; peerConfigEditHandle('check-changes').then()" :checked="peerConfigEditData.dns.enabled">
+                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.dnsToggle" @change="peerEditDNS.enabled = !peerEditDNS.enabled; peerConfigEditHandle('check-changes').then()" :checked="peerEditDNS.enabled">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input list="inputDNSList" v-show="peerConfigEditData.dns.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.dns.value" id="peerConfigEditData.dns" placeholder="click to see recommendations" @change="peerConfigEditHandle('check-changes').then()">
+                                <input list="inputDNSList" v-show="peerEditDNS.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditDNS.value" id="peerConfigEditData.dns" placeholder="click to see recommendations" @change="peerConfigEditHandle('check-changes').then()">
                               </div>
                               <div v-else-if="peerConfigKey === 'mtu'">
                                 <label for="peerConfigEditData.mtuToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.mtuToggle" @change="peerConfigEditData.mtu.enabled = !peerConfigEditData.mtu.enabled; peerConfigEditHandle('check-changes').then()" :checked="peerConfigEditData.mtu.enabled">
+                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.mtuToggle" @change="peerEditMTU.enabled = !peerEditMTU.enabled; peerConfigEditHandle('check-changes').then()" :checked="peerEditMTU.enabled">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input list="inputMTUList" v-show="peerConfigEditData.mtu.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerConfigEditData.mtu.value" id="peerConfigEditData.mtu" placeholder="click to see recommendations" @change="peerConfigEditHandle('check-changes').then()">
+                                <input list="inputMTUList" v-show="peerEditMTU.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditMTU.value" id="peerConfigEditData.mtu" placeholder="click to see recommendations" @change="peerConfigEditHandle('check-changes').then()">
                               </div>
                               <span v-else-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mr-1 pl-1">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
                               <span v-else class="text-gray-800 text-xs mr-1 pl-1">{{ network.peers[peerConfigId][peerConfigKey] }}</span>
@@ -977,12 +976,12 @@
                       </div>
 
                       <!-- Peer's connections in boxes -->
-                      <div v-for="[index, connectionId] in Object.entries(peerConfigEditData.connectionIds)" class="relative">
+                      <div v-for="[index, connectionId] in Object.entries(peerEditConnectionIds)" class="relative">
                           <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :id="`peerConfigEditData.${connectionId}.enabled`" @change="peerConfigEditHandle('check-changes-connection').then()">
                             <div class=" mr-6">
                               <div class="form-check">
                                 <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model.lazy="peerConfigEditData.isConnectionEnabled[index]">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model.lazy="peerEditIsConnectionEnabled[index]">
                                   <span class="text-gray-800 text-xs">
                                     <strong class="text-sm">{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong>
                                     {{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].address }}
@@ -991,7 +990,7 @@
                                 </label>
                               </div>
                             </div>
-                            <div v-show="peerConfigEditData.isConnectionEnabled[index]">
+                            <div v-show="peerEditIsConnectionEnabled[index]">
                               <div v-for="connectionKey in ['preSharedKey', 'persistentKeepalive', 'latestHandshakeAt']" class="relative">
                                 <div class="flex grid grid-cols-3 gap-1 text-xs mx-6">
                                   <div class="col-span-1 text-xs">
@@ -1002,7 +1001,7 @@
                                   <div class="col-span-2 text-xs">
                                     <input v-if="connectionKey === 'persistentKeepalive'"
                                            class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
-                                           type="checkbox" v-model="peerConfigEditData.persistentKeepaliveData[index]">
+                                           type="checkbox" v-model="peerEditPersistentKeepaliveData[index]">
                                     <span v-else class="text-gray-800 text-xs pr-1 align-middle">
                                       {{ network.connections[connectionId][connectionKey] }}
                                     </span>
@@ -1012,14 +1011,14 @@
                               <div class="relative text-gray-800 text-xs mx-6">
                                 <div class="mt-1 flex items-center">
                                   <span class="flex-none"><strong>{{ network.peers[peerConfigId].name }}</strong> will forward IP subnet(s)</span>
-                                  <input v-if="connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerConfigEditData.allowedIPsAtoB[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`">
-                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerConfigEditData.allowedIPsBtoA[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`">
+                                  <input v-if="connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`">
+                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`">
                                   <span class="flex-none pr-2"> to <strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong></span>
                                 </div>
                                 <div class="mt-1 flex">
                                   <span class="flex-none"><strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong> will forward IP subnet(s)</span>
-                                  <input v-if="!connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerConfigEditData.allowedIPsAtoB[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`">
-                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerConfigEditData.allowedIPsBtoA[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`">
+                                  <input v-if="!connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`">
+                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[index]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`">
                                   <span class="flex-none pr-2"> to <strong>{{ network.peers[peerConfigId].name }}</strong></span>
                                 </div>
                               </div>

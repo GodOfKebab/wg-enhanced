@@ -41,16 +41,6 @@ new Vue({
     peerDeleteId: null,
     peerConfigId: null,
     peerConfigWindow: 'edit',
-    peerEditName: null,
-    peerEditNameId: null,
-    peerEditAddress: null,
-    peerEditAddressId: null,
-    peerEditDisableSaveChanges: true,
-    peerChangedPeer: false,
-    peerChangedConnections: false,
-    peerEditChangedFields: {},
-    peerEditOldConfig: { peers: {}, connections: {} },
-    peerEditNewConfig: { peers: {}, connections: {} },
     peerQRId: null,
 
     peerCreatePeerId: '',
@@ -68,19 +58,28 @@ new Vue({
     peerCreateAllowedIPsOldToNew: {},
     peerCreateEligibilityAllowedIPsONRefresh: 0,
     peerCreateEligibilityAllowedIPsNORefresh: 0,
-    peerConfigEditData: {
-      name: '',
-      address: '',
-      mobility: '',
-      endpoint: '',
-      dns: { enabled: null, value: '' },
-      mtu: { enabled: null, value: '' },
-      connectionIds: [],
-      isConnectionEnabled: [],
-      persistentKeepaliveData: [],
-      allowedIPsAtoB: [],
-      allowedIPsBtoA: [],
-    },
+
+    peerQuickEditName: null,
+    peerQuickEditNameId: null,
+    peerQuickEditAddress: null,
+    peerQuickEditAddressId: null,
+    peerEditName: '',
+    peerEditAddress: '',
+    peerEditMobility: '',
+    peerEditEndpoint: '',
+    peerEditDNS: { enabled: null, value: '' },
+    peerEditMTU: { enabled: null, value: '' },
+    peerEditConnectionIds: '',
+    peerEditIsConnectionEnabled: '',
+    peerEditPersistentKeepaliveData: '',
+    peerEditAllowedIPsAtoB: '',
+    peerEditAllowedIPsBtoA: '',
+    peerChangedPeer: false,
+    peerChangedConnections: false,
+    peerEditChangedFields: {},
+    peerEditOldConfig: { peers: {}, connections: {} },
+    peerEditNewConfig: { peers: {}, connections: {} },
+    peerEditDisableSaveChanges: true,
 
     staticPeers: {},
     roamingPeers: {},
@@ -430,33 +429,33 @@ new Vue({
       const tailwindWhite = 'rgb(255 255 255)';
 
       if (mode === 'init') {
-        this.peerConfigEditData.name = this.network.peers[this.peerConfigId]['name'];
-        this.peerConfigEditData.address = this.network.peers[this.peerConfigId]['address'];
-        this.peerConfigEditData.mobility = this.network.peers[this.peerConfigId]['mobility'];
-        this.peerConfigEditData.endpoint = this.network.peers[this.peerConfigId]['endpoint'];
-        this.peerConfigEditData.dns.enabled = this.network.peers[this.peerConfigId]['dns'].enabled;
-        this.peerConfigEditData.dns.value = this.network.peers[this.peerConfigId]['dns'].value;
-        this.peerConfigEditData.mtu.enabled = this.network.peers[this.peerConfigId]['mtu'].enabled;
-        this.peerConfigEditData.mtu.value = this.network.peers[this.peerConfigId]['mtu'].value;
+        this.peerEditName = this.network.peers[this.peerConfigId]['name'];
+        this.peerEditAddress = this.network.peers[this.peerConfigId]['address'];
+        this.peerEditMobility = this.network.peers[this.peerConfigId]['mobility'];
+        this.peerEditEndpoint = this.network.peers[this.peerConfigId]['endpoint'];
+        this.peerEditDNS.enabled = this.network.peers[this.peerConfigId]['dns'].enabled;
+        this.peerEditDNS.value = this.network.peers[this.peerConfigId]['dns'].value;
+        this.peerEditMTU.enabled = this.network.peers[this.peerConfigId]['mtu'].enabled;
+        this.peerEditMTU.value = this.network.peers[this.peerConfigId]['mtu'].value;
 
         // store all the conections related to this peer
-        this.peerConfigEditData.connectionIds = [];
-        this.peerConfigEditData.isConnectionEnabled = [];
-        this.peerConfigEditData.persistentKeepaliveData = [];
-        this.peerConfigEditData.allowedIPsAtoB = [];
-        this.peerConfigEditData.allowedIPsBtoA = [];
+        this.peerEditConnectionIds = [];
+        this.peerEditIsConnectionEnabled = [];
+        this.peerEditPersistentKeepaliveData = [];
+        this.peerEditAllowedIPsAtoB = [];
+        this.peerEditAllowedIPsBtoA = [];
         for (const connectionId of Object.keys(this.network.connections)) {
           if (connectionId.includes(this.peerConfigId)) {
-            this.peerConfigEditData.connectionIds.push(connectionId);
-            this.peerConfigEditData.isConnectionEnabled.push(this.network.connections[connectionId]['enabled']);
-            this.peerConfigEditData.persistentKeepaliveData.push(this.network.connections[connectionId]['persistentKeepalive'] === 'on');
-            this.peerConfigEditData.allowedIPsAtoB.push(this.network.connections[connectionId].allowedIPsAtoB);
-            this.peerConfigEditData.allowedIPsBtoA.push(this.network.connections[connectionId].allowedIPsBtoA);
+            this.peerEditConnectionIds.push(connectionId);
+            this.peerEditIsConnectionEnabled.push(this.network.connections[connectionId]['enabled']);
+            this.peerEditPersistentKeepaliveData.push(this.network.connections[connectionId]['persistentKeepalive'] === 'on');
+            this.peerEditAllowedIPsAtoB.push(this.network.connections[connectionId].allowedIPsAtoB);
+            this.peerEditAllowedIPsBtoA.push(this.network.connections[connectionId].allowedIPsBtoA);
           }
         }
 
         try {
-          for (const connectionId of this.peerConfigEditData.connectionIds) {
+          for (const connectionId of this.peerEditConnectionIds) {
             if (this.network.connections[connectionId]['enabled']) {
               document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindLightGreen;
             } else {
@@ -474,24 +473,31 @@ new Vue({
       const changedFields = { peers: {}, connections: {} };
       changedFields.peers[this.peerConfigId] = {};
       if (['check-changes', 'check-changes-connection', 'check-all'].includes(mode)) {
-        for (const peerConfigField of ['name', 'address', 'mobility', 'endpoint', 'dns', 'mtu']) {
+        for (const [peerConfigField, peerConfigValue] of Object.entries({
+          name: this.peerEditName,
+          address: this.peerEditAddress,
+          mobility: this.peerEditMobility,
+          endpoint: this.peerEditEndpoint,
+          dns: this.peerEditDNS,
+          mtu: this.peerEditMTU,
+        })) {
           let assignedColor = tailwindWhite;
           if (peerConfigField === 'dns' || peerConfigField === 'mtu') {
             const changedDNSMTUFields = {};
-            if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled) {
-              changedDNSMTUFields['enabled'] = this.peerConfigEditData[peerConfigField].enabled;
+            if (peerConfigValue.enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled) {
+              changedDNSMTUFields['enabled'] = peerConfigValue.enabled;
             }
-            if (this.peerConfigEditData[peerConfigField].value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
-              changedDNSMTUFields['value'] = this.peerConfigEditData[peerConfigField].value;
+            if (peerConfigValue.value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
+              changedDNSMTUFields['value'] = peerConfigValue.value;
             }
-            if (this.peerConfigEditData[peerConfigField].enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled
-              || this.peerConfigEditData[peerConfigField].value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
-              assignedColor = WireGuardHelper.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
+            if (peerConfigValue.enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled
+              || peerConfigValue.value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
+              assignedColor = WireGuardHelper.checkField(peerConfigField, peerConfigValue) ? tailwindDarkerGreen : tailwindDarkerRed;
               changedFields.peers[this.peerConfigId][peerConfigField] = changedDNSMTUFields;
             }
-          } else if (this.peerConfigEditData[peerConfigField] !== this.network.peers[this.peerConfigId][peerConfigField]) {
-            assignedColor = WireGuardHelper.checkField(peerConfigField, this.peerConfigEditData[peerConfigField]) ? tailwindDarkerGreen : tailwindDarkerRed;
-            changedFields.peers[this.peerConfigId][peerConfigField] = this.peerConfigEditData[peerConfigField];
+          } else if (peerConfigValue !== this.network.peers[this.peerConfigId][peerConfigField]) {
+            assignedColor = WireGuardHelper.checkField(peerConfigField, peerConfigValue) ? tailwindDarkerGreen : tailwindDarkerRed;
+            changedFields.peers[this.peerConfigId][peerConfigField] = peerConfigValue;
           }
           try {
             if (peerConfigField !== 'mobility') {
@@ -510,29 +516,29 @@ new Vue({
 
       const changedConnections = {};
       if (['check-changes', 'check-changes-connection', 'check-all'].includes(mode)) {
-        for (const [index, connectionId] of Object.entries(this.peerConfigEditData.connectionIds)) {
+        for (const [index, connectionId] of Object.entries(this.peerEditConnectionIds)) {
           const changedSubFields = {};
           let assignedColor = tailwindLightGreen;
-          if (!this.peerConfigEditData.isConnectionEnabled[index]) {
+          if (!this.peerEditIsConnectionEnabled[index]) {
             assignedColor = tailwindLightRed;
           }
-          if (this.peerConfigEditData.isConnectionEnabled[index] !== this.network.connections[connectionId].enabled) {
-            changedSubFields['enabled'] = this.peerConfigEditData.isConnectionEnabled[index];
+          if (this.peerEditIsConnectionEnabled[index] !== this.network.connections[connectionId].enabled) {
+            changedSubFields['enabled'] = this.peerEditIsConnectionEnabled[index];
           }
           document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = assignedColor;
 
           assignedColor = tailwindWhite;
-          if (this.peerConfigEditData.allowedIPsAtoB[index] !== this.network.connections[connectionId].allowedIPsAtoB) {
-            assignedColor = WireGuardHelper.checkField('allowedIPs', this.peerConfigEditData.allowedIPsAtoB[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
-            changedSubFields.allowedIPsAtoB = this.peerConfigEditData.allowedIPsAtoB[index];
+          if (this.peerEditAllowedIPsAtoB[index] !== this.network.connections[connectionId].allowedIPsAtoB) {
+            assignedColor = WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsAtoB[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
+            changedSubFields.allowedIPsAtoB = this.peerEditAllowedIPsAtoB[index];
           }
           errorNotFound &= assignedColor !== tailwindDarkerRed;
           document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsAtoB`).style.backgroundColor = assignedColor;
 
           assignedColor = tailwindWhite;
-          if (this.peerConfigEditData.allowedIPsBtoA[index] !== this.network.connections[connectionId].allowedIPsBtoA) {
-            assignedColor = WireGuardHelper.checkField('allowedIPs', this.peerConfigEditData.allowedIPsBtoA[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
-            changedSubFields.allowedIPsBtoA = this.peerConfigEditData.allowedIPsBtoA[index];
+          if (this.peerEditAllowedIPsBtoA[index] !== this.network.connections[connectionId].allowedIPsBtoA) {
+            assignedColor = WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsBtoA[index]) ? tailwindDarkerGreen : tailwindDarkerRed;
+            changedSubFields.allowedIPsBtoA = this.peerEditAllowedIPsBtoA[index];
           }
           errorNotFound &= assignedColor !== tailwindDarkerRed;
           document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsBtoA`).style.backgroundColor = assignedColor;
