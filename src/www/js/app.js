@@ -472,7 +472,7 @@ new Vue({
       let errorNotFound = true;
       const changedFields = { peers: {}, connections: {} };
       changedFields.peers[this.peerConfigId] = {};
-      if (['check-changes', 'check-changes-connection', 'check-all'].includes(mode)) {
+      if (['check-changes', 'check-all'].includes(mode)) {
         for (const [peerConfigField, peerConfigValue] of Object.entries({
           name: this.peerEditName,
           address: this.peerEditAddress,
@@ -515,7 +515,7 @@ new Vue({
       }
 
       const changedConnections = {};
-      if (['check-changes', 'check-changes-connection', 'check-all'].includes(mode)) {
+      if (['check-changes-connection', 'check-all'].includes(mode)) {
         for (const [index, connectionId] of Object.entries(this.peerEditConnectionIds)) {
           const changedSubFields = {};
           let assignedColor = tailwindLightGreen;

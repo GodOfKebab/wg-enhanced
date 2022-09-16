@@ -127,17 +127,17 @@
               <div class="relative overflow-hidden border-b border-gray-100 border-solid">
 
                 <!-- Chart -->
-                <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                  <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">
-                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferTxSeries">
-                    </apexchart>
-                  </div>
-                  <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">
-                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferRxSeries"
-                               style="transform: scaleY(-1);">
-                    </apexchart>
-                  </div>
-                </div>
+<!--                <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">-->
+<!--                  <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
+<!--                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferTxSeries">-->
+<!--                    </apexchart>-->
+<!--                  </div>-->
+<!--                  <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
+<!--                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferRxSeries"-->
+<!--                               style="transform: scaleY(-1);">-->
+<!--                    </apexchart>-->
+<!--                  </div>-->
+<!--                </div>-->
 
                 <div class="relative p-5 z-10 flex flex-row">
                   <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
@@ -352,17 +352,17 @@
               <div class="relative overflow-hidden border-b border-gray-100 border-solid">
 
                 <!-- Chart -->
-                <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                  <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">
-                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferTxSeries">
-                    </apexchart>
-                  </div>
-                  <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">
-                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferRxSeries"
-                               style="transform: scaleY(-1);">
-                    </apexchart>
-                  </div>
-                </div>
+<!--                <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">-->
+<!--                  <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
+<!--                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferTxSeries">-->
+<!--                    </apexchart>-->
+<!--                  </div>-->
+<!--                  <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
+<!--                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferRxSeries"-->
+<!--                               style="transform: scaleY(-1);">-->
+<!--                    </apexchart>-->
+<!--                  </div>-->
+<!--                </div>-->
 
                 <div class="relative p-5 z-10 flex flex-row">
                   <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
@@ -932,29 +932,29 @@
                               </span>
                             </div>
 
-                            <div class="col-span-2 text-sm">
-                              <input v-if="peerConfigKey === 'name'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditName" id="peerConfigEditData.name" @change="peerConfigEditHandle('check-changes').then()">
-                              <input v-else-if="peerConfigKey === 'address'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditAddress" id="peerConfigEditData.address" @change="peerConfigEditHandle('check-changes').then()">
+                            <div class="col-span-2 text-sm" @change="peerConfigEditHandle('check-changes')">
+                              <input v-if="peerConfigKey === 'name'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditName" id="peerConfigEditData.name">
+                              <input v-else-if="peerConfigKey === 'address'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditAddress" id="peerConfigEditData.address">
                               <div v-else-if="peerConfigKey === 'endpoint'">
                                 <label for="peerConfigEditData.endpointToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.endpointToggle" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static'; peerConfigEditHandle('check-changes').then()" :checked="peerEditMobility === 'static'">
+                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.endpointToggle" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static';" :checked="peerEditMobility === 'static'">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input v-show="peerEditMobility === 'static'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditEndpoint" id="peerConfigEditData.endpoint" @change="peerConfigEditHandle('check-changes').then()">
+                                <input v-show="peerEditMobility === 'static'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditEndpoint" id="peerConfigEditData.endpoint">
                               </div>
                               <div v-else-if="peerConfigKey === 'dns'">
                                 <label for="peerConfigEditData.dnsToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.dnsToggle" @change="peerEditDNS.enabled = !peerEditDNS.enabled; peerConfigEditHandle('check-changes').then()" :checked="peerEditDNS.enabled">
+                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.dnsToggle" @change="peerEditDNS.enabled = !peerEditDNS.enabled" :checked="peerEditDNS.enabled">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input list="inputDNSList" v-show="peerEditDNS.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditDNS.value" id="peerConfigEditData.dns" placeholder="click to see recommendations" @change="peerConfigEditHandle('check-changes').then()">
+                                <input list="inputDNSList" v-show="peerEditDNS.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditDNS.value" id="peerConfigEditData.dns" placeholder="click to see recommendations">
                               </div>
                               <div v-else-if="peerConfigKey === 'mtu'">
                                 <label for="peerConfigEditData.mtuToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.mtuToggle" @change="peerEditMTU.enabled = !peerEditMTU.enabled; peerConfigEditHandle('check-changes').then()" :checked="peerEditMTU.enabled">
+                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.mtuToggle" @change="peerEditMTU.enabled = !peerEditMTU.enabled" :checked="peerEditMTU.enabled">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input list="inputMTUList" v-show="peerEditMTU.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditMTU.value" id="peerConfigEditData.mtu" placeholder="click to see recommendations" @change="peerConfigEditHandle('check-changes').then()">
+                                <input list="inputMTUList" v-show="peerEditMTU.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditMTU.value" id="peerConfigEditData.mtu" placeholder="click to see recommendations">
                               </div>
                               <span v-else-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mr-1 pl-1">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
                               <span v-else class="text-gray-800 text-xs mr-1 pl-1">{{ network.peers[peerConfigId][peerConfigKey] }}</span>
@@ -977,7 +977,7 @@
 
                       <!-- Peer's connections in boxes -->
                       <div v-for="[index, connectionId] in Object.entries(peerEditConnectionIds)" class="relative">
-                          <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :id="`peerConfigEditData.${connectionId}.enabled`" @change="peerConfigEditHandle('check-changes-connection').then()">
+                          <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :id="`peerConfigEditData.${connectionId}.enabled`" @change="peerConfigEditHandle('check-changes-connection')">
                             <div class=" mr-6">
                               <div class="form-check">
                                 <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
