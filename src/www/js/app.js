@@ -80,6 +80,13 @@ new Vue({
     peerEditOldConfig: { peers: {}, connections: {} },
     peerEditNewConfig: { peers: {}, connections: {} },
     peerEditDisableSaveChanges: true,
+    peerEditAssignedColor: {
+      name: 'bg-white',
+      address: 'bg-white',
+      endpoint: 'bg-white',
+      dns: 'bg-white',
+      mtu: 'bg-white',
+    },
 
     staticPeers: {},
     roamingPeers: {},
@@ -422,11 +429,11 @@ new Vue({
       return WireGuardHelper.getConnectionId(peer1, peer2);
     },
     async peerConfigEditHandle(mode) {
-      const tailwindLightGreen = 'rgb(240 253 244)';
-      const tailwindDarkerGreen = 'rgb(187 247 208)';
-      const tailwindLightRed = 'rgb(254 242 242)';
-      const tailwindDarkerRed = 'rgb(254 202 202)';
-      const tailwindWhite = 'rgb(255 255 255)';
+      const tailwindLightGreen = 'bg-green-100';
+      const tailwindDarkerGreen = 'bg-green-200';
+      const tailwindLightRed = 'bg-red-100';
+      const tailwindDarkerRed = 'bg-red-200';
+      const tailwindWhite = 'bg-white';
 
       if (mode === 'init') {
         this.peerEditName = this.network.peers[this.peerConfigId]['name'];
@@ -502,7 +509,8 @@ new Vue({
           try {
             if (peerConfigField !== 'mobility') {
               errorNotFound &= assignedColor !== tailwindDarkerRed;
-              document.getElementById(`peerConfigEditData.${peerConfigField}`).style.backgroundColor = assignedColor;
+              this.peerEditAssignedColor[peerConfigField] = assignedColor;
+              // document.getElementById(`peerConfigEditData.${peerConfigField}`).style.backgroundColor = assignedColor;
             }
           } catch (e) {
             errorNotFound &= false;
