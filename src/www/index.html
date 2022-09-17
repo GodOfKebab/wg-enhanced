@@ -932,8 +932,7 @@
                               </span>
                             </div>
 
-<!--                            @change="peerConfigEditHandle('check-changes')"          [peerEditName === network.peers[peerConfigId].name ? 'bg-white' : WireGuardHelper.checkField('name', peerEditName) ? 'bg-green-100' : 'bg-red-100'] -->
-                            <div class="col-span-2 text-sm" @change="peerConfigEditHandle('check-changes')" >
+                            <div class="col-span-2 text-sm" @change="peerConfigEditHandle('check-changes').then()" >
                               <input v-if="peerConfigKey === 'name'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditName" id="peerConfigEditData.name" :class="peerEditAssignedColor[peerConfigKey]">
                               <input v-else-if="peerConfigKey === 'address'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditAddress" id="peerConfigEditData.address" :class="peerEditAssignedColor[peerConfigKey]">
                               <div v-else-if="peerConfigKey === 'endpoint'">
@@ -941,21 +940,21 @@
                                   <input type="checkbox" class="sr-only peer" id="peerConfigEditData.endpointToggle" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static';" :checked="peerEditMobility === 'static'">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input v-show="peerEditMobility === 'static'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditEndpoint" id="peerConfigEditData.endpoint" :class="peerEditAssignedColor[peerConfigKey]">
+                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditEndpoint" id="peerConfigEditData.endpoint" :class="peerEditMobility === 'static' ? peerEditAssignedColor[peerConfigKey] : 'bg-gray-100'" :disabled="peerEditMobility !== 'static'">
                               </div>
                               <div v-else-if="peerConfigKey === 'dns'">
                                 <label for="peerConfigEditData.dnsToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.dnsToggle" @change="peerEditDNS.enabled = !peerEditDNS.enabled" :checked="peerEditDNS.enabled" :class="peerEditAssignedColor[peerConfigKey]">
+                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.dnsToggle" @change="peerEditDNS.enabled = !peerEditDNS.enabled" :checked="peerEditDNS.enabled">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input list="inputDNSList" v-show="peerEditDNS.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditDNS.value" id="peerConfigEditData.dns" placeholder="click to see recommendations">
+                                <input list="inputDNSList" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditDNS.value" id="peerConfigEditData.dns" :class="peerEditDNS.enabled ? peerEditAssignedColor[peerConfigKey] : 'bg-gray-100'" :disabled="!peerEditDNS.enabled" :placeholder="peerEditDNS.enabled ? 'click to see recommendations' : ''">
                               </div>
                               <div v-else-if="peerConfigKey === 'mtu'">
                                 <label for="peerConfigEditData.mtuToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.mtuToggle" @change="peerEditMTU.enabled = !peerEditMTU.enabled" :checked="peerEditMTU.enabled" :class="peerEditAssignedColor[peerConfigKey]">
+                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.mtuToggle" @change="peerEditMTU.enabled = !peerEditMTU.enabled" :checked="peerEditMTU.enabled">
                                   <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
                                 </label>
-                                <input list="inputMTUList" v-show="peerEditMTU.enabled" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditMTU.value" id="peerConfigEditData.mtu" placeholder="click to see recommendations">
+                                <input list="inputMTUList" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditMTU.value" id="peerConfigEditData.mtu" :class="peerEditMTU.enabled ? peerEditAssignedColor[peerConfigKey] : 'bg-gray-100'" :disabled="!peerEditMTU.enabled" :placeholder="peerEditMTU.enabled ? 'click to see recommendations' : ''">
                               </div>
                               <span v-else-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mr-1 pl-1">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
                               <span v-else class="text-gray-800 text-xs mr-1 pl-1">{{ network.peers[peerConfigId][peerConfigKey] }}</span>

@@ -506,18 +506,10 @@ new Vue({
             assignedColor = WireGuardHelper.checkField(peerConfigField, peerConfigValue) ? tailwindDarkerGreen : tailwindDarkerRed;
             changedFields.peers[this.peerConfigId][peerConfigField] = peerConfigValue;
           }
-          try {
-            if (peerConfigField !== 'mobility') {
-              errorNotFound &= assignedColor !== tailwindDarkerRed;
-              this.peerEditAssignedColor[peerConfigField] = assignedColor;
-              // document.getElementById(`peerConfigEditData.${peerConfigField}`).style.backgroundColor = assignedColor;
-            }
-          } catch (e) {
-            errorNotFound &= false;
-            console.log('edit error!');
-            console.log(e);
-            await new Promise(r => setTimeout(r, 100));
-            await this.peerConfigEditHandle(mode);
+
+          if (peerConfigField !== 'mobility') {
+            errorNotFound &= assignedColor !== tailwindDarkerRed;
+            this.peerEditAssignedColor[peerConfigField] = assignedColor;
           }
         }
       }
