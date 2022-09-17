@@ -35,7 +35,7 @@ new Vue({
     password: null,
     requiresPassword: null,
 
-    network: { peers: {}, connections: {} },
+    network: { peers: { root: { address: '' } }, connections: {} },
 
     peersPersist: {},
     peerDeleteId: null,
