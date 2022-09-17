@@ -273,7 +273,7 @@ module.exports = class WireGuard {
     const publicKey = await Util.exec(`echo ${privateKey} | wg pubkey`);
 
     if (!WireGuardHelper.checkField('dns', dns)) throw new Error('DNS error.');
-    if (!WireGuardHelper.checkField('mtu', dns)) throw new Error('MTU error.');
+    if (!WireGuardHelper.checkField('mtu', mtu)) throw new Error('MTU error.');
 
     // TODO: add check for incoming id and address
     if (peerId === null || address === null) {

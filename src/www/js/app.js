@@ -86,6 +86,9 @@ new Vue({
       endpoint: 'bg-white',
       dns: 'bg-white',
       mtu: 'bg-white',
+      connectionEnabled: {},
+      connectionAllowedIPsAtoB: {},
+      connectionAllowedIPsBtoA: {},
     },
 
     staticPeers: {},
@@ -317,12 +320,12 @@ new Vue({
         });
       }
       const dns = {
-        enabled: document.getElementById('dns_checkbox').checked,
-        value: document.getElementById('dns_checkbox').checked ? this.peerCreateDNS.value : '',
+        enabled: this.peerCreateDNS.enabled,
+        value: this.peerCreateDNS.enabled ? this.peerCreateDNS.value : '',
       };
       const mtu = {
-        enabled: document.getElementById('mtu_checkbox').checked,
-        value: document.getElementById('mtu_checkbox').checked ? this.peerCreateMTU.value : '',
+        enabled: this.peerCreateMTU.enabled,
+        value: this.peerCreateMTU.enabled ? this.peerCreateMTU.value : '',
       };
       const peerId = this.peerCreatePeerId;
       const address = this.peerCreateAddress;
@@ -410,7 +413,6 @@ new Vue({
         this.peerCreateAddress = address;
 
         for (const peerId of Object.keys(this.staticPeers)) {
-          // document.getElementById(`${peerId}_checkbox`).checked = false;
           this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
           this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
         }
@@ -429,9 +431,9 @@ new Vue({
       return WireGuardHelper.getConnectionId(peer1, peer2);
     },
     async peerConfigEditHandle(mode) {
-      const tailwindLightGreen = 'bg-green-100';
+      const tailwindLightGreen = 'bg-green-50';
       const tailwindDarkerGreen = 'bg-green-200';
-      const tailwindLightRed = 'bg-red-100';
+      const tailwindLightRed = 'bg-red-50';
       const tailwindDarkerRed = 'bg-red-200';
       const tailwindWhite = 'bg-white';
 
@@ -461,18 +463,6 @@ new Vue({
           }
         }
 
-        try {
-          for (const connectionId of this.peerEditConnectionIds) {
-            if (this.network.connections[connectionId]['enabled']) {
-              document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindLightGreen;
-            } else {
-              document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = tailwindLightRed;
-            }
-          }
-        } catch (e) {
-          await new Promise(r => setTimeout(r, 100));
-          await this.peerConfigEditHandle(mode);
-        }
         return;
       }
 
@@ -525,7 +515,7 @@ new Vue({
           if (this.peerEditIsConnectionEnabled[index] !== this.network.connections[connectionId].enabled) {
             changedSubFields['enabled'] = this.peerEditIsConnectionEnabled[index];
           }
-          document.getElementById(`peerConfigEditData.${connectionId}.enabled`).style.backgroundColor = assignedColor;
+          this.peerEditAssignedColor.connectionEnabled[index] = assignedColor;
 
           assignedColor = tailwindWhite;
           if (this.peerEditAllowedIPsAtoB[index] !== this.network.connections[connectionId].allowedIPsAtoB) {
@@ -533,7 +523,7 @@ new Vue({
             changedSubFields.allowedIPsAtoB = this.peerEditAllowedIPsAtoB[index];
           }
           errorNotFound &= assignedColor !== tailwindDarkerRed;
-          document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsAtoB`).style.backgroundColor = assignedColor;
+          this.peerEditAssignedColor.connectionAllowedIPsAtoB[index] = assignedColor;
 
           assignedColor = tailwindWhite;
           if (this.peerEditAllowedIPsBtoA[index] !== this.network.connections[connectionId].allowedIPsBtoA) {
@@ -541,7 +531,7 @@ new Vue({
             changedSubFields.allowedIPsBtoA = this.peerEditAllowedIPsBtoA[index];
           }
           errorNotFound &= assignedColor !== tailwindDarkerRed;
-          document.getElementById(`peerConfigEditData.${connectionId}.allowedIPsBtoA`).style.backgroundColor = assignedColor;
+          this.peerEditAssignedColor.connectionAllowedIPsBtoA[index] = assignedColor;
 
           if (Object.keys(changedSubFields).length > 0) {
             changedConnections[connectionId] = changedSubFields;
