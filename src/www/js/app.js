@@ -375,6 +375,17 @@ new Vue({
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
+    enableConnection(connectionId, enabled) {
+      if (enabled) {
+        this.api.enableConnection({ connectionId })
+          .catch(err => alert(err.message || err.toString()))
+          .finally(() => this.refresh().catch(console.error));
+      } else {
+        this.api.disableConnection({ connectionId })
+          .catch(err => alert(err.message || err.toString()))
+          .finally(() => this.refresh().catch(console.error));
+      }
+    },
     updateConnectionAllowedIPs(connectionId, AtoB, BtoA) {
       this.api.updateConnectionAllowedIPs({ connectionId, AtoB, BtoA })
         .catch(err => alert(err.message || err.toString()))
@@ -625,6 +636,9 @@ new Vue({
         let BtoAValue = null;
         for (const [field, value] of Object.entries(connection)) {
           switch (field) {
+            case 'enabled':
+              this.enableConnection(connectionId, value);
+              break;
             case 'allowedIPsAtoB':
               AtoBValue = value;
               break;

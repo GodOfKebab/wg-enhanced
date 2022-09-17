@@ -153,7 +153,7 @@ module.exports = class WireGuard {
       config.connections[peerConnectionId].latestHandshakeAt = null;
       config.connections[peerConnectionId].transferRx = null;
       config.connections[peerConnectionId].transferTx = null;
-      config.connections[peerConnectionId].persistentKeepalive = null;
+      config.connections[peerConnectionId].persistentKeepalive = 0;
     });
 
     // Loop WireGuard status to fill the above values
@@ -192,7 +192,7 @@ module.exports = class WireGuard {
           : new Date(Number(`${latestHandshakeAt}000`));
         config.connections[clientConnectionId].transferRx = Number(transferRx);
         config.connections[clientConnectionId].transferTx = Number(transferTx);
-        config.connections[clientConnectionId].persistentKeepalive = persistentKeepalive === 'off' ? 0 : persistentKeepalive;
+        // config.connections[clientConnectionId].persistentKeepalive = persistentKeepalive === 'off' ? 0 : persistentKeepalive;
       });
 
     return config;
@@ -424,6 +424,17 @@ module.exports = class WireGuard {
 
     config.peers[peerId].mtu = mtu;
     config.peers[peerId].updatedAt = new Date();
+
+    await this.saveConfig();
+  }
+
+  async enableConnection({ connectionId, enabled }) {
+    const config = await this.getConfig();
+    if (!await this.getConnection({ connectionId })) return;
+
+    config.connections[connectionId].enabled = enabled;
+    // TODO: get peerIds and update them.
+    // config.peers[peerId].updatedAt = new Date();
 
     await this.saveConfig();
   }

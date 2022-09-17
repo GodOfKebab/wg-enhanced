@@ -155,6 +155,20 @@ class API {
     });
   }
 
+  async enableConnection({ connectionId }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/connection/${connectionId}/enable/`,
+    });
+  }
+
+  async disableConnection({ connectionId }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/connection/${connectionId}/disable/`,
+    });
+  }
+
   async updateConnectionAllowedIPs({ connectionId, AtoB, BtoA }) {
     return this.call({
       method: 'put',
