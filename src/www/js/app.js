@@ -475,7 +475,6 @@ new Vue({
             this.peerEditAllowedIPsBtoA[connectionId] = this.network.connections[connectionId].allowedIPsBtoA;
           }
         }
-        return;
       }
     },
     async peerConfigEditUpdateConfirmation() {
@@ -690,18 +689,24 @@ new Vue({
       let changeDetectedPeer = false;
       const changedFields = { peers: {}, connections: {} };
 
+      let peerErrorField = '';
       // check errors
-      for (const peerEditFieldColor of [this.peerEditNameColor,
-        this.peerEditAddressColor,
-        this.peerEditEndpointColor,
-        this.peerEditDNSColor,
-        this.peerEditMTUColor]) {
-        errorNotFound &&= peerEditFieldColor !== 'bg-red-200';
+      for (const [field, peerEditFieldColor] of Object.entries({
+        name: this.peerEditNameColor,
+        address: this.peerEditAddressColor,
+        endpoint: this.peerEditEndpointColor,
+        DNS: this.peerEditDNSColor,
+        MTU: this.peerEditMTUColor,
+      })) {
+        if (peerEditFieldColor === 'bg-red-200') {
+          peerErrorField = field;
+          errorNotFound = false;
+        }
         changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200';
       }
 
       if (!errorNotFound) {
-        return [{}, false];
+        return [{ msg: `Error detected in the peer's '${peerErrorField}' field. Changes can't be considered until this is fixed.` }, false];
       }
 
       this.peerChangedPeer = changeDetectedPeer;
@@ -734,18 +739,24 @@ new Vue({
       }
 
       let changeDetectedConnection = false;
+      let connectionIdError = '';
+      let connectionErrorField = '';
 
       // check errors
       for (const connectionId of this.peerEditConnectionIds) {
-        errorNotFound &&= this.peerEditConnectionColor.allowedIPsAtoB[connectionId] !== 'bg-red-200';
-        errorNotFound &&= this.peerEditConnectionColor.allowedIPsBtoA[connectionId] !== 'bg-red-200';
-        changeDetectedConnection ||= this.peerEditConnectionColor.allowedIPsAtoB[connectionId] === 'bg-green-200';
-        changeDetectedConnection ||= this.peerEditConnectionColor.allowedIPsBtoA[connectionId] === 'bg-green-200';
+        for (const connectionField of ['allowedIPsAtoB', 'allowedIPsBtoA']) {
+          if (this.peerEditConnectionColor[connectionField][connectionId] === 'bg-red-200') {
+            connectionIdError = connectionId;
+            connectionErrorField = connectionField;
+            errorNotFound = false;
+          }
+          changeDetectedConnection ||= this.peerEditConnectionColor[connectionField][connectionId] === 'bg-green-200';
+        }
         changeDetectedConnection ||= this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled;
       }
 
       if (!errorNotFound) {
-        return [{}, false];
+        return [{ msg: `Error detected in the connection '${connectionIdError}'s '${connectionErrorField}' field. Changes can't be considered until this is fixed.` }, false];
       }
 
       this.peerChangedConnections = changeDetectedConnection;
