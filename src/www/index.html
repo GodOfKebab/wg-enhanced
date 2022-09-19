@@ -975,7 +975,7 @@
                       </div>
 
                       <!-- Peer's connections in boxes -->
-                      <div v-for="[index, connectionId] in Object.entries(peerEditConnectionIds)" class="relative">
+                      <div v-for="connectionId in peerEditConnectionIds" class="relative">
                           <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :class="[peerEditConnectionColor.div[connectionId]]">
                             <div class=" mr-6">
                               <div class="form-check">
@@ -1010,14 +1010,14 @@
                               <div class="relative text-gray-800 text-xs mx-6">
                                 <div class="mt-1 flex items-center">
                                   <span class="flex-none"><strong>{{ network.peers[peerConfigId].name }}</strong> will forward IP subnet(s)</span>
-                                  <input v-if="connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[connectionId]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`" :class="[peerEditConnectionColor.allowedIPsAtoB[connectionId]]" @change="peerEditConnectionColorRefresh += 1">
-                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[connectionId]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`" :class="[peerEditConnectionColor.allowedIPsBtoA[connectionId]]" @change="peerEditConnectionColorRefresh += 1">
+                                  <input v-if="connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[connectionId]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`" :class="[peerEditConnectionColor.allowedIPsAtoB[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
+                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[connectionId]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`" :class="[peerEditConnectionColor.allowedIPsBtoA[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
                                   <span class="flex-none pr-2"> to <strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong></span>
                                 </div>
                                 <div class="mt-1 flex">
                                   <span class="flex-none"><strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong> will forward IP subnet(s)</span>
-                                  <input v-if="!connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[connectionId]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`" :class="[peerEditConnectionColor.connections.allowedIPsAtoB[connectionId]]" @change="peerEditConnectionColorRefresh += 1">
-                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[connectionId]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`" :class="[peerEditConnectionColor.allowedIPsBtoA[connectionId]]" @change="peerEditConnectionColorRefresh += 1">
+                                  <input v-if="!connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[connectionId]" :id="`peerConfigEditData.${connectionId}.allowedIPsAtoB`" :class="[peerEditConnectionColor.allowedIPsAtoB[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
+                                  <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[connectionId]" :id="`peerConfigEditData.${connectionId}.allowedIPsBtoA`" :class="[peerEditConnectionColor.allowedIPsBtoA[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
                                   <span class="flex-none pr-2"> to <strong>{{ network.peers[peerConfigId].name }}</strong></span>
                                 </div>
                               </div>
@@ -1032,9 +1032,9 @@
                         <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
                           <div v-if="!peerChangedPeer && !peerChangedConnections" class="p-1">{}</div>
-                          <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFields.peers }, false, 2) }}</div>
-                          <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFields.connections }, false, 2) }}</div>
-                          <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFields, false, 2) }}</div>
+                          <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
+                          <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
+                          <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
                         </div>
                         <div class="bg-red-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
