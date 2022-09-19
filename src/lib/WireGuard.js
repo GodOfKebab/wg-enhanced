@@ -259,12 +259,14 @@ module.exports = class WireGuard {
       if (!WireGuardHelper.checkField('endpoint', endpoint)) throw new Error('Couldn\'t parse: Endpoint : str (in the format x.x.x.x:x)');
     }
 
+    // TODO: change the error message to reflect the changes in the API schema
     if (!attachedPeers) throw new Error('Missing: attachedPeers : array ([peerId: str, allowedIPs: str (in the format x.x.x.x/32)])');
     if (!attachedPeers.length) throw new Error('Couldn\'t parse: attachedPeers : array ([peerId: str, allowedIPs: str (in the format x.x.x.x/32)])');
     for (const attachedPeer of attachedPeers) {
-      if (!attachedPeer.peer || !attachedPeer.allowedIPs) throw new Error('Couldn\'t parse: attachedPeers : array ([{peerId: str, allowedIPs: str (in the format x.x.x.x/32)}, ...])');
+      if (!attachedPeer.peer || !attachedPeer.allowedIPsNewToOld || !attachedPeer.allowedIPsOldToNew) throw new Error('Couldn\'t parse: attachedPeers : array ([{peerId: str, allowedIPs: str (in the format x.x.x.x/32)}, ...])');
       if (!await this.getPeer({ peerId: attachedPeer.peer })) throw new Error(`attachedPeer doesn't exist: ${attachedPeer.peer}`);
-      if (!WireGuardHelper.checkField('allowedIPs', attachedPeer.allowedIPs)) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPs}`);
+      if (!WireGuardHelper.checkField('allowedIPs', attachedPeer.allowedIPsNewToOld)) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPsNewToOld}`);
+      if (!WireGuardHelper.checkField('allowedIPs', attachedPeer.allowedIPsOldToNew)) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPsOldToNew}`);
     }
 
     const config = await this.getConfig();
@@ -301,9 +303,9 @@ module.exports = class WireGuard {
       const preSharedKey = await Util.exec('wg genpsk');
       config.connections[connectionId] = {
         preSharedKey,
-        enabled: true,
-        allowedIPsAtoB: connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
-        allowedIPsBtoA: !connectionId.startsWith(peerId) ? attachedPeer.allowedIPs : `${address}/32`,
+        enabled: attachedPeer.enabled,
+        allowedIPsAtoB: connectionId.startsWith(peerId) ? attachedPeer.allowedIPsNewToOld : attachedPeer.allowedIPsOldToNew,
+        allowedIPsBtoA: !connectionId.startsWith(peerId) ? attachedPeer.allowedIPsNewToOld : attachedPeer.allowedIPsOldToNew,
         persistentKeepalive: attachedPeer.persistentKeepalive,
       };
     }
