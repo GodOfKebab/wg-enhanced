@@ -496,7 +496,7 @@ new Vue({
     },
     async peerConfigEditUpdateConfirmation() {
       const [changedFields, errorNotFound] = this.peerEditChangedFieldsCompute;
-      if (!errorNotFound) return;
+      if (!errorNotFound || Object.keys(changedFields).length === 0) return;
 
       this.peerEditOldConfig.peers[this.peerConfigId] = {
         name: this.network.peers[this.peerConfigId].name,
@@ -521,13 +521,15 @@ new Vue({
       }
 
       this.peerEditNewConfig = JSON.parse(JSON.stringify(this.peerEditOldConfig)); // deep copy
-      for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
-        if (field === 'dns' || field === 'mtu') {
-          for (const [fieldDNSMTU, valueDNSMTU] of Object.entries(value)) {
-            this.peerEditNewConfig.peers[this.peerConfigId][field][fieldDNSMTU] = valueDNSMTU;
+      if (Object.keys(changedFields.peers).length) {
+        for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
+          if (field === 'dns' || field === 'mtu') {
+            for (const [fieldDNSMTU, valueDNSMTU] of Object.entries(value)) {
+              this.peerEditNewConfig.peers[this.peerConfigId][field][fieldDNSMTU] = valueDNSMTU;
+            }
+          } else {
+            this.peerEditNewConfig.peers[this.peerConfigId][field] = value;
           }
-        } else {
-          this.peerEditNewConfig.peers[this.peerConfigId][field] = value;
         }
       }
       for (const [connectionId, connection] of Object.entries(changedFields.connections)) {
@@ -538,32 +540,34 @@ new Vue({
     },
     async peerConfigEditApply() {
       const [changedFields, errorNotFound] = this.peerEditChangedFieldsCompute;
-      if (!errorNotFound) return;
+      if (!errorNotFound || Object.keys(changedFields).length === 0) return;
 
       let mobilityValue = null;
       let endpointValue = null;
-      for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
-        switch (field) {
-          case 'name':
-            this.updatePeerName(this.peerConfigId, value);
-            break;
-          case 'address':
-            this.updatePeerAddress(this.peerConfigId, value);
-            break;
-          case 'mobility':
-            mobilityValue = value;
-            break;
-          case 'endpoint':
-            endpointValue = value;
-            break;
-          case 'dns':
-            this.updatePeerDNS(this.peerConfigId, value);
-            break;
-          case 'mtu':
-            this.updatePeerMTU(this.peerConfigId, value);
-            break;
-          default:
-            break;
+      if (Object.keys(changedFields.peers).length) {
+        for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
+          switch (field) {
+            case 'name':
+              this.updatePeerName(this.peerConfigId, value);
+              break;
+            case 'address':
+              this.updatePeerAddress(this.peerConfigId, value);
+              break;
+            case 'mobility':
+              mobilityValue = value;
+              break;
+            case 'endpoint':
+              endpointValue = value;
+              break;
+            case 'dns':
+              this.updatePeerDNS(this.peerConfigId, value);
+              break;
+            case 'mtu':
+              this.updatePeerMTU(this.peerConfigId, value);
+              break;
+            default:
+              break;
+          }
         }
       }
       if (mobilityValue || endpointValue) this.updatePeerEndpoint(this.peerConfigId, mobilityValue, endpointValue);
@@ -588,7 +592,6 @@ new Vue({
         }
         if (AtoBValue || BtoAValue) this.updateConnectionAllowedIPs(connectionId, AtoBValue, BtoAValue);
       }
-      console.log('changes applied!');
     },
   },
   computed: {
@@ -675,14 +678,14 @@ new Vue({
     peerEditDNSColor() {
       // eslint-disable-next-line no-nested-ternary
       this.peerEditAssignedColor.dns = this.peerEditDNS.value !== this.network.peers[this.peerConfigId].dns.value
-        ? (WireGuardHelper.checkField('dns', this.peerEditDNS) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+        ? (WireGuardHelper.checkField('dns', { enabled: true, value: this.peerEditDNS.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200') : 'bg-white';
       return this.peerEditAssignedColor.dns;
     },
     peerEditMTUColor() {
       // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.dns = this.peerEditMTU.value !== this.network.peers[this.peerConfigId].mtu.value
-        ? (WireGuardHelper.checkField('mtu', this.peerEditMTU) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
-      return this.peerEditAssignedColor.dns;
+      this.peerEditAssignedColor.mtu = this.peerEditMTU.value !== this.network.peers[this.peerConfigId].mtu.value
+        ? (WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerEditMTU.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200') : 'bg-white';
+      return this.peerEditAssignedColor.mtu;
     },
     peerEditConnectionColor() {
       this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;
@@ -804,6 +807,8 @@ new Vue({
           changedFields.connections = changedConnections;
         }
       }
+
+      this.peerEditDisableSaveChanges = !(changeDetectedPeer || changeDetectedConnection);
 
       return [changeDetectedPeer || changeDetectedConnection ? changedFields : {}, true];
     },
