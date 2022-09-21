@@ -118,7 +118,7 @@
             </div>
             <div class="flex-shrink-0">
               <button @click="peerCreateWindowHandler('init'); peerCreateMobility = 'static';"
-                      class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
+                      class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition" :disabled="webServerStatus !== 'up'">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -317,7 +317,7 @@
             <div v-else-if="Object.keys(staticPeers).length === 0">
               <p class="text-center m-10 text-gray-400 text-sm">There are no static peers yet.<br /><br />
               <button @click="peerCreateWindowHandler('init'); peerCreateMobility = 'static';"
-                      class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
+                      class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition" :disabled="webServerStatus !== 'up'">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -343,7 +343,7 @@
             </div>
             <div class="flex-shrink-0">
               <button @click="peerCreateWindowHandler('init'); peerCreateMobility = 'roaming';"
-                class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
+                class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition" :disabled="webServerStatus !== 'up'">
                 <svg class="w-4 mr-2" inline xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                   stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -542,7 +542,7 @@
             <div v-else-if="Object.keys(roamingPeers).length === 0">
               <p class="text-center m-10 text-gray-400 text-sm">There are no roaming peers yet.<br /><br />
               <button @click="peerCreateWindowHandler('init'); peerCreateMobility = 'roaming';"
-                      class="hover:bg-green-700 hover:border-green-700 hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition">
+                      class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition" :disabled="webServerStatus !== 'up'">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

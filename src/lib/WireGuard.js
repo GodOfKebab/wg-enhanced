@@ -153,7 +153,6 @@ module.exports = class WireGuard {
       config.connections[peerConnectionId].latestHandshakeAt = null;
       config.connections[peerConnectionId].transferRx = null;
       config.connections[peerConnectionId].transferTx = null;
-      config.connections[peerConnectionId].persistentKeepalive = 0;
     });
 
     // Loop WireGuard status to fill the above values
@@ -173,7 +172,7 @@ module.exports = class WireGuard {
           latestHandshakeAt,
           transferRx,
           transferTx,
-          persistentKeepalive,
+          persistentKeepalive, // eslint-disable-line no-unused-vars
         ] = line.split('\t');
 
         let clientId = null; // Object.values(config.peers).find(peer => peer.publicKey === publicKey);
@@ -192,7 +191,6 @@ module.exports = class WireGuard {
           : new Date(Number(`${latestHandshakeAt}000`));
         config.connections[clientConnectionId].transferRx = Number(transferRx);
         config.connections[clientConnectionId].transferTx = Number(transferTx);
-        // config.connections[clientConnectionId].persistentKeepalive = persistentKeepalive === 'off' ? 0 : persistentKeepalive;
       });
 
     return config;

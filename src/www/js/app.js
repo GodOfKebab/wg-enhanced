@@ -437,7 +437,7 @@ new Vue({
           enabled: this.peerCreateIsConnectionEnabled[peerId],
           allowedIPsNewToOld: this.peerCreateAllowedIPsNewToOld[peerId],
           allowedIPsOldToNew: this.peerCreateAllowedIPsOldToNew[peerId],
-          persistentKeepalive: 25, // TODO: remove hard coding
+          persistentKeepalive: { enabled: false, value: 25 }, // TODO: remove hard coding
         });
       }
       const dns = {

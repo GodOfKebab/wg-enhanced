@@ -12,7 +12,7 @@ class WireGuardHelper {
 PrivateKey = ${peer.privateKey}
 Address = ${peer.address}/24
 ${peer.mobility === 'static' ? `ListenPort = ${peer.endpoint.toString().split(':')[1]}` : 'DEL'}
-${peer.dns.enabled ? `DNS = ${peer.dns.ip}` : 'DEL'}
+${peer.dns.enabled ? `DNS = ${peer.dns.value}` : 'DEL'}
 ${peer.mtu.enabled ? `MTU = ${peer.mtu.value}` : 'DEL'}\n`.replaceAll('DEL\n', '');
 
     for (const [connectionPeers, connectionDetails] of Object.entries(network.connections)) {
@@ -35,7 +35,7 @@ ${peer.mtu.enabled ? `MTU = ${peer.mtu.value}` : 'DEL'}\n`.replaceAll('DEL\n', '
 PublicKey = ${network.peers[otherPeerId].publicKey}
 PresharedKey = ${connectionDetails.preSharedKey}
 AllowedIPs = ${allowedIPsThisPeer}
-PersistentKeepalive = ${connectionDetails.persistentKeepalive}\n`;
+${connectionDetails.persistentKeepalive.enabled ? `PersistentKeepalive = ${connectionDetails.persistentKeepalive.value}` : 'DEL'}\n`.replaceAll('DEL\n', '');
 
       // Add the Endpoint line if known TODO: get roaming endpoints as well
       if (network.peers[otherPeerId].mobility === 'static') {
