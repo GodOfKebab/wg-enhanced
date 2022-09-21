@@ -719,25 +719,8 @@
                               </div>
                             </div>
                             <div v-show="peerCreateIsConnectionEnabled[peerId]">
-                              <div v-for="connectionKey in ['persistentKeepalive']" class="relative">
-                                <div class="flex grid grid-cols-3 gap-1 text-xs mx-6">
-                                  <div class="col-span-1 text-xs">
-                                    <span class="text-gray-800 align-middle">
-                                        <strong class="">{{ connectionKey }}</strong>:
-                                    </span>
-                                  </div>
-                                  <div class="col-span-2 text-xs">
-                                    <input v-if="connectionKey === 'persistentKeepalive'"
-                                           class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
-                                           type="checkbox">
-                                    <span v-else class="text-gray-800 text-xs pr-1 align-middle">
-                                      TODO
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
                               <div class="relative text-gray-800 text-xs mx-6">
-                                <div class="mt-1 flex items-center">
+                                <div class="mt-1 flex">
                                   <span class="flex-none"><strong>{{ peerCreateName }}</strong> will forward IP subnet(s)</span>
                                   <input class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" :id="`peerCreateData.${peerId}.allowedIPsNewToOld`" v-model="peerCreateAllowedIPsNewToOld[peerId]" :class="[peerCreateConnectionColor.allowedIPsNewToOld[peerId]]" @change="peerCreateConnectionColorRefresh += 1;" @keyup="peerCreateConnectionColorRefresh += 1;">
                                   <datalist :id="`${peerId}_ip_subnets_new_to_old`">
@@ -768,6 +751,15 @@
                                     </option>
                                   </datalist>
                                   <span class="flex-none pr-2"> to <strong>{{ peerCreateName }}</strong></span>
+                                </div>
+                                <div class="text-xs">
+                                  <label class="align-middle">
+                                    <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 align-top bg-no-repeat bg-center bg-contain float-left mr-1 my-1 cursor-pointer" type="checkbox" v-model="peerCreatePersistentKeepaliveEnabledData[peerId]">
+                                    <span class="text-gray-800 cursor-pointer text-xs mr-1">
+                                    <strong>Persistent Keepalive:</strong>
+                                  </span>
+                                  </label>
+                                  <input class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerCreatePersistentKeepaliveValueData[peerId]" :class="['bg-gray-100']" :disabled="!peerCreatePersistentKeepaliveEnabledData[peerId]">
                                 </div>
                               </div>
                             </div>

@@ -53,7 +53,8 @@ new Vue({
     peerCreateMTU: { enabled: null, value: '' },
     peerCreateAttachedPeerIds: [],
     peerCreateIsConnectionEnabled: {},
-    peerCreatePersistentKeepaliveData: {},
+    peerCreatePersistentKeepaliveEnabledData: {},
+    peerCreatePersistentKeepaliveValueData: {},
     peerCreateAllowedIPsNewToOld: {},
     peerCreateAllowedIPsOldToNew: {},
     peerCreateAssignedColor: {
