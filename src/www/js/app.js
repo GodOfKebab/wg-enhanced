@@ -89,6 +89,8 @@ new Vue({
     peerEditConnectionIds: [],
     peerEditIsConnectionEnabled: {},
     peerEditPersistentKeepaliveData: {},
+    peerEditPersistentKeepaliveEnabledData: {},
+    peerEditPersistentKeepaliveValueData: {},
     peerEditAllowedIPsAtoB: {},
     peerEditAllowedIPsBtoA: {},
     peerChangedPeer: false,
@@ -107,6 +109,7 @@ new Vue({
         div: {},
         allowedIPsAtoB: {},
         allowedIPsBtoA: {},
+        persistentKeepalive: {},
       },
     },
     peerEditConnectionColorRefresh: 0,
@@ -418,6 +421,8 @@ new Vue({
         for (const peerId of Object.keys(this.staticPeers)) {
           this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
           this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
+          this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
+          this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
         }
 
         this.peerCreateDNS.enabled = false;
@@ -439,7 +444,10 @@ new Vue({
           enabled: this.peerCreateIsConnectionEnabled[peerId],
           allowedIPsNewToOld: this.peerCreateAllowedIPsNewToOld[peerId],
           allowedIPsOldToNew: this.peerCreateAllowedIPsOldToNew[peerId],
-          persistentKeepalive: { enabled: false, value: 25 }, // TODO: remove hard coding
+          persistentKeepalive: {
+            enabled: this.peerCreatePersistentKeepaliveEnabledData[peerId],
+            value: this.peerCreatePersistentKeepaliveValueData[peerId],
+          },
         });
       }
       const dns = {
@@ -479,19 +487,21 @@ new Vue({
         this.peerEditMTU.enabled = this.network.peers[peerId]['mtu'].enabled;
         this.peerEditMTU.value = this.network.peers[peerId]['mtu'].value;
 
-        // store all the conections related to this peer
+        // store all the connections related to this peer
         this.peerEditConnectionIds = [];
         this.peerEditIsConnectionEnabled = {};
-        this.peerEditPersistentKeepaliveData = {};
         this.peerEditAllowedIPsAtoB = {};
         this.peerEditAllowedIPsBtoA = {};
+        this.peerEditPersistentKeepaliveEnabledData = {};
+        this.peerEditPersistentKeepaliveValueData = {};
         for (const connectionId of Object.keys(this.network.connections)) {
           if (connectionId.includes(peerId)) {
             this.peerEditConnectionIds.push(connectionId);
-            this.peerEditIsConnectionEnabled[connectionId] = this.network.connections[connectionId]['enabled'];
-            this.peerEditPersistentKeepaliveData[connectionId] = this.network.connections[connectionId]['persistentKeepalive'] === 'on';
+            this.peerEditIsConnectionEnabled[connectionId] = this.network.connections[connectionId].enabled;
             this.peerEditAllowedIPsAtoB[connectionId] = this.network.connections[connectionId].allowedIPsAtoB;
             this.peerEditAllowedIPsBtoA[connectionId] = this.network.connections[connectionId].allowedIPsBtoA;
+            this.peerEditPersistentKeepaliveEnabledData[connectionId] = this.network.connections[connectionId].persistentKeepalive.enabled;
+            this.peerEditPersistentKeepaliveValueData[connectionId] = this.network.connections[connectionId].persistentKeepalive.value.toString();
           }
         }
       }
@@ -644,7 +654,7 @@ new Vue({
           // eslint-disable-next-line no-nested-ternary
           this.peerCreateAssignedColor.connections.attachedPeerDiv[peerId] = this.peerCreateIsConnectionEnabled[peerId] && this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] !== 'bg-red-200' && this.peerCreateAssignedColor.connections.allowedIPsNewToOld[peerId] !== 'bg-red-200' ? 'bg-green-50' : 'bg-red-50';
           // eslint-disable-next-line no-nested-ternary
-          this.peerCreateAssignedColor.connections.persistentKeepalive[peerId] = this.peerCreatePersistentKeepaliveEnabledData[peerId] && this.peerCreatePersistentKeepaliveValueData[peerId] >= 0 && this.peerCreatePersistentKeepaliveValueData[peerId] <= 100 ? 'bg-green-200' : 'bg-red-200';
+          this.peerCreateAssignedColor.connections.persistentKeepalive[peerId] = this.peerCreatePersistentKeepaliveEnabledData[peerId] && parseInt(this.peerCreatePersistentKeepaliveValueData[peerId], 10) >= 0 && parseInt(this.peerCreatePersistentKeepaliveValueData[peerId], 10) <= 100 ? 'bg-green-200' : 'bg-red-200';
         } catch (e) {
           this.peerCreateAssignedColor.connections.attachedPeerDiv[peerId] = 'bg-red-50';
           this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] = 'bg-red-50';
@@ -703,6 +713,8 @@ new Vue({
             ? (WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
           // eslint-disable-next-line no-nested-ternary
           this.peerEditAssignedColor.connections.div[connectionId] = this.peerEditIsConnectionEnabled[connectionId] && this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] !== 'bg-red-200' && this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] !== 'bg-red-200' ? 'bg-green-50' : 'bg-red-50';
+          // eslint-disable-next-line no-nested-ternary
+          this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] = this.peerEditPersistentKeepaliveEnabledData[connectionId] && parseInt(this.peerEditPersistentKeepaliveValueData[connectionId], 10) >= 0 && parseInt(this.peerEditPersistentKeepaliveValueData[connectionId], 10) <= 100 ? 'bg-green-200' : 'bg-red-200';
         } catch (e) {
           this.peerEditAssignedColor.connections.div[connectionId] = 'bg-red-50';
           this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = 'bg-red-50';
