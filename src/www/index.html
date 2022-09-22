@@ -752,14 +752,14 @@
                                   </datalist>
                                   <span class="flex-none pr-2"> to <strong>{{ peerCreateName }}</strong></span>
                                 </div>
-                                <div class="text-xs">
-                                  <label class="align-middle">
-                                    <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 align-top bg-no-repeat bg-center bg-contain float-left mr-1 my-1 cursor-pointer" type="checkbox" v-model="peerCreatePersistentKeepaliveEnabledData[peerId]" @change="peerCreateConnectionColorRefresh += 1">
+                                <div class="text-xs flex items-center">
+                                  <label class="flex items-center">
+                                    <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer inline-block" type="checkbox" v-model="peerCreatePersistentKeepaliveEnabledData[peerId]" @change="peerCreateConnectionColorRefresh += 1">
                                     <span class="text-gray-800 cursor-pointer text-xs mr-1">
                                     <strong>Persistent Keepalive:</strong>
                                   </span>
                                   </label>
-                                  <input class="text-gray-800 text-xs mr-1 mt-1 rounded-md pl-1" v-model="peerCreatePersistentKeepaliveValueData[peerId]" type="string" :disabled="!peerCreatePersistentKeepaliveEnabledData[peerId]" :class="[peerCreatePersistentKeepaliveEnabledData[peerId] ? peerCreateAssignedColor.connections.persistentKeepalive[peerId] : 'bg-gray-100']" @change="peerCreateConnectionColorRefresh += 1" @keyup="peerCreateConnectionColorRefresh += 1">
+                                  <input class="text-gray-800 text-xs mr-1 mt-1 rounded-md pl-1 inline-block" v-model="peerCreatePersistentKeepaliveValueData[peerId]" type="string" :disabled="!peerCreatePersistentKeepaliveEnabledData[peerId]" :class="[peerCreatePersistentKeepaliveEnabledData[peerId] ? peerCreateAssignedColor.connections.persistentKeepalive[peerId] : 'bg-gray-100']" @change="peerCreateConnectionColorRefresh += 1" @keyup="peerCreateConnectionColorRefresh += 1">
                                 </div>
                               </div>
                             </div>
@@ -1013,14 +1013,14 @@
                                   </div>
                                 </div>
                               </div>
-                              <div class="text-xs mx-6">
-                                <label class="align-middle">
-                                  <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 align-top bg-no-repeat bg-center bg-contain float-left mr-1 my-1 cursor-pointer" type="checkbox" v-model="peerEditPersistentKeepaliveEnabledData[connectionId]" @change="peerEditConnectionColorRefresh += 1">
+                              <div class="text-xs mx-6 flex items-center">
+                                <label class=" flex items-center">
+                                  <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer inline-block" type="checkbox" v-model="peerEditPersistentKeepaliveEnabledData[connectionId]" @change="peerEditConnectionColorRefresh += 1">
                                   <span class="text-gray-800 cursor-pointer text-xs mr-1">
-                                          <strong>Persistent Keepalive:</strong>
-                                        </span>
+                                    <strong>Persistent Keepalive:</strong>
+                                  </span>
                                 </label>
-                                <input class="text-gray-800 text-xs mr-1 mt-1 rounded-md pl-1" v-model="peerEditPersistentKeepaliveValueData[connectionId]" type="string" :disabled="!peerEditPersistentKeepaliveEnabledData[connectionId]" :class="[peerEditPersistentKeepaliveEnabledData[connectionId] ? peerEditAssignedColor.connections.persistentKeepalive[connectionId] : 'bg-gray-100']" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
+                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 inline-block" v-model="peerEditPersistentKeepaliveValueData[connectionId]" type="string" :disabled="!peerEditPersistentKeepaliveEnabledData[connectionId]" :class="[peerEditPersistentKeepaliveEnabledData[connectionId] ? peerEditAssignedColor.connections.persistentKeepalive[connectionId] : 'bg-gray-100']" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
                               </div>
                               <div class="relative text-gray-800 text-xs mx-6">
                                 <div class="mt-1 flex items-center">
