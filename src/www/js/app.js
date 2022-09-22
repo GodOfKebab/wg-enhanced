@@ -71,6 +71,7 @@ new Vue({
         attachedPeerDiv: {},
         allowedIPsOldToNew: {},
         allowedIPsNewToOld: {},
+        persistentKeepalive: {},
       },
     },
     peerCreateConnectionColorRefresh: 0,
@@ -642,6 +643,8 @@ new Vue({
           this.peerCreateAssignedColor.connections.allowedIPsNewToOld[peerId] = WireGuardHelper.checkField('allowedIPs', this.peerCreateAllowedIPsNewToOld[peerId]) ? 'bg-green-200' : 'bg-red-200';
           // eslint-disable-next-line no-nested-ternary
           this.peerCreateAssignedColor.connections.attachedPeerDiv[peerId] = this.peerCreateIsConnectionEnabled[peerId] && this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] !== 'bg-red-200' && this.peerCreateAssignedColor.connections.allowedIPsNewToOld[peerId] !== 'bg-red-200' ? 'bg-green-50' : 'bg-red-50';
+          // eslint-disable-next-line no-nested-ternary
+          this.peerCreateAssignedColor.connections.persistentKeepalive[peerId] = this.peerCreatePersistentKeepaliveEnabledData[peerId] && this.peerCreatePersistentKeepaliveValueData[peerId] >= 0 && this.peerCreatePersistentKeepaliveValueData[peerId] <= 100 ? 'bg-green-200' : 'bg-red-200';
         } catch (e) {
           this.peerCreateAssignedColor.connections.attachedPeerDiv[peerId] = 'bg-red-50';
           this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] = 'bg-red-50';

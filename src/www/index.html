@@ -759,7 +759,7 @@
                                     <strong>Persistent Keepalive:</strong>
                                   </span>
                                   </label>
-                                  <input class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerCreatePersistentKeepaliveValueData[peerId]" :class="['bg-gray-100']" :disabled="!peerCreatePersistentKeepaliveEnabledData[peerId]">
+                                  <input class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerCreatePersistentKeepaliveValueData[peerId]" type="number" :disabled="!peerCreatePersistentKeepaliveEnabledData[peerId]" :class="[peerCreatePersistentKeepaliveEnabledData[peerId] ? peerCreateAssignedColor.connections.persistentKeepalive[peerId] : 'bg-gray-100']">
                                 </div>
                               </div>
                             </div>
