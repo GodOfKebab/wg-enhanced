@@ -177,6 +177,14 @@ class API {
     });
   }
 
+  async updateConnectionPersistentKeepalive({ connectionId, enabled, value }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/connection/${connectionId}/persistentKeepalive/`,
+      body: { enabled, value },
+    });
+  }
+
   async getWirGuardStatus() {
     return this.call({
       method: 'get',

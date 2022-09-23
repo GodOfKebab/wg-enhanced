@@ -439,7 +439,7 @@ module.exports = class WireGuard {
     await this.saveConfig();
   }
 
-  async updateClientAllowedIPs({ connectionId, AtoB, BtoA }) {
+  async updateConnectionAllowedIPs({ connectionId, AtoB, BtoA }) {
     const config = await this.getConfig();
     if (!await this.getConnection({ connectionId })) return;
 
@@ -450,6 +450,23 @@ module.exports = class WireGuard {
     if (BtoA !== null) {
       if (!WireGuardHelper.checkField('allowedIPs', BtoA)) throw new Error(`allowedIPs couldn't be parsed: ${BtoA}`);
       config.connections[connectionId].allowedIPsBtoA = BtoA;
+    }
+    // TODO: get peerIds and update them.
+    // config.peers[peerId].updatedAt = new Date();
+
+    await this.saveConfig();
+  }
+
+  async updateConnectionPersistentKeepalive({ connectionId, enabled, value }) {
+    const config = await this.getConfig();
+    if (!await this.getConnection({ connectionId })) return;
+
+    if (enabled !== null) {
+      config.connections[connectionId].persistentKeepalive.enabled = enabled;
+    }
+    if (value !== null) {
+      if (!(parseInt(value, 10) >= 0 && parseInt(value, 10) <= 100)) throw new Error(`PersistentKeepalive couldn't be parsed: ${value}`);
+      config.connections[connectionId].persistentKeepalive.value = value;
     }
     // TODO: get peerIds and update them.
     // config.peers[peerId].updatedAt = new Date();

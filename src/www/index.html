@@ -1020,7 +1020,7 @@
                                     <strong>Persistent Keepalive:</strong>
                                   </span>
                                 </label>
-                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 inline-block" v-model="peerEditPersistentKeepaliveValueData[connectionId]" type="string" :disabled="!peerEditPersistentKeepaliveEnabledData[connectionId]" :class="[peerEditPersistentKeepaliveEnabledData[connectionId] ? peerEditAssignedColor.connections.persistentKeepalive[connectionId] : 'bg-gray-100']" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
+                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 inline-block" v-model="peerEditPersistentKeepaliveValueData[connectionId]" type="string" :disabled="!peerEditPersistentKeepaliveEnabledData[connectionId]" :class="[peerEditPersistentKeepaliveEnabledData[connectionId] ? peerEditConnectionColor.persistentKeepalive[connectionId] : 'bg-gray-100']" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
                               </div>
                               <div class="relative text-gray-800 text-xs mx-6">
                                 <div class="mt-1 flex items-center">

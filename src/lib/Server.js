@@ -156,7 +156,12 @@ module.exports = class Server {
       .put('/api/wireguard/connection/:connectionId/allowedIPs', Util.promisify(async req => {
         const { connectionId } = req.params;
         const { AtoB, BtoA } = req.body;
-        return WireGuard.updateClientAllowedIPs({ connectionId, AtoB, BtoA });
+        return WireGuard.updateConnectionAllowedIPs({ connectionId, AtoB, BtoA });
+      }))
+      .put('/api/wireguard/connection/:connectionId/persistentKeepalive', Util.promisify(async req => {
+        const { connectionId } = req.params;
+        const { enabled, value } = req.body;
+        return WireGuard.updateConnectionPersistentKeepalive({ connectionId, enabled, value });
       }))
 
       .listen(PORT, () => {
