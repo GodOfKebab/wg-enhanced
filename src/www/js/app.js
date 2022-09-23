@@ -86,7 +86,8 @@ new Vue({
     peerEditEndpoint: '',
     peerEditDNS: { enabled: null, value: '' },
     peerEditMTU: { enabled: null, value: '' },
-    peerEditConnectionIds: [],
+    peerEditStaticConnectionIds: [],
+    peerEditRoamingConnectionIds: [],
     peerEditIsConnectionEnabled: {},
     peerEditPersistentKeepaliveEnabledData: {},
     peerEditPersistentKeepaliveValueData: {},
@@ -104,6 +105,7 @@ new Vue({
       dns: 'bg-white',
       mtu: 'bg-white',
       connections: {
+        attachedPeerCountDiv: 'bg-white',
         div: {},
         allowedIPsAtoB: {},
         allowedIPsBtoA: {},
@@ -491,7 +493,6 @@ new Vue({
         this.peerEditMTU.value = this.network.peers[peerId]['mtu'].value;
 
         // store all the connections related to this peer
-        this.peerEditConnectionIds = [];
         this.peerEditIsConnectionEnabled = {};
         this.peerEditAllowedIPsAtoB = {};
         this.peerEditAllowedIPsBtoA = {};
@@ -499,7 +500,6 @@ new Vue({
         this.peerEditPersistentKeepaliveValueData = {};
         for (const connectionId of Object.keys(this.network.connections)) {
           if (connectionId.includes(peerId)) {
-            this.peerEditConnectionIds.push(connectionId);
             this.peerEditIsConnectionEnabled[connectionId] = this.network.connections[connectionId].enabled;
             this.peerEditAllowedIPsAtoB[connectionId] = this.network.connections[connectionId].allowedIPsAtoB;
             this.peerEditAllowedIPsBtoA[connectionId] = this.network.connections[connectionId].allowedIPsBtoA;
@@ -507,6 +507,21 @@ new Vue({
             this.peerEditPersistentKeepaliveValueData[connectionId] = this.network.connections[connectionId].persistentKeepalive.value.toString();
           }
         }
+        // To enforce order of static > roaming connections when listed in the view
+        this.peerEditStaticConnectionIds = [];
+        this.peerEditRoamingConnectionIds = [];
+        Object.keys(this.staticPeers).forEach(staticPeerId => {
+          if (staticPeerId !== peerId) {
+            const connectionId = WireGuardHelper.getConnectionId(staticPeerId, peerId);
+            if (Object.keys(this.network.connections).includes(connectionId)) this.peerEditStaticConnectionIds.push(connectionId);
+          }
+        });
+        Object.keys(this.roamingPeers).forEach(roamingPeerId => {
+          if (roamingPeerId !== peerId) {
+            const connectionId = WireGuardHelper.getConnectionId(roamingPeerId, peerId);
+            if (Object.keys(this.network.connections).includes(connectionId)) this.peerEditRoamingConnectionIds.push(connectionId);
+          }
+        });
       }
     },
     async peerConfigEditUpdateConfirmation() {
@@ -623,6 +638,21 @@ new Vue({
     },
   },
   computed: {
+    peerCreateNameColor() {
+      this.peerCreateAssignedColor.name = WireGuardHelper.checkField('name', this.peerCreateName) ? 'bg-green-50' : 'bg-red-50';
+      return this.peerCreateAssignedColor.name;
+    },
+    peerCreateEndpointColor() {
+      this.peerCreateAssignedColor.endpoint = WireGuardHelper.checkField('endpoint', this.peerCreateEndpoint) ? 'bg-green-50' : 'bg-red-50';
+      return this.peerCreateAssignedColor.endpoint;
+    },
+    peerCreateDNSMTUColor() {
+      this.peerCreateAssignedColor.dnsmtu.dnsInput = WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateDNS.value }) ? 'enabled:bg-green-100' : 'enabled:bg-red-100';
+      this.peerCreateAssignedColor.dnsmtu.mtuInput = WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerCreateMTU.value }) ? 'enabled:bg-green-100' : 'enabled:bg-red-100';
+      // eslint-disable-next-line no-nested-ternary
+      this.peerCreateAssignedColor.dnsmtu.div = this.peerCreateDNS.enabled || this.peerCreateMTU.enabled ? ((this.peerCreateDNS.enabled && this.peerCreateAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-100') || (this.peerCreateMTU.enabled && this.peerCreateAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-100') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      return this.peerCreateAssignedColor.dnsmtu;
+    },
     peerCreateSelectAll: {
       get() {
         return this.staticPeers ? Object.keys(this.staticPeers).length === this.peerCreateAttachedPeerIds.length : false;
@@ -641,21 +671,6 @@ new Vue({
 
         this.peerCreateAttachedPeerIds = attached;
       },
-    },
-    peerCreateNameColor() {
-      this.peerCreateAssignedColor.name = WireGuardHelper.checkField('name', this.peerCreateName) ? 'bg-green-50' : 'bg-red-50';
-      return this.peerCreateAssignedColor.name;
-    },
-    peerCreateEndpointColor() {
-      this.peerCreateAssignedColor.endpoint = WireGuardHelper.checkField('endpoint', this.peerCreateEndpoint) ? 'bg-green-50' : 'bg-red-50';
-      return this.peerCreateAssignedColor.endpoint;
-    },
-    peerCreateDNSMTUColor() {
-      this.peerCreateAssignedColor.dnsmtu.dnsInput = WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateDNS.value }) ? 'enabled:bg-green-100' : 'enabled:bg-red-100';
-      this.peerCreateAssignedColor.dnsmtu.mtuInput = WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerCreateMTU.value }) ? 'enabled:bg-green-100' : 'enabled:bg-red-100';
-      // eslint-disable-next-line no-nested-ternary
-      this.peerCreateAssignedColor.dnsmtu.div = this.peerCreateDNS.enabled || this.peerCreateMTU.enabled ? ((this.peerCreateDNS.enabled && this.peerCreateAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-100') || (this.peerCreateMTU.enabled && this.peerCreateAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-100') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
-      return this.peerCreateAssignedColor.dnsmtu;
     },
     peerCreateAttachedPeersCountDivColor() {
       this.peerCreateAssignedColor.connections.attachedPeerCountDiv = WireGuardHelper.checkField('peerCount', this.peerCreateAttachedPeerIds) ? 'bg-green-50' : 'bg-red-50';
@@ -716,6 +731,81 @@ new Vue({
       this.peerEditAssignedColor.mtu = this.peerEditMTU.value !== this.network.peers[this.peerConfigId].mtu.value
         ? (WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerEditMTU.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200') : 'bg-white';
       return this.peerEditAssignedColor.mtu;
+    },
+    peerEditAttachablePeerIds() {
+      const staticPeers = [];
+      Object.keys(this.staticPeers).forEach(peerId => {
+        if (peerId !== this.peerConfigId) {
+          staticPeers.push(peerId);
+        }
+      });
+      const roamingPeers = [];
+      Object.keys(this.roamingPeers).forEach(peerId => {
+        if (peerId !== this.peerConfigId) {
+          roamingPeers.push(peerId);
+        }
+      });
+      return { staticPeers, roamingPeers };
+    },
+    peerEditStaticSelectAll: {
+      get() {
+        return this.peerEditAttachablePeerIds.staticPeers.every(peerId => {
+          const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
+          return this.peerEditStaticConnectionIds.includes(connectionId);
+        });
+      },
+      set(value) {
+        const attached = [];
+
+        if (value) {
+          this.peerEditAttachablePeerIds.staticPeers.forEach(peerId => {
+            const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
+            attached.push(connectionId);
+            if (!(connectionId in this.peerEditStaticConnectionIds)) {
+              this.peerEditIsConnectionEnabled[connectionId] = true;
+            }
+          });
+        }
+
+        this.peerEditStaticConnectionIds = attached;
+      },
+    },
+    peerEditRoamingSelectAll: {
+      get() {
+        return this.peerEditAttachablePeerIds.roamingPeers.every(peerId => {
+          const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
+          return this.peerEditRoamingConnectionIds.includes(connectionId);
+        });
+      },
+      set(value) {
+        const attached = [];
+
+        if (value) {
+          this.peerEditAttachablePeerIds.roamingPeers.forEach(peerId => {
+            const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
+            attached.push(connectionId);
+            if (!(connectionId in this.peerEditRoamingConnectionIds)) {
+              this.peerEditIsConnectionEnabled[connectionId] = true;
+            }
+          });
+        }
+
+        this.peerEditRoamingConnectionIds = attached;
+      },
+    },
+    peerEditConnectionIds() {
+      const connectionIds = [];
+      Object.keys(this.network.connections).forEach(connectionId => {
+        if (this.peerEditStaticConnectionIds.includes(connectionId)) connectionIds.push(connectionId);
+      });
+      Object.keys(this.network.connections).forEach(connectionId => {
+        if (this.peerEditRoamingConnectionIds.includes(connectionId)) connectionIds.push(connectionId);
+      });
+      return connectionIds;
+    },
+    peerEditAttachedPeersCountDivColor() {
+      this.peerEditAssignedColor.connections.attachedPeerCountDiv = WireGuardHelper.checkField('peerCount', this.peerEditConnectionIds) ? 'bg-green-50' : 'bg-red-50';
+      return this.peerEditAssignedColor.connections.attachedPeerCountDiv;
     },
     peerEditConnectionColor() {
       this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;

@@ -972,14 +972,55 @@
                       </div>
 
                       <!-- Peer's connections edit -->
-                      <div class="mr-2">
-                        <h2 class="ml-2 mt-2 inline">Attached Peers: </h2>
-                        <div class=" flex items-center justify-center h-6 w-6 rounded-full bg-green-700 inline-block float-right">
-                          <svg class="h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-                               viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
+                      <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0 || peerEditAttachablePeerIds.roamingPeers.length > 0" class="m-2 p-1 shadow-md border rounded" :class="[peerEditAttachedPeersCountDivColor]">
+                        <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0">
+                          <div class="text-gray-800">
+                            Attached static peers:
+                          </div>
+                          <div class="form-check">
+                            <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
+                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticSelectAll">
+                              <span>Select All</span>
+                            </label>
+                          </div>
+                          <div class="flex grid grid-cols-2">
+                            <div v-for="peerId in peerEditAttachablePeerIds.staticPeers"
+                                 class="relative overflow-hidden">
+                              <div class="form-check truncate">
+                                <label>
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerCreateIsConnectionEnabled[peerId] = true;">
+                                  <span class="text-gray-800 cursor-pointer text-xs">
+                                    <strong class="text-sm">{{ network.peers[peerId].name }}</strong> {{ network.peers[peerId].address }} ({{ peerId }})
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div v-if="peerEditAttachablePeerIds.roamingPeers.length > 0">
+                          <div class="text-gray-800">
+                            Attached roaming peers:
+                          </div>
+                          <div class="form-check">
+                            <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
+                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingSelectAll">
+                              <span>Select All</span>
+                            </label>
+                          </div>
+                          <div class="flex grid grid-cols-2">
+                            <div v-for="peerId in peerEditAttachablePeerIds.roamingPeers"
+                                 class="relative overflow-hidden">
+                              <div class="form-check truncate">
+                                <label>
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerCreateIsConnectionEnabled[peerId] = true;">
+                                  <span class="text-gray-800 cursor-pointer text-xs">
+                                    <strong class="text-sm">{{ network.peers[peerId].name }}</strong> {{ network.peers[peerId].address }} ({{ peerId }})
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
