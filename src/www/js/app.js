@@ -760,7 +760,14 @@ new Vue({
           peerErrorField = field;
           errorNotFound = false;
         }
-        changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200';
+        if (field === 'endpoint') {
+          changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
+        } else if (field === 'DNS') {
+          changeDetectedPeer ||= this.peerEditDNS.enabled !== this.network.peers[this.peerConfigId].dns.enabled;
+        } else if (field === 'MTU') {
+          changeDetectedPeer ||= this.peerEditMTU.enabled !== this.network.peers[this.peerConfigId].mtu.enabled;
+        }
+        changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200' || peerEditFieldColor === 'enabled:bg-green-200';
       }
 
       if (!errorNotFound) {
