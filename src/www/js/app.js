@@ -97,7 +97,6 @@ new Vue({
     // peerEditChangedFields: {},
     peerEditOldConfig: { peers: {}, connections: {} },
     peerEditNewConfig: { peers: {}, connections: {} },
-    peerEditDisableSaveChanges: true,
     peerEditAssignedColor: {
       name: 'bg-white',
       address: 'bg-white',
@@ -743,7 +742,6 @@ new Vue({
       return this.peerEditAssignedColor.connections;
     },
     peerEditChangedFieldsCompute() {
-      console.log('peerEditChangedFieldsCompute');
       // this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;
       let errorNotFound = true;
       let changeDetectedPeer = false;
@@ -860,9 +858,6 @@ new Vue({
           changedFields.connections = changedConnections;
         }
       }
-
-      console.log(`changeDetectedPeer: ${changeDetectedPeer} && changeDetectedConnection: ${changeDetectedConnection}`);
-      this.peerEditDisableSaveChanges = !(changeDetectedPeer || changeDetectedConnection);
 
       return [changeDetectedPeer || changeDetectedConnection ? changedFields : {}, true];
     },

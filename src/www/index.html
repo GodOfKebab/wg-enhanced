@@ -883,7 +883,7 @@
                       </h3>
                       <span class="order-last">
                         <button v-show="peerConfigWindow === 'edit'" class="align-middle bg-gray-100 hover:enabled:bg-gray-600 hover:enabled:text-white disabled:text-blue-100 disabled:bg-gray-50 p-2 rounded transition special-fill"
-                                title="See the configuration differences for this peer" @click="peerConfigEditUpdateConfirmation().then(); peerConfigWindow = 'view-changes'" :disabled="peerEditDisableSaveChanges">
+                                title="See the configuration differences for this peer" @click="peerConfigEditUpdateConfirmation().then(); peerConfigWindow = 'view-changes'" :disabled="Object.keys(peerEditChangedFieldsCompute[0]).length === 0">
                           <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 122.742 122.881" xml:space="preserve">
                             <g>
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0"
@@ -1081,7 +1081,7 @@
                 <button v-show="peerConfigWindow === 'edit' || peerConfigWindow === 'view-changes'" type="button"
                         @click="peerConfigEditUpdateConfirmation().then(); peerConfigWindow = 'confirm-changes'"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm disabled:bg-gray-200 transition"
-                        :disabled="peerEditDisableSaveChanges">
+                        :disabled="!(Object.keys(peerEditChangedFieldsCompute[0]).length > 0 && peerEditChangedFieldsCompute[1])">
                   Save Configuration
                 </button>
                 <button type="button" @click="peerConfigId = null;"
@@ -1168,7 +1168,7 @@
                 </div>
               </div>
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button type="button" @click="peerConfigEditApply().then(); peerConfigWindow = 'edit'; peerConfigId = null; peerEditDisableSaveChanges = true;"
+                <button type="button" @click="peerConfigEditApply().then(); peerConfigWindow = 'edit'; peerConfigId = null;"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
                   Do it!
                 </button>
