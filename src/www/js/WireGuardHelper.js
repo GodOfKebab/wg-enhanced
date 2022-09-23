@@ -100,6 +100,11 @@ ${connectionDetails.persistentKeepalive.enabled ? `PersistentKeepalive = ${conne
       return fieldVariable.match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|1[0-9]|[0-9]))(,((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\/(3[0-2]|2[0-9]|1[0-9]|[0-9])))*$');
     }
 
+    // check allowedIPs
+    if (fieldName === 'persistentKeepalive') {
+      return fieldVariable.match('^([0-9][0-9]|[0-9])$');
+    }
+
     // check dns
     if (fieldName === 'dns') {
       let checkDNS = fieldVariable.enabled === true || fieldVariable.enabled === false;

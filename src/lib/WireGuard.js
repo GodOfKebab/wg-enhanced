@@ -296,6 +296,7 @@ module.exports = class WireGuard {
     };
 
     // create the connections
+    // TODO: add check for incoming connection id and fields
     for (const attachedPeer of attachedPeers) {
       const connectionId = WireGuardHelper.getConnectionId(peerId, attachedPeer.peer);
       const preSharedKey = await Util.exec('wg genpsk');
@@ -465,7 +466,7 @@ module.exports = class WireGuard {
       config.connections[connectionId].persistentKeepalive.enabled = enabled;
     }
     if (value !== null) {
-      if (!(parseInt(value, 10) >= 0 && parseInt(value, 10) <= 100)) throw new Error(`PersistentKeepalive couldn't be parsed: ${value}`);
+      if (!WireGuardHelper.checkField('persistentKeepalive', value)) throw new Error(`PersistentKeepalive couldn't be parsed: ${value}`);
       config.connections[connectionId].persistentKeepalive.value = value;
     }
     // TODO: get peerIds and update them.

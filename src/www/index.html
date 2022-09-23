@@ -1007,7 +1007,7 @@
                                     </span>
                                   </div>
                                   <div class="col-span-2 text-xs">
-                                    <span v-else class="text-gray-800 text-xs pr-1 align-middle">
+                                    <span class="text-gray-800 text-xs pr-1 align-middle">
                                       {{ network.connections[connectionId][connectionKey] }}
                                     </span>
                                   </div>
@@ -1054,11 +1054,13 @@
                         </div>
                         <div class="bg-red-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
-                          <div class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
+                          <div v-if="!peerEditChangedFieldsCompute[1]" class="p-1">{}</div>
+                          <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
                         </div>
                         <div class="bg-green-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
-                          <div class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
+                          <div v-if="!peerEditChangedFieldsCompute[1]" class="p-1">{}</div>
+                          <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
                         </div>
                       </div>
                     </div>
@@ -1081,7 +1083,7 @@
                 <button v-show="peerConfigWindow === 'edit' || peerConfigWindow === 'view-changes'" type="button"
                         @click="peerConfigEditUpdateConfirmation().then(); peerConfigWindow = 'confirm-changes'"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm disabled:bg-gray-200 transition"
-                        :disabled="!(Object.keys(peerEditChangedFieldsCompute[0]).length > 0 && peerEditChangedFieldsCompute[1])">
+                        :disabled="!(Object.keys(peerEditChangedFieldsCompute[0]).length > 0 && peerEditChangedFieldsCompute[1] && webServerStatus === 'up')">
                   Save Configuration
                 </button>
                 <button type="button" @click="peerConfigId = null;"

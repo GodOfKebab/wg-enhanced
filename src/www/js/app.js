@@ -670,7 +670,7 @@ new Vue({
           // eslint-disable-next-line no-nested-ternary
           this.peerCreateAssignedColor.connections.attachedPeerDiv[peerId] = this.peerCreateIsConnectionEnabled[peerId] && this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] !== 'bg-red-200' && this.peerCreateAssignedColor.connections.allowedIPsNewToOld[peerId] !== 'bg-red-200' ? 'bg-green-50' : 'bg-red-50';
           // eslint-disable-next-line no-nested-ternary
-          this.peerCreateAssignedColor.connections.persistentKeepalive[peerId] = this.peerCreatePersistentKeepaliveEnabledData[peerId] && parseInt(this.peerCreatePersistentKeepaliveValueData[peerId], 10) >= 0 && parseInt(this.peerCreatePersistentKeepaliveValueData[peerId], 10) <= 100 ? 'bg-green-200' : 'bg-red-200';
+          this.peerCreateAssignedColor.connections.persistentKeepalive[peerId] = this.peerCreatePersistentKeepaliveEnabledData[peerId] && WireGuardHelper.checkField('persistentKeepalive', this.peerCreatePersistentKeepaliveValueData[peerId]) ? 'bg-green-200' : 'bg-red-200';
         } catch (e) {
           this.peerCreateAssignedColor.connections.attachedPeerDiv[peerId] = 'bg-red-50';
           this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] = 'bg-red-50';
@@ -729,7 +729,7 @@ new Vue({
             ? (WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
           // eslint-disable-next-line no-nested-ternary
           this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] = this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value
-            ? (parseInt(this.peerEditPersistentKeepaliveValueData[connectionId], 10) >= 0 && parseInt(this.peerEditPersistentKeepaliveValueData[connectionId], 10) <= 100 ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+            ? (WireGuardHelper.checkField('persistentKeepalive', this.peerEditPersistentKeepaliveValueData[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
           // eslint-disable-next-line no-nested-ternary
           this.peerEditAssignedColor.connections.div[connectionId] = this.peerEditIsConnectionEnabled[connectionId] && this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] !== 'bg-red-200' && this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] !== 'bg-red-200' && this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] !== 'bg-red-200' ? 'bg-green-50' : 'bg-red-50';
         } catch (e) {
