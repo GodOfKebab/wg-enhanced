@@ -706,7 +706,17 @@
 
                         <div v-if="Object.keys(staticPeers).length" v-for="(peerDetails, peerId) in staticPeers" class="relative">
                           <div v-if="peerCreateAttachedPeerIds.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :class="[peerCreateConnectionColor.attachedPeerDiv[peerId]]">
-                            <div class=" mr-6">
+                            <div class="inline-block float-right absolute z-20 right-[0.5rem] top-[0.25rem]">
+                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-20 hover:opacity-100 transition"
+                                      title="Remove Connection" @click="peerCreateAttachedPeerIds.splice(peerCreateAttachedPeerIds.indexOf(peerId), 1)">
+                                <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd"
+                                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div class=" ml-1">
                               <div class="form-check">
                                 <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
                                   <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox"  v-model="peerCreateIsConnectionEnabled[peerId]" @change="peerCreateConnectionColorRefresh += 1;">
@@ -1028,7 +1038,8 @@
                       <div v-for="connectionId in peerEditConnectionIds" class="relative">
                         <div class="inline-block float-right absolute z-20 right-[1rem] top-[0.25rem]">
                           <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-20 hover:opacity-100 transition"
-                                  title="Remove Connection" @click="peerEditRemoveConnections(connectionId)">
+                                  title="Remove Connection"
+                                  @click="peerEditStaticConnectionIds.includes(connectionId) ? peerEditStaticConnectionIds.splice(peerEditStaticConnectionIds.indexOf(connectionId), 1) : peerEditRoamingConnectionIds.splice(peerEditRoamingConnectionIds.indexOf(connectionId), 1)">
                             <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                               <path fill-rule="evenodd"
                                     d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
