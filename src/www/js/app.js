@@ -524,6 +524,43 @@ new Vue({
           }
         });
       }
+
+      if (mode === 'init-connection') {
+        const { peerId } = options;
+        const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
+        this.peerEditIsConnectionEnabled[connectionId] = true;
+        if (!Object.keys(this.network.connections).includes(connectionId)) {
+          console.log('adding a new connection');
+          if (connectionId.startsWith(peerId)) {
+            this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[this.peerConfigId].address}/32`;
+            this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[peerId].address}/32`;
+          } else {
+            this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[peerId].address}/32`;
+            this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[this.peerConfigId].address}/32`;
+          }
+          this.peerEditPersistentKeepaliveEnabledData[connectionId] = false;
+          this.peerEditPersistentKeepaliveValueData[connectionId] = '25';
+        }
+      }
+
+      if (mode === 'init-connections') {
+        for (const connectionId of this.peerEditConnectionIds) {
+          this.peerEditIsConnectionEnabled[connectionId] = true;
+          if (!Object.keys(this.network.connections).includes(connectionId)) {
+            const peerId = connectionId.replace(this.peerConfigId, '').replace('*', '');
+            console.log('adding a new connection');
+            if (connectionId.startsWith(peerId)) {
+              this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[this.peerConfigId].address}/32`;
+              this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[peerId].address}/32`;
+            } else {
+              this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[peerId].address}/32`;
+              this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[this.peerConfigId].address}/32`;
+            }
+            this.peerEditPersistentKeepaliveEnabledData[connectionId] = false;
+            this.peerEditPersistentKeepaliveValueData[connectionId] = '25';
+          }
+        }
+      }
     },
     async peerConfigEditUpdateConfirmation() {
       const [changedFields, errorNotFound] = this.peerEditChangedFieldsCompute;
@@ -815,18 +852,30 @@ new Vue({
       this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;
       for (const connectionId of this.peerEditConnectionIds) {
         try {
-          // eslint-disable-next-line no-nested-ternary
-          this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB
-            ? (WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
-          // eslint-disable-next-line no-nested-ternary
-          this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] = this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA
-            ? (WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
-          // eslint-disable-next-line no-nested-ternary
-          this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] = this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value
-            ? (WireGuardHelper.checkField('persistentKeepalive', this.peerEditPersistentKeepaliveValueData[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
-          // eslint-disable-next-line no-nested-ternary
-          this.peerEditAssignedColor.connections.div[connectionId] = this.peerEditIsConnectionEnabled[connectionId] && this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] !== 'bg-red-200' && this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] !== 'bg-red-200' && this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] !== 'bg-red-200' ? 'bg-green-50' : 'bg-red-50';
+          if (Object.keys(this.network.connections).includes(connectionId)) {
+            // eslint-disable-next-line no-nested-ternary
+            this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB
+              ? (WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+            // eslint-disable-next-line no-nested-ternary
+            this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] = this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA
+              ? (WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+            // eslint-disable-next-line no-nested-ternary
+            this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] = this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value
+              ? (WireGuardHelper.checkField('persistentKeepalive', this.peerEditPersistentKeepaliveValueData[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+            // eslint-disable-next-line no-nested-ternary
+            this.peerEditAssignedColor.connections.div[connectionId] = this.peerEditIsConnectionEnabled[connectionId] && this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] !== 'bg-red-200' && this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] !== 'bg-red-200' && this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] !== 'bg-red-200' ? 'bg-green-50' : 'bg-red-50';
+          } else {
+            // eslint-disable-next-line no-nested-ternary
+            this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200';
+            // eslint-disable-next-line no-nested-ternary
+            this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] = WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200';
+            // eslint-disable-next-line no-nested-ternary
+            this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] = WireGuardHelper.checkField('persistentKeepalive', this.peerEditPersistentKeepaliveValueData[connectionId]) ? 'bg-green-200' : 'bg-red-200';
+            // eslint-disable-next-line no-nested-ternary
+            this.peerEditAssignedColor.connections.div[connectionId] = this.peerEditIsConnectionEnabled[connectionId] && this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] !== 'bg-red-200' && this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] !== 'bg-red-200' && this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] !== 'bg-red-200' ? 'bg-green-50' : 'bg-red-50';
+          }
         } catch (e) {
+          console.log(e);
           this.peerEditAssignedColor.connections.div[connectionId] = 'bg-red-50';
           this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = 'bg-red-50';
           this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] = 'bg-red-50';
@@ -903,7 +952,7 @@ new Vue({
 
       // check errors
       for (const connectionId of this.peerEditConnectionIds) {
-        try {
+        if (Object.keys(this.network.connections).includes(connectionId)) {
           for (const connectionField of ['allowedIPsAtoB', 'allowedIPsBtoA', 'persistentKeepalive']) {
             if (this.peerEditConnectionColor[connectionField][connectionId] === 'bg-red-200') {
               connectionIdError = connectionId;
@@ -917,8 +966,15 @@ new Vue({
           }
           changeDetectedConnection ||= this.peerEditConnectionColor.persistentKeepalive[connectionId] === 'bg-green-200';
           changeDetectedConnection ||= this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled;
-        } catch (e) {
-          console.log(`This connectionId doesn't exists: ${connectionId}`);
+        } else {
+          changeDetectedConnection = true;
+          for (const connectionField of ['allowedIPsAtoB', 'allowedIPsBtoA', 'persistentKeepalive']) {
+            if (this.peerEditConnectionColor[connectionField][connectionId] === 'bg-red-200') {
+              connectionIdError = connectionId;
+              connectionErrorField = connectionField;
+              errorNotFound = false;
+            }
+          }
         }
       }
 
@@ -932,32 +988,36 @@ new Vue({
         try {
           for (const connectionId of this.peerEditConnectionIds) {
             const changedSubFields = {};
-            if (this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled) {
-              changedSubFields.enabled = this.peerEditIsConnectionEnabled[connectionId];
-            }
-
-            if (this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB) {
-              changedSubFields.allowedIPsAtoB = this.peerEditAllowedIPsAtoB[connectionId];
-            }
-
-            if (this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA) {
-              changedSubFields.allowedIPsBtoA = this.peerEditAllowedIPsBtoA[connectionId];
-            }
-
-            if (this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled) {
-              changedSubFields.persistentKeepalive = { enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId] };
-            }
-
-            if (this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value) {
-              if ('persistentKeepalive' in changedSubFields) {
-                changedSubFields.persistentKeepalive.value = this.peerEditPersistentKeepaliveValueData[connectionId];
-              } else {
-                changedSubFields.persistentKeepalive = { value: this.peerEditPersistentKeepaliveValueData[connectionId] };
+            if (Object.keys(this.network.connections).includes(connectionId)) {
+              if (this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled) {
+                changedSubFields.enabled = this.peerEditIsConnectionEnabled[connectionId];
               }
-            }
 
-            if (Object.keys(changedSubFields).length > 0) {
-              changedConnections[connectionId] = changedSubFields;
+              if (this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB) {
+                changedSubFields.allowedIPsAtoB = this.peerEditAllowedIPsAtoB[connectionId];
+              }
+
+              if (this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA) {
+                changedSubFields.allowedIPsBtoA = this.peerEditAllowedIPsBtoA[connectionId];
+              }
+
+              if (this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled) {
+                changedSubFields.persistentKeepalive = { enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId] };
+              }
+
+              if (this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value) {
+                if ('persistentKeepalive' in changedSubFields) {
+                  changedSubFields.persistentKeepalive.value = this.peerEditPersistentKeepaliveValueData[connectionId];
+                } else {
+                  changedSubFields.persistentKeepalive = { value: this.peerEditPersistentKeepaliveValueData[connectionId] };
+                }
+              }
+
+              if (Object.keys(changedSubFields).length > 0) {
+                changedConnections[connectionId] = changedSubFields;
+              }
+            } else {
+              console.log('TODO add new connections to the changedFields');
             }
           }
         } catch (e) {

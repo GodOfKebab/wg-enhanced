@@ -989,7 +989,7 @@
                           </div>
                           <div class="form-check">
                             <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticSelectAll">
+                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticSelectAll" @change="peerEditWindowHandler('init-connections')">
                               <span>Select All</span>
                             </label>
                           </div>
@@ -998,7 +998,7 @@
                                  class="relative overflow-hidden">
                               <div class="form-check truncate">
                                 <label>
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerEditIsConnectionEnabled[WireGuardHelper.getConnectionId(peerConfigId, peerId)] = true;">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerEditWindowHandler('init-connection', {peerId: peerId})">
                                   <span class="text-gray-800 cursor-pointer text-xs">
                                     <strong class="text-sm">{{ network.peers[peerId].name }}</strong> {{ network.peers[peerId].address }} ({{ peerId }})
                                   </span>
@@ -1014,7 +1014,7 @@
                           </div>
                           <div class="form-check">
                             <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingSelectAll">
+                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingSelectAll" @change="peerEditWindowHandler('init-connections')">
                               <span>Select All</span>
                             </label>
                           </div>
@@ -1023,7 +1023,7 @@
                                  class="relative overflow-hidden">
                               <div class="form-check truncate">
                                 <label>
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerEditIsConnectionEnabled[WireGuardHelper.getConnectionId(peerConfigId, peerId)] = true;">
+                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerEditWindowHandler('init-connection', {peerId: peerId})">
                                   <span class="text-gray-800 cursor-pointer text-xs">
                                     <strong class="text-sm">{{ network.peers[peerId].name }}</strong> {{ network.peers[peerId].address }} ({{ peerId }})
                                   </span>
