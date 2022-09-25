@@ -88,6 +88,7 @@ new Vue({
     peerEditMTU: { enabled: null, value: '' },
     peerEditStaticConnectionIds: [],
     peerEditRoamingConnectionIds: [],
+    peerEditNewConnectionIds: [],
     peerEditIsConnectionEnabled: {},
     peerEditPersistentKeepaliveEnabledData: {},
     peerEditPersistentKeepaliveValueData: {},
@@ -795,12 +796,15 @@ new Vue({
     },
     peerEditConnectionIds() {
       const connectionIds = [];
-      Object.keys(this.network.connections).forEach(connectionId => {
+      this.peerEditAttachablePeerIds.staticPeers.forEach(peerId => {
+        const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
         if (this.peerEditStaticConnectionIds.includes(connectionId)) connectionIds.push(connectionId);
       });
-      Object.keys(this.network.connections).forEach(connectionId => {
+      this.peerEditAttachablePeerIds.roamingPeers.forEach(peerId => {
+        const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
         if (this.peerEditRoamingConnectionIds.includes(connectionId)) connectionIds.push(connectionId);
       });
+
       return connectionIds;
     },
     peerEditAttachedPeersCountDivColor() {
@@ -899,19 +903,23 @@ new Vue({
 
       // check errors
       for (const connectionId of this.peerEditConnectionIds) {
-        for (const connectionField of ['allowedIPsAtoB', 'allowedIPsBtoA', 'persistentKeepalive']) {
-          if (this.peerEditConnectionColor[connectionField][connectionId] === 'bg-red-200') {
-            connectionIdError = connectionId;
-            connectionErrorField = connectionField;
-            errorNotFound = false;
+        try {
+          for (const connectionField of ['allowedIPsAtoB', 'allowedIPsBtoA', 'persistentKeepalive']) {
+            if (this.peerEditConnectionColor[connectionField][connectionId] === 'bg-red-200') {
+              connectionIdError = connectionId;
+              connectionErrorField = connectionField;
+              errorNotFound = false;
+            }
+            if (connectionField === 'persistentKeepalive') {
+              changeDetectedConnection ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
+            }
+            changeDetectedConnection ||= this.peerEditConnectionColor[connectionField][connectionId] === 'bg-green-200';
           }
-          if (connectionField === 'persistentKeepalive') {
-            changeDetectedConnection ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
-          }
-          changeDetectedConnection ||= this.peerEditConnectionColor[connectionField][connectionId] === 'bg-green-200';
+          changeDetectedConnection ||= this.peerEditConnectionColor.persistentKeepalive[connectionId] === 'bg-green-200';
+          changeDetectedConnection ||= this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled;
+        } catch (e) {
+          console.log(`This connectionId doesn't exists: ${connectionId}`);
         }
-        changeDetectedConnection ||= this.peerEditConnectionColor.persistentKeepalive[connectionId] === 'bg-green-200';
-        changeDetectedConnection ||= this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled;
       }
 
       if (!errorNotFound) {
@@ -921,36 +929,41 @@ new Vue({
       this.peerChangedConnections = changeDetectedConnection;
       if (changeDetectedConnection) {
         const changedConnections = {};
-        for (const connectionId of this.peerEditConnectionIds) {
-          const changedSubFields = {};
-          if (this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled) {
-            changedSubFields.enabled = this.peerEditIsConnectionEnabled[connectionId];
-          }
+        try {
+          for (const connectionId of this.peerEditConnectionIds) {
+            const changedSubFields = {};
+            if (this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled) {
+              changedSubFields.enabled = this.peerEditIsConnectionEnabled[connectionId];
+            }
 
-          if (this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB) {
-            changedSubFields.allowedIPsAtoB = this.peerEditAllowedIPsAtoB[connectionId];
-          }
+            if (this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB) {
+              changedSubFields.allowedIPsAtoB = this.peerEditAllowedIPsAtoB[connectionId];
+            }
 
-          if (this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA) {
-            changedSubFields.allowedIPsBtoA = this.peerEditAllowedIPsBtoA[connectionId];
-          }
+            if (this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA) {
+              changedSubFields.allowedIPsBtoA = this.peerEditAllowedIPsBtoA[connectionId];
+            }
 
-          if (this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled) {
-            changedSubFields.persistentKeepalive = { enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId] };
-          }
+            if (this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled) {
+              changedSubFields.persistentKeepalive = { enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId] };
+            }
 
-          if (this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value) {
-            if ('persistentKeepalive' in changedSubFields) {
-              changedSubFields.persistentKeepalive.value = this.peerEditPersistentKeepaliveValueData[connectionId];
-            } else {
-              changedSubFields.persistentKeepalive = { value: this.peerEditPersistentKeepaliveValueData[connectionId] };
+            if (this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value) {
+              if ('persistentKeepalive' in changedSubFields) {
+                changedSubFields.persistentKeepalive.value = this.peerEditPersistentKeepaliveValueData[connectionId];
+              } else {
+                changedSubFields.persistentKeepalive = { value: this.peerEditPersistentKeepaliveValueData[connectionId] };
+              }
+            }
+
+            if (Object.keys(changedSubFields).length > 0) {
+              changedConnections[connectionId] = changedSubFields;
             }
           }
-
-          if (Object.keys(changedSubFields).length > 0) {
-            changedConnections[connectionId] = changedSubFields;
-          }
+        } catch (e) {
+          console.log(e);
         }
+
         if (Object.keys(changedConnections).length > 0) {
           changedFields.connections = changedConnections;
         }
