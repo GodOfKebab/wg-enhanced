@@ -525,6 +525,14 @@ new Vue({
         });
       }
     },
+    peerEditRemoveConnections(connectionId) {
+      if (this.peerEditStaticConnectionIds.includes(connectionId)) {
+        this.peerEditStaticConnectionIds.splice(this.peerEditStaticConnectionIds.indexOf(connectionId), 1);
+      }
+      if (this.peerEditRoamingConnectionIds.includes(connectionId)) {
+        this.peerEditRoamingConnectionIds.splice(this.peerEditRoamingConnectionIds.indexOf(connectionId), 1);
+      }
+    },
     async peerConfigEditUpdateConfirmation() {
       const [changedFields, errorNotFound] = this.peerEditChangedFieldsCompute;
       if (!errorNotFound || Object.keys(changedFields).length === 0) return;
