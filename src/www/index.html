@@ -43,6 +43,12 @@
     .special-fill-edit:hover > svg > path{
       stroke: rgb(243 244 246);
     }
+    .highlight-remove-box:hover > div > button{
+      opacity: 0.2;
+    }
+    .highlight-remove-box:hover > div > button:hover{
+      opacity: 1.0;
+    }
   </style>
 </head>
 
@@ -705,9 +711,9 @@
                         </div>
 
                         <div v-if="Object.keys(staticPeers).length" v-for="(peerDetails, peerId) in staticPeers" class="relative">
-                          <div v-if="peerCreateAttachedPeerIds.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap" :class="[peerCreateConnectionColor.attachedPeerDiv[peerId]]">
+                          <div v-if="peerCreateAttachedPeerIds.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap highlight-remove-box" :class="[peerCreateConnectionColor.attachedPeerDiv[peerId]]">
                             <div class="inline-block float-right absolute z-20 right-[0.5rem] top-[0.25rem]">
-                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-20 hover:opacity-100 transition"
+                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition"
                                       title="Remove Connection" @click="peerCreateAttachedPeerIds.splice(peerCreateAttachedPeerIds.indexOf(peerId), 1)">
                                 <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                   <path fill-rule="evenodd"
@@ -893,7 +899,7 @@
                       </h3>
                       <span class="order-last">
                         <button v-show="peerConfigWindow === 'edit'" class="align-middle bg-gray-100 hover:enabled:bg-gray-600 hover:enabled:text-white disabled:text-blue-100 disabled:bg-gray-50 p-2 rounded transition special-fill"
-                                title="See the configuration differences for this peer" @click="peerConfigEditUpdateConfirmation().then(); peerConfigWindow = 'view-changes'" :disabled="Object.keys(peerEditChangedFieldsCompute[0]).length === 0">
+                                title="See the configuration differences for this peer" @click="peerConfigEditUpdateConfirmation().then(); peerConfigWindow = 'view-changes'" :disabled="Object.keys(peerEditChangedFieldsCompute[0]).length + Object.keys(peerEditChangedFieldsCompute[1]).length + Object.keys(peerEditChangedFieldsCompute[2]).length === 0">
                           <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 122.742 122.881" xml:space="preserve">
                             <g>
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0"
@@ -1035,9 +1041,9 @@
                       </div>
 
                       <!-- Peer's connections in boxes -->
-                      <div v-for="connectionId in peerEditConnectionIds" class="relative">
+                      <div v-for="connectionId in peerEditConnectionIds" class="relative highlight-remove-box">
                         <div class="inline-block float-right absolute z-20 right-[1rem] top-[0.25rem]">
-                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-20 hover:opacity-100 transition"
+                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition"
                                   title="Remove Connection"
                                   @click="peerEditStaticConnectionIds.includes(connectionId) ? peerEditStaticConnectionIds.splice(peerEditStaticConnectionIds.indexOf(connectionId), 1) : peerEditRoamingConnectionIds.splice(peerEditRoamingConnectionIds.indexOf(connectionId), 1)">
                             <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -1113,20 +1119,29 @@
                       <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
                         <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                          <div v-if="!peerEditChangedFieldsCompute[1]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                          <div v-else-if="!peerChangedPeer && !peerChangedConnections" class="p-1">{}</div>
-                          <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
-                          <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
-                          <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+                          <div v-if="peerChangedPeer || peerChangedConnections || !peerEditChangedFieldsCompute[3]">
+                            <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+                            <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
+                            <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
+                            <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+                          </div>
+                        </div>
+                        <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
+                          <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
+                          <div v-if="peerAddedConnections" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
+                        </div>
+                        <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
+                          <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
+                          <div v-if="peerRemovedConnections" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
                         </div>
                         <div class="bg-red-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
-                          <div v-if="!peerEditChangedFieldsCompute[1]" class="p-1">{}</div>
+                          <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
                           <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
                         </div>
                         <div class="bg-green-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
-                          <div v-if="!peerEditChangedFieldsCompute[1]" class="p-1">{}</div>
+                          <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
                           <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
                         </div>
                       </div>
@@ -1150,7 +1165,7 @@
                 <button v-show="peerConfigWindow === 'edit' || peerConfigWindow === 'view-changes'" type="button"
                         @click="peerConfigEditUpdateConfirmation().then(); peerConfigWindow = 'confirm-changes'"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm disabled:bg-gray-200 transition"
-                        :disabled="!(Object.keys(peerEditChangedFieldsCompute[0]).length > 0 && peerEditChangedFieldsCompute[1] && webServerStatus === 'up')">
+                        :disabled="!(Object.keys(peerEditChangedFieldsCompute[0]).length + Object.keys(peerEditChangedFieldsCompute[1]).length + Object.keys(peerEditChangedFieldsCompute[2]).length > 0 && peerEditChangedFieldsCompute[3] && webServerStatus === 'up')">
                   Save Configuration
                 </button>
                 <button type="button" @click="peerConfigId = null;"
@@ -1219,17 +1234,30 @@
                       <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
                         <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                          <div v-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
-                          <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
-                          <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+                          <div v-if="peerChangedPeer || peerChangedConnections || !peerEditChangedFieldsCompute[3]">
+                            <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+                            <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
+                            <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
+                            <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+                          </div>
+                        </div>
+                        <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
+                          <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
+                          <div v-if="peerAddedConnections" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
+                        </div>
+                        <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
+                          <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
+                          <div v-if="peerRemovedConnections" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
                         </div>
                         <div class="bg-red-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
-                          <div class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
+                          <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
+                          <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
                         </div>
                         <div class="bg-green-100 rounded-md overflow-scroll">
                           <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
-                          <div class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
+                          <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
+                          <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
                         </div>
                       </div>
                     </div>

@@ -96,6 +96,8 @@ new Vue({
     peerEditAllowedIPsBtoA: {},
     peerChangedPeer: false,
     peerChangedConnections: false,
+    peerAddedConnections: false,
+    peerRemovedConnections: false,
     // peerEditChangedFields: {},
     peerEditOldConfig: { peers: {}, connections: {} },
     peerEditNewConfig: { peers: {}, connections: {} },
@@ -530,7 +532,6 @@ new Vue({
         const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
         this.peerEditIsConnectionEnabled[connectionId] = true;
         if (!Object.keys(this.network.connections).includes(connectionId)) {
-          console.log('adding a new connection');
           if (connectionId.startsWith(peerId)) {
             this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[this.peerConfigId].address}/32`;
             this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[peerId].address}/32`;
@@ -548,7 +549,6 @@ new Vue({
           this.peerEditIsConnectionEnabled[connectionId] = true;
           if (!Object.keys(this.network.connections).includes(connectionId)) {
             const peerId = connectionId.replace(this.peerConfigId, '').replace('*', '');
-            console.log('adding a new connection');
             if (connectionId.startsWith(peerId)) {
               this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[this.peerConfigId].address}/32`;
               this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[peerId].address}/32`;
@@ -563,8 +563,8 @@ new Vue({
       }
     },
     async peerConfigEditUpdateConfirmation() {
-      const [changedFields, errorNotFound] = this.peerEditChangedFieldsCompute;
-      if (!errorNotFound || Object.keys(changedFields).length === 0) return;
+      const [changedFields, addedFields, removedFields, errorNotFound] = this.peerEditChangedFieldsCompute;
+      if (!errorNotFound || Object.keys(changedFields).length + Object.keys(addedFields).length + Object.keys(removedFields).length === 0) return;
 
       this.peerEditOldConfig.peers[this.peerConfigId] = {
         name: this.network.peers[this.peerConfigId].name,
@@ -588,90 +588,121 @@ new Vue({
           };
         }
       }
-
       this.peerEditNewConfig = JSON.parse(JSON.stringify(this.peerEditOldConfig)); // deep copy
-      if (Object.keys(changedFields.peers).length) {
-        for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
-          if (field === 'dns' || field === 'mtu') {
-            for (const [fieldDNSMTU, valueDNSMTU] of Object.entries(value)) {
-              this.peerEditNewConfig.peers[this.peerConfigId][field][fieldDNSMTU] = valueDNSMTU;
+
+      // apply changed fields
+      if (Object.keys(changedFields).length) {
+        if (Object.keys(changedFields.peers).length) {
+          for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
+            if (field === 'dns' || field === 'mtu') {
+              for (const [fieldDNSMTU, valueDNSMTU] of Object.entries(value)) {
+                this.peerEditNewConfig.peers[this.peerConfigId][field][fieldDNSMTU] = valueDNSMTU;
+              }
+            } else {
+              this.peerEditNewConfig.peers[this.peerConfigId][field] = value;
             }
-          } else {
-            this.peerEditNewConfig.peers[this.peerConfigId][field] = value;
+          }
+        }
+        for (const [connectionId, connection] of Object.entries(changedFields.connections)) {
+          for (const [field, value] of Object.entries(connection)) {
+            if (field === 'persistentKeepalive') {
+              if ('enabled' in value) this.peerEditNewConfig.connections[connectionId][field].enabled = value.enabled;
+              if ('value' in value) this.peerEditNewConfig.connections[connectionId][field].value = value.value;
+            } else {
+              this.peerEditNewConfig.connections[connectionId][field] = value;
+            }
           }
         }
       }
-      for (const [connectionId, connection] of Object.entries(changedFields.connections)) {
-        for (const [field, value] of Object.entries(connection)) {
-          if (field === 'persistentKeepalive') {
-            if ('enabled' in value) this.peerEditNewConfig.connections[connectionId][field].enabled = value.enabled;
-            if ('value' in value) this.peerEditNewConfig.connections[connectionId][field].value = value.value;
-          } else {
-            this.peerEditNewConfig.connections[connectionId][field] = value;
-          }
+
+      // apply added fields
+      if (Object.keys(addedFields).length) {
+        for (const [connectionId, connection] of Object.entries(addedFields.connections)) {
+          this.peerEditNewConfig.connections[connectionId] = connection;
+        }
+      }
+
+      // apply removed fields
+      if (Object.keys(removedFields).length) {
+        for (const connectionId of Object.keys(removedFields.connections)) {
+          delete this.peerEditNewConfig.connections[connectionId];
         }
       }
     },
     async peerConfigEditApply() {
-      const [changedFields, errorNotFound] = this.peerEditChangedFieldsCompute;
-      if (!errorNotFound || Object.keys(changedFields).length === 0) return;
+      const [changedFields, addedFields, removedFields, errorNotFound] = this.peerEditChangedFieldsCompute;
+      if (!errorNotFound || Object.keys(changedFields).length + Object.keys(addedFields).length + Object.keys(removedFields).length === 0) return;
 
-      let mobilityValue = null;
-      let endpointValue = null;
-      if (Object.keys(changedFields.peers).length) {
-        for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
-          switch (field) {
-            case 'name':
-              this.updatePeerName(this.peerConfigId, value);
-              break;
-            case 'address':
-              this.updatePeerAddress(this.peerConfigId, value);
-              break;
-            case 'mobility':
-              mobilityValue = value;
-              break;
-            case 'endpoint':
-              endpointValue = value;
-              break;
-            case 'dns':
-              this.updatePeerDNS(this.peerConfigId, value);
-              break;
-            case 'mtu':
-              this.updatePeerMTU(this.peerConfigId, value);
-              break;
-            default:
-              break;
+      if (Object.keys(changedFields).length > 0) {
+        let mobilityValue = null;
+        let endpointValue = null;
+        if (Object.keys(changedFields.peers).length) {
+          for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
+            switch (field) {
+              case 'name':
+                this.updatePeerName(this.peerConfigId, value);
+                break;
+              case 'address':
+                this.updatePeerAddress(this.peerConfigId, value);
+                break;
+              case 'mobility':
+                mobilityValue = value;
+                break;
+              case 'endpoint':
+                endpointValue = value;
+                break;
+              case 'dns':
+                this.updatePeerDNS(this.peerConfigId, value);
+                break;
+              case 'mtu':
+                this.updatePeerMTU(this.peerConfigId, value);
+                break;
+              default:
+                break;
+            }
           }
+        }
+        if (mobilityValue || endpointValue) this.updatePeerEndpoint(this.peerConfigId, mobilityValue, endpointValue);
+
+        for (const [connectionId, connection] of Object.entries(changedFields.connections)) {
+          let AtoBValue = null;
+          let BtoAValue = null;
+          let persistentKeepaliveEnabled = null;
+          let persistentKeepaliveValue = null;
+          for (const [field, value] of Object.entries(connection)) {
+            switch (field) {
+              case 'enabled':
+                this.enableConnection(connectionId, value);
+                break;
+              case 'allowedIPsAtoB':
+                AtoBValue = value;
+                break;
+              case 'allowedIPsBtoA':
+                BtoAValue = value;
+                break;
+              case 'persistentKeepalive':
+                if ('enabled' in value) persistentKeepaliveEnabled = value.enabled;
+                if ('value' in value) persistentKeepaliveValue = value.value;
+                break;
+              default:
+                break;
+            }
+          }
+          if (AtoBValue || BtoAValue) this.updateConnectionAllowedIPs(connectionId, AtoBValue, BtoAValue);
+          if (persistentKeepaliveEnabled || persistentKeepaliveValue) this.updateConnectionPersistentKeepalive(connectionId, persistentKeepaliveEnabled, persistentKeepaliveValue);
         }
       }
-      if (mobilityValue || endpointValue) this.updatePeerEndpoint(this.peerConfigId, mobilityValue, endpointValue);
 
-      for (const [connectionId, connection] of Object.entries(changedFields.connections)) {
-        let AtoBValue = null;
-        let BtoAValue = null;
-        let persistentKeepaliveEnabled = null;
-        let persistentKeepaliveValue = null;
-        for (const [field, value] of Object.entries(connection)) {
-          switch (field) {
-            case 'enabled':
-              this.enableConnection(connectionId, value);
-              break;
-            case 'allowedIPsAtoB':
-              AtoBValue = value;
-              break;
-            case 'allowedIPsBtoA':
-              BtoAValue = value;
-              break;
-            case 'persistentKeepalive':
-              if ('enabled' in value) persistentKeepaliveEnabled = value.enabled;
-              if ('value' in value) persistentKeepaliveValue = value.value;
-              break;
-            default:
-              break;
-          }
+      if (Object.keys(addedFields).length > 0) {
+        for (const [connectionId, connectionDetails] of Object.entries(addedFields.connections)) {
+          console.log(`processing added filed ${connectionId}`);
         }
-        if (AtoBValue || BtoAValue) this.updateConnectionAllowedIPs(connectionId, AtoBValue, BtoAValue);
-        if (persistentKeepaliveEnabled || persistentKeepaliveValue) this.updateConnectionPersistentKeepalive(connectionId, persistentKeepaliveEnabled, persistentKeepaliveValue);
+      }
+
+      if (Object.keys(removedFields).length > 0) {
+        for (const [connectionId, connectionDetails] of Object.entries(removedFields.connections)) {
+          console.log(`processing removed filed ${connectionId}`);
+        }
       }
     },
   },
@@ -888,7 +919,10 @@ new Vue({
       // this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;
       let errorNotFound = true;
       let changeDetectedPeer = false;
+      let addDetectedPeer = false;
       const changedFields = { peers: {}, connections: {} };
+      const addedFields = { connections: {} };
+      const removedFields = { connections: {} };
 
       let peerErrorField = '';
       // check errors
@@ -914,7 +948,12 @@ new Vue({
       }
 
       if (!errorNotFound) {
-        return [{ msg: `Error detected in the peer's '${peerErrorField}' field. Changes can't be considered until this is fixed.` }, false];
+        return [
+          { msg: `Error detected in the peer's '${peerErrorField}' field. Changes can't be considered until this is fixed.` },
+          {},
+          {},
+          false,
+        ];
       }
 
       this.peerChangedPeer = changeDetectedPeer;
@@ -967,7 +1006,7 @@ new Vue({
           changeDetectedConnection ||= this.peerEditConnectionColor.persistentKeepalive[connectionId] === 'bg-green-200';
           changeDetectedConnection ||= this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled;
         } else {
-          changeDetectedConnection = true;
+          addDetectedPeer = true;
           for (const connectionField of ['allowedIPsAtoB', 'allowedIPsBtoA', 'persistentKeepalive']) {
             if (this.peerEditConnectionColor[connectionField][connectionId] === 'bg-red-200') {
               connectionIdError = connectionId;
@@ -979,49 +1018,48 @@ new Vue({
       }
 
       if (!errorNotFound) {
-        return [{ msg: `Error detected in the connection '${connectionIdError}'s '${connectionErrorField}' field. Changes can't be considered until this is fixed.` }, false];
+        return [
+          { msg: `Error detected in the connection '${connectionIdError}'s '${connectionErrorField}' field. Changes can't be considered until this is fixed.` },
+          {},
+          {},
+          false,
+        ];
       }
 
       this.peerChangedConnections = changeDetectedConnection;
       if (changeDetectedConnection) {
         const changedConnections = {};
-        try {
-          for (const connectionId of this.peerEditConnectionIds) {
-            const changedSubFields = {};
-            if (Object.keys(this.network.connections).includes(connectionId)) {
-              if (this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled) {
-                changedSubFields.enabled = this.peerEditIsConnectionEnabled[connectionId];
-              }
+        for (const connectionId of this.peerEditConnectionIds) {
+          const changedSubFields = {};
+          if (Object.keys(this.network.connections).includes(connectionId)) {
+            if (this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled) {
+              changedSubFields.enabled = this.peerEditIsConnectionEnabled[connectionId];
+            }
 
-              if (this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB) {
-                changedSubFields.allowedIPsAtoB = this.peerEditAllowedIPsAtoB[connectionId];
-              }
+            if (this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB) {
+              changedSubFields.allowedIPsAtoB = this.peerEditAllowedIPsAtoB[connectionId];
+            }
 
-              if (this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA) {
-                changedSubFields.allowedIPsBtoA = this.peerEditAllowedIPsBtoA[connectionId];
-              }
+            if (this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA) {
+              changedSubFields.allowedIPsBtoA = this.peerEditAllowedIPsBtoA[connectionId];
+            }
 
-              if (this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled) {
-                changedSubFields.persistentKeepalive = { enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId] };
-              }
+            if (this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled) {
+              changedSubFields.persistentKeepalive = { enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId] };
+            }
 
-              if (this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value) {
-                if ('persistentKeepalive' in changedSubFields) {
-                  changedSubFields.persistentKeepalive.value = this.peerEditPersistentKeepaliveValueData[connectionId];
-                } else {
-                  changedSubFields.persistentKeepalive = { value: this.peerEditPersistentKeepaliveValueData[connectionId] };
-                }
+            if (this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value) {
+              if ('persistentKeepalive' in changedSubFields) {
+                changedSubFields.persistentKeepalive.value = this.peerEditPersistentKeepaliveValueData[connectionId];
+              } else {
+                changedSubFields.persistentKeepalive = { value: this.peerEditPersistentKeepaliveValueData[connectionId] };
               }
+            }
 
-              if (Object.keys(changedSubFields).length > 0) {
-                changedConnections[connectionId] = changedSubFields;
-              }
-            } else {
-              console.log('TODO add new connections to the changedFields');
+            if (Object.keys(changedSubFields).length > 0) {
+              changedConnections[connectionId] = changedSubFields;
             }
           }
-        } catch (e) {
-          console.log(e);
         }
 
         if (Object.keys(changedConnections).length > 0) {
@@ -1029,7 +1067,42 @@ new Vue({
         }
       }
 
-      return [changeDetectedPeer || changeDetectedConnection ? changedFields : {}, true];
+      this.peerAddedConnections = addDetectedPeer;
+      if (addDetectedPeer) {
+        for (const connectionId of this.peerEditConnectionIds) {
+          if (!Object.keys(this.network.connections).includes(connectionId)) {
+            addedFields.connections[connectionId] = {
+              enabled: this.peerEditIsConnectionEnabled[connectionId],
+              allowedIPsAtoB: this.peerEditAllowedIPsAtoB[connectionId],
+              allowedIPsBtoA: this.peerEditAllowedIPsBtoA[connectionId],
+              persistentKeepalive: {
+                enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId],
+                value: this.peerEditPersistentKeepaliveValueData[connectionId],
+              },
+            };
+          }
+        }
+      }
+
+      for (const connectionId of Object.keys(this.network.connections)) {
+        if (connectionId.includes(this.peerConfigId)
+            && !this.peerEditConnectionIds.includes(connectionId)) {
+          removedFields.connections[connectionId] = {
+            enabled: this.network.connections[connectionId].enabled,
+            allowedIPsAtoB: this.network.connections[connectionId].allowedIPsAtoB,
+            allowedIPsBtoA: this.network.connections[connectionId].allowedIPsBtoA,
+            persistentKeepalive: this.network.connections[connectionId].persistentKeepalive
+          };
+        }
+      }
+      this.peerRemovedConnections = Object.keys(removedFields.connections).length > 0;
+
+      return [
+        changeDetectedPeer || changeDetectedConnection ? changedFields : {},
+        this.peerAddedConnections ? addedFields : {},
+        this.peerRemovedConnections ? removedFields : {},
+        true,
+      ];
     },
   },
   filters: {
