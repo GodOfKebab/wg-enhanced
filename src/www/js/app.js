@@ -37,6 +37,7 @@ new Vue({
 
     network: { peers: { root: { address: '' } }, connections: {} },
 
+    peerAvatars: {},
     peersPersist: {},
     peerDeleteId: null,
     peerConfigId: null,
@@ -219,7 +220,6 @@ new Vue({
       await this.api.getNetwork().then(network => {
         const staticPeers = {};
         const roamingPeers = {};
-        this.network = network;
 
         // start append to network.connections
         for (const [connectionId, connectionDetails] of Object.entries(network.connections)) {
@@ -252,21 +252,7 @@ new Vue({
             this.peersPersist[connectionId].transferTxHistory.push(this.peersPersist[connectionId].transferTxCurrent);
             this.peersPersist[connectionId].transferTxHistory.shift();
 
-            this.network.connections[connectionId].transferTxCurrent = this.peersPersist[connectionId].transferTxCurrent;
-            this.network.connections[connectionId].transferTxSeries = [{
-              name: 'tx',
-              data: this.peersPersist[connectionId].transferTxHistory,
-            }];
-
-            this.network.connections[connectionId].transferRxCurrent = this.peersPersist[connectionId].transferRxCurrent;
-            this.network.connections[connectionId].transferRxSeries = [{
-              name: 'rx',
-              data: this.peersPersist[connectionId].transferRxHistory,
-            }];
-
             this.peersPersist[connectionId].chartMax = Math.max(...this.peersPersist[connectionId].transferTxHistory, ...this.peersPersist[connectionId].transferRxHistory);
-
-            this.network.connections[connectionId].chartOptions = this.peersPersist[connectionId].chartOptions;
           }
         }
         // end append to network.connections
@@ -274,7 +260,7 @@ new Vue({
         // start append to network.peers
         for (const [peerId, peerDetails] of Object.entries(network.peers)) {
           if (peerDetails.name.includes('@') && peerDetails.name.includes('.')) {
-            this.network.peers[peerId].avatar = `https://www.gravatar.com/avatar/${md5(peerDetails.name)}?d=blank`;
+            this.peerAvatars[peerId] = `https://www.gravatar.com/avatar/${md5(peerDetails.name)}?d=blank`;
           }
 
           if (peerDetails.mobility === 'static') {
@@ -286,6 +272,16 @@ new Vue({
         this.staticPeers = staticPeers;
         this.roamingPeers = roamingPeers;
         // end append to network.peers
+
+        // Check for changes
+        Object.keys(network.connections).forEach(connectionId => {
+          delete network.connections[connectionId].latestHandshakeAt;
+          delete network.connections[connectionId].transferTx;
+          delete network.connections[connectionId].transferRx;
+        });
+        if (JSON.stringify(this.network) !== JSON.stringify(network)) {
+          this.network = network;
+        }
       }).catch(err => {
         if (err.toString() === 'TypeError: Load failed') {
           this.webServerStatus = 'down';
@@ -1135,7 +1131,7 @@ new Vue({
       this.refresh().catch(error => {
         console.log(error);
       });
-    }, 5000);
+    }, 1000);
 
     // Promise.resolve().then(async () => {
     //   const currentRelease = await this.api.getRelease();

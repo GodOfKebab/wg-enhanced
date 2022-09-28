@@ -143,11 +143,11 @@
                 <!-- Chart -->
 <!--                <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">-->
 <!--                  <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
-<!--                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferTxSeries">-->
+<!--                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="{ name: 'tx', data: peersPersist[getConnectionId('root', peerId)].transferTxHistory }">-->
 <!--                    </apexchart>-->
 <!--                  </div>-->
 <!--                  <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
-<!--                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferRxSeries"-->
+<!--                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="{ name: 'rx', data: peersPersist[getConnectionId('root', peerId)].transferRxHistory }"-->
 <!--                               style="transform: scaleY(-1);">-->
 <!--                    </apexchart>-->
 <!--                  </div>-->
@@ -160,7 +160,7 @@
                       <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                             clip-rule="evenodd" />
                     </svg>
-                    <img v-if="peerDetails.avatar" :src="peerDetails.avatar" class="w-10 rounded-full absolute top-0 left-0" />
+                    <img v-if="peerAvatars[peerId]" :src="peerAvatars[peerId]" class="w-10 rounded-full absolute top-0 left-0" />
 
                     <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
                       <div v-show="network.connections[getConnectionId('root', peerId)].latestHandshakeAt && ((new Date() - new Date(network.connections[getConnectionId('root', peerId)].latestHandshakeAt) < 1000 * 60 * 10))">
@@ -173,7 +173,7 @@
                   <div class="flex-grow">
 
                     <!-- Name -->
-                    <div class="text-gray-700 group" :title="'Created at ' + dateTime(new Date(peerDetails.createdAt))">
+                    <div class="text-gray-700 group" :title="'Created at ' + new Date(peerDetails.createdAt)">
 
                       <!-- Show -->
                       <input v-if="peerQuickEditNameId === peerId" v-model="peerQuickEditName"
@@ -235,7 +235,7 @@
                                   d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z"
                                   clip-rule="evenodd" />
                           </svg>
-                          {{network.connections[getConnectionId('root', peerId)].transferTxCurrent | bytes}}/s
+                          {{peersPersist[getConnectionId('root', peerId)].transferTxCurrent | bytes}}/s
                         </span>
                       </span>
 
@@ -249,14 +249,14 @@
                                   d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
                                   clip-rule="evenodd" />
                           </svg>
-                          {{network.connections[getConnectionId('root', peerId)].transferRxCurrent | bytes}}/s
+                          {{peersPersist[getConnectionId('root', peerId)].transferRxCurrent | bytes}}/s
                         </span>
                       </span>
 
                       <!-- Last seen -->
                       <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
                         <span v-show="network.connections[getConnectionId('root', peerId)].latestHandshakeAt"
-                              :title="'Last seen at ' + dateTime(new Date(network.connections[getConnectionId('root', peerId)].latestHandshakeAt))">
+                              :title="'Last seen at ' + new Date(network.connections[getConnectionId('root', peerId)].latestHandshakeAt)">
                           · {{new Date(network.connections[getConnectionId('root', peerId)].latestHandshakeAt) | timeago}}
                         </span>
                       </span>
@@ -368,11 +368,11 @@
                 <!-- Chart -->
 <!--                <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">-->
 <!--                  <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
-<!--                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferTxSeries">-->
+<!--                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="{ name: 'tx', data: peersPersist[getConnectionId('root', peerId)].transferTxHistory }">-->
 <!--                    </apexchart>-->
 <!--                  </div>-->
 <!--                  <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
-<!--                    <apexchart width="100%" height="100%" :options="network.connections[getConnectionId('root', peerId)].chartOptions" :series="network.connections[getConnectionId('root', peerId)].transferRxSeries"-->
+<!--                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="{ name: 'rx', data: peersPersist[getConnectionId('root', peerId)].transferRxHistory }"-->
 <!--                               style="transform: scaleY(-1);">-->
 <!--                    </apexchart>-->
 <!--                  </div>-->
@@ -385,7 +385,7 @@
                       <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                         clip-rule="evenodd" />
                     </svg>
-                    <img v-if="peerDetails.avatar" :src="peerDetails.avatar" class="w-10 rounded-full absolute top-0 left-0" />
+                    <img v-if="peerAvatars[peerId]" :src="peerAvatars[peerId]" class="w-10 rounded-full absolute top-0 left-0" />
 
                     <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
                       <div v-show="network.connections[getConnectionId('root', peerId)].latestHandshakeAt && ((new Date() - new Date(network.connections[getConnectionId('root', peerId)].latestHandshakeAt) < 1000 * 60 * 10))">
@@ -398,7 +398,7 @@
                   <div class="flex-grow">
 
                     <!-- Name -->
-                    <div class="text-gray-700 group" :title="'Created at ' + dateTime(new Date(peerDetails.createdAt))">
+                    <div class="text-gray-700 group" :title="'Created at ' + new Date(peerDetails.createdAt)">
 
                       <!-- Show -->
                       <input v-show="peerQuickEditNameId === peerId" v-model="peerQuickEditName"
@@ -460,7 +460,7 @@
                               d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z"
                               clip-rule="evenodd" />
                           </svg>
-                          {{network.connections[getConnectionId('root', peerId)].transferTxCurrent | bytes}}/s
+                          {{peersPersist[getConnectionId('root', peerId)].transferTxCurrent | bytes}}/s
                         </span>
                       </span>
 
@@ -474,14 +474,14 @@
                               d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
                               clip-rule="evenodd" />
                           </svg>
-                          {{network.connections[getConnectionId('root', peerId)].transferRxCurrent | bytes}}/s
+                          {{peersPersist[getConnectionId('root', peerId)].transferRxCurrent | bytes}}/s
                         </span>
                       </span>
 
                       <!-- Last seen -->
                       <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
                         <span v-show="network.connections[getConnectionId('root', peerId)].latestHandshakeAt"
-                          :title="'Last seen at ' + dateTime(new Date(network.connections[getConnectionId('root', peerId)].latestHandshakeAt))">
+                          :title="'Last seen at ' + new Date(network.connections[getConnectionId('root', peerId)].latestHandshakeAt)">
                           · {{new Date(network.connections[getConnectionId('root', peerId)].latestHandshakeAt) | timeago}}
                         </span>
                       </span>
