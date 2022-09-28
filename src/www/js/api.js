@@ -94,10 +94,25 @@ class API {
     });
   }
 
+  async createConnection({ connectionId, enabled, persistentKeepalive, allowedIPsAtoB, allowedIPsBtoA }) {
+    return this.call({
+      method: 'post',
+      path: '/wireguard/connection',
+      body: { connectionId, enabled, persistentKeepalive, allowedIPsAtoB, allowedIPsBtoA },
+    });
+  }
+
   async deletePeer({ peerId }) {
     return this.call({
       method: 'delete',
       path: `/wireguard/peer/${peerId}`,
+    });
+  }
+
+  async deleteConnection({ connectionId }) {
+    return this.call({
+      method: 'delete',
+      path: `/wireguard/connection/${connectionId}`,
     });
   }
 

@@ -695,13 +695,19 @@ new Vue({
 
       if (Object.keys(addedFields).length > 0) {
         for (const [connectionId, connectionDetails] of Object.entries(addedFields.connections)) {
-          console.log(`processing added filed ${connectionId}`);
+          await this.api.createConnection({
+            connectionId,
+            enabled: connectionDetails.enabled,
+            persistentKeepalive: connectionDetails.persistentKeepalive,
+            allowedIPsAtoB: connectionDetails.allowedIPsAtoB,
+            allowedIPsBtoA: connectionDetails.allowedIPsBtoA,
+          });
         }
       }
 
       if (Object.keys(removedFields).length > 0) {
-        for (const [connectionId, connectionDetails] of Object.entries(removedFields.connections)) {
-          console.log(`processing removed filed ${connectionId}`);
+        for (const connectionId of Object.keys(removedFields.connections)) {
+          await this.api.deleteConnection({ connectionId });
         }
       }
     },

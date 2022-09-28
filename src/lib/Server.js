@@ -102,9 +102,17 @@ module.exports = class Server {
         const { peerId } = req.params;
         return WireGuard.deletePeer({ peerId });
       }))
+      .delete('/api/wireguard/connection/:connectionId', Util.promisify(async req => {
+        const { connectionId } = req.params;
+        return WireGuard.deleteConnection({ connectionId });
+      }))
       .post('/api/wireguard/peer/', Util.promisify(async req => {
         const { peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers } = req.body;
         return WireGuard.createPeer({ peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers });
+      }))
+      .post('/api/wireguard/connection/', Util.promisify(async req => {
+        const { connectionId, enabled, persistentKeepalive, allowedIPsAtoB, allowedIPsBtoA } = req.body;
+        return WireGuard.createConnection({ connectionId, enabled, persistentKeepalive, allowedIPsAtoB, allowedIPsBtoA });
       }))
       .post('/api/wireguard/peer/:peerId/enable', Util.promisify(async req => {
         const { peerId } = req.params;

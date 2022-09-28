@@ -312,6 +312,42 @@ module.exports = class WireGuard {
     await this.saveConfig();
   }
 
+  async createConnection({
+    connectionId, enabled, persistentKeepalive, allowedIPsAtoB, allowedIPsBtoA,
+  }) {
+    const config = await this.getConfig();
+    if (!connectionId) throw new Error('Missing: connectionId');
+    const peers = [];
+    for (const peerId of connectionId.split('*')) {
+      if (!Object.keys(config.peers).includes(peerId)) throw new Error(`Couldn't parse: connectionId: ${peerId} doesn't exist`);
+      peers.push(peerId);
+    }
+    if (peers.length === 2 && WireGuardHelper.getConnectionId(peers[0], peers[1]) !== connectionId) throw new Error('Couldn\'t parse: connectionId: wrong order or peers');
+
+    if (!(enabled === true || enabled === false)) throw new Error('Couldn\'t parse: enabled : enabled is either true or false');
+
+    if (!persistentKeepalive) throw new Error('Missing: persistentKeepalive : {"enabled": false, "value": "25"}');
+    if (!Object.keys(persistentKeepalive).includes('enabled')
+    || !Object.keys(persistentKeepalive).includes('value')) throw new Error('Couldn\'t parse: persistentKeepalive : {"enabled": false, "value": "25"}');
+    if (!(persistentKeepalive.enabled === true || persistentKeepalive.enabled === false)
+    || !WireGuardHelper.checkField('persistentKeepalive', persistentKeepalive.value)) throw new Error('Couldn\'t parse: persistentKeepalive : {"enabled": false, "value": "25"}');
+
+    if (!WireGuardHelper.checkField('allowedIPs', allowedIPsAtoB)) throw new Error(`Couldn't parse: allowedIPsAtoB: ${allowedIPsAtoB}`);
+    if (!WireGuardHelper.checkField('allowedIPs', allowedIPsBtoA)) throw new Error(`Couldn't parse: allowedIPsBtoA: ${allowedIPsBtoA}`);
+
+    // create the connection
+    const preSharedKey = await Util.exec('wg genpsk');
+    config.connections[connectionId] = {
+      preSharedKey,
+      enabled,
+      allowedIPsAtoB,
+      allowedIPsBtoA,
+      persistentKeepalive,
+    };
+
+    await this.saveConfig();
+  }
+
   async deletePeer({ peerId }) {
     const config = await this.getConfig();
     if (!await this.getPeer({ peerId })) return;
@@ -325,6 +361,14 @@ module.exports = class WireGuard {
     await this.saveConfig();
 
   //  TODO: add the option to delete specific connections in the map
+  }
+
+  async deleteConnection({ connectionId }) {
+    const config = await this.getConfig();
+    if (!await this.getConnection({ connectionId })) return;
+
+    delete config.connections[connectionId];
+    await this.saveConfig();
   }
 
   async enablePeer({ peerId }) {
