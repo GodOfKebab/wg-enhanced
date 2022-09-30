@@ -106,8 +106,11 @@ new Vue({
       name: 'bg-white',
       address: 'bg-white',
       endpoint: 'bg-white',
-      dns: 'bg-white',
-      mtu: 'bg-white',
+      dnsmtu: {
+        div: 'bg-white',
+        dnsInput: 'bg-white',
+        mtuInput: 'bg-white',
+      },
       connections: {
         attachedPeerCountDiv: 'bg-white',
         div: {},
@@ -718,10 +721,10 @@ new Vue({
       return this.peerCreateAssignedColor.endpoint;
     },
     peerCreateDNSMTUColor() {
-      this.peerCreateAssignedColor.dnsmtu.dnsInput = WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateDNS.value }) ? 'enabled:bg-green-100' : 'enabled:bg-red-100';
-      this.peerCreateAssignedColor.dnsmtu.mtuInput = WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerCreateMTU.value }) ? 'enabled:bg-green-100' : 'enabled:bg-red-100';
+      this.peerCreateAssignedColor.dnsmtu.dnsInput = WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateDNS.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerCreateAssignedColor.dnsmtu.mtuInput = WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerCreateMTU.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       // eslint-disable-next-line no-nested-ternary
-      this.peerCreateAssignedColor.dnsmtu.div = this.peerCreateDNS.enabled || this.peerCreateMTU.enabled ? ((this.peerCreateDNS.enabled && this.peerCreateAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-100') || (this.peerCreateMTU.enabled && this.peerCreateAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-100') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      this.peerCreateAssignedColor.dnsmtu.div = this.peerCreateDNS.enabled || this.peerCreateMTU.enabled ? ((this.peerCreateDNS.enabled && this.peerCreateAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-200') || (this.peerCreateMTU.enabled && this.peerCreateAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       return this.peerCreateAssignedColor.dnsmtu;
     },
     peerCreateSelectAll: {
@@ -791,17 +794,12 @@ new Vue({
         ? (WireGuardHelper.checkField('endpoint', this.peerEditEndpoint) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
       return this.peerEditAssignedColor.endpoint;
     },
-    peerEditDNSColor() {
+    peerEditDNSMTUColor() {
+      this.peerEditAssignedColor.dnsmtu.dnsInput = WireGuardHelper.checkField('dns', { enabled: true, value: this.peerEditDNS.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerEditAssignedColor.dnsmtu.mtuInput = WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerEditMTU.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.dns = this.peerEditDNS.value !== this.network.peers[this.peerConfigId].dns.value
-        ? (WireGuardHelper.checkField('dns', { enabled: true, value: this.peerEditDNS.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200') : 'bg-white';
-      return this.peerEditAssignedColor.dns;
-    },
-    peerEditMTUColor() {
-      // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.mtu = this.peerEditMTU.value !== this.network.peers[this.peerConfigId].mtu.value
-        ? (WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerEditMTU.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200') : 'bg-white';
-      return this.peerEditAssignedColor.mtu;
+      this.peerEditAssignedColor.dnsmtu.div = this.peerEditDNS.enabled || this.peerEditMTU.enabled ? ((this.peerEditDNS.enabled && this.peerEditAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-200') || (this.peerEditMTU.enabled && this.peerEditAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      return this.peerEditAssignedColor.dnsmtu;
     },
     peerEditAttachablePeerIds() {
       const staticPeers = [];
@@ -932,10 +930,18 @@ new Vue({
         name: this.peerEditNameColor,
         address: this.peerEditAddressColor,
         endpoint: this.peerEditEndpointColor,
-        DNS: this.peerEditDNSColor,
-        MTU: this.peerEditMTUColor,
+        DNS: this.peerEditDNSMTUColor.dnsInput,
+        MTU: this.peerEditDNSMTUColor.mtuInput,
       })) {
-        if (peerEditFieldColor === 'bg-red-200') {
+        if ((field === 'DNS' || field === 'MTU') && this.peerEditDNSMTUColor.div === 'bg-red-50') {
+          if (field === 'DNS' && this.peerEditDNS.enabled) {
+            peerErrorField = field;
+          }
+          if (field === 'MTU' && this.peerEditMTU.enabled) {
+            peerErrorField = field;
+          }
+          errorNotFound = false;
+        } else if (peerEditFieldColor === 'bg-red-200') {
           peerErrorField = field;
           errorNotFound = false;
         }

@@ -937,7 +937,7 @@
                     <div v-show="peerConfigWindow === 'edit'" class="mt-2 w-full overflow-auto h-96">
                      <!-- Peer config edit -->
                       <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto">
-                        <div v-for="peerConfigKey in ['name', 'address', 'publicKey', 'privateKey', 'endpoint', 'dns', 'mtu', 'createdAt', 'updatedAt']"
+                        <div v-for="peerConfigKey in ['name', 'address', 'publicKey', 'privateKey', 'endpoint', 'createdAt', 'updatedAt']"
                              class="relative">
                           <div class="flex grid grid-cols-3 text-sm">
                             <div class="col-span-1">
@@ -956,32 +956,48 @@
                                 </label>
                                 <input class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditEndpoint" id="peerConfigEditData.endpoint" :class="[peerEditMobility === 'static' ? peerEditEndpointColor : 'bg-gray-100']" :disabled="peerEditMobility !== 'static'">
                               </div>
-                              <div v-else-if="peerConfigKey === 'dns'">
-                                <label for="peerConfigEditData.dnsToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.dnsToggle" @change="peerEditDNS.enabled = !peerEditDNS.enabled" :checked="peerEditDNS.enabled">
-                                  <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
-                                </label>
-                                <input list="inputDNSListEdit" class="text-gray-800 text-xs mr-1 rounded-md pl-1 bg-gray-100" v-model="peerEditDNS.value" id="peerConfigEditData.dns" :class="[peerEditDNSColor]" :disabled="!peerEditDNS.enabled" :placeholder="peerEditDNS.enabled ? 'click to see recommendations' : ''">
-                                <datalist id="inputDNSListEdit">
-                                  <option :value="network.peers.root.address">
-                                    Forward all DNS related traffic to {{network.peers.root.address}}
-                                  </option>
-                                </datalist>
-                              </div>
-                              <div v-else-if="peerConfigKey === 'mtu'">
-                                <label for="peerConfigEditData.mtuToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.mtuToggle" @change="peerEditMTU.enabled = !peerEditMTU.enabled" :checked="peerEditMTU.enabled">
-                                  <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
-                                </label>
-                                <input list="inputMTUListEdit" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditMTU.value" id="peerConfigEditData.mtu" :class="[peerEditMTU.enabled ? peerEditMTUColor : 'bg-gray-100']" :disabled="!peerEditMTU.enabled" :placeholder="peerEditMTU.enabled ? 'click to see recommendations' : ''">
-                                <datalist id="inputMTUListEdit">
-                                  <option :value="1420">
-                                    TODO
-                                  </option>
-                                </datalist>
-                              </div>
                               <span v-else-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mr-1 pl-1">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
                               <span v-else class="text-gray-800 text-xs mr-1 pl-1">{{ network.peers[peerConfigId][peerConfigKey] }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="m-2 p-1 shadow-md border rounded" :class="[peerEditDNSMTUColor.div]">
+                        <div class="text-gray-800">
+                          Configure DNS and MTU:
+                        </div>
+                        <div class="flex grid grid-cols-2">
+                          <div class="truncate mr-2">
+                            <div class="form-check truncate">
+                              <label>
+                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditDNS.enabled">
+                                <span class="text-gray-800 cursor-pointer text-xs">
+                                    <strong class="text-sm">DNS: </strong>
+                                  </span>
+                              </label>
+                              <input list="inputDNSListEdit" name="inputDNS" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerEditDNS.value" :disabled="!peerEditDNS.enabled" :class="[peerEditDNSMTUColor.dnsInput]">
+                              <datalist id="inputDNSListEdit">
+                                <option :value="network.peers.root.address">
+                                  Forward all DNS related traffic to {{network.peers.root.address}}
+                                </option>
+                              </datalist>
+                            </div>
+                          </div>
+                          <div class="truncate mr-2">
+                            <div class="form-check truncate">
+                              <label>
+                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditMTU.enabled">
+                                <span class="text-gray-800 cursor-pointer text-xs">
+                                    <strong class="text-sm">MTU: </strong>
+                                  </span>
+                              </label>
+                              <input list="inputMTUListEdit" name="inputMTU" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerEditMTU.value" :disabled="!peerEditMTU.enabled" :class="[peerEditDNSMTUColor.mtuInput]">
+                              <datalist id="inputMTUListEdit">
+                                <option :value="1420">
+                                  TODO
+                                </option>
+                              </datalist>
                             </div>
                           </div>
                         </div>
