@@ -47,6 +47,7 @@ new Vue({
     peerCreatePeerId: '',
     peerCreateName: '',
     peerCreateAddress: '',
+    peerCreatePreambleExpiration: (new Date()).getTime(),
     peerCreateMobility: '',
     peerCreateEndpoint: '',
     peerCreateShowAdvance: '',
@@ -420,10 +421,12 @@ new Vue({
         this.peerCreateEndpoint = '';
         this.peerCreateShowAdvance = false;
 
-        const { peerId, address } = await this.api.preamblePeer({ });
-
-        this.peerCreatePeerId = peerId;
-        this.peerCreateAddress = address;
+        if ((new Date()).getTime() > this.peerCreatePreambleExpiration) {
+          const { peerId, address, expiration } = await this.api.preamblePeer({ });
+          this.peerCreatePeerId = peerId;
+          this.peerCreateAddress = address;
+          this.peerCreatePreambleExpiration = expiration;
+        }
 
         for (const peerId of Object.keys(this.staticPeers)) {
           this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
@@ -475,14 +478,13 @@ new Vue({
         peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers: attachedPeersCompact,
       }).catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
+
+      // Reset the peerId, address and expiration time
+      this.peerCreatePeerId = '';
+      this.peerCreateAddress = '';
+      this.peerCreatePreambleExpiration = (new Date()).getTime();
     },
     peerEditWindowHandler(mode, options = {}) {
-      // const tailwindLightGreen = 'bg-green-50';
-      // const tailwindDarkerGreen = 'bg-green-200';
-      // const tailwindLightRed = 'bg-red-50';
-      // const tailwindDarkerRed = 'bg-red-200';
-      // const tailwindWhite = 'bg-white';
-
       if (mode === 'init') {
         const { peerId } = options;
         this.peerEditName = this.network.peers[peerId]['name'];
@@ -1099,7 +1101,7 @@ new Vue({
             enabled: this.network.connections[connectionId].enabled,
             allowedIPsAtoB: this.network.connections[connectionId].allowedIPsAtoB,
             allowedIPsBtoA: this.network.connections[connectionId].allowedIPsBtoA,
-            persistentKeepalive: this.network.connections[connectionId].persistentKeepalive
+            persistentKeepalive: this.network.connections[connectionId].persistentKeepalive,
           };
         }
       }
