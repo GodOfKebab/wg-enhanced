@@ -35,6 +35,8 @@ new Vue({
     password: null,
     requiresPassword: null,
 
+    initializedGraph: false,
+
     network: { peers: { root: { address: '' } }, connections: {} },
 
     peerAvatars: {},
@@ -294,6 +296,27 @@ new Vue({
           console.log(err);
         }
       });
+
+      if (this.initializedGraph) return;
+      try {
+        // Random tree
+        const N = 300;
+        const gData = {
+          nodes: [...Array(N).keys()].map(i => ({ id: i })),
+          links: [...Array(N).keys()]
+            .filter(id => id)
+            .map(id => ({
+              source: id,
+              target: Math.round(Math.random() * (id - 1)),
+            })),
+        };
+
+        const Graph = ForceGraph()(document.getElementById('graph'))
+          .linkDirectionalParticles(2)
+          .graphData(gData);
+        this.initializedGraph = true;
+      } catch (e) {
+      }
     },
     login(e) {
       e.preventDefault();
