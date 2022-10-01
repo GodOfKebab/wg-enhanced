@@ -248,6 +248,23 @@ module.exports = class WireGuard {
     return preamble;
   }
 
+  async peerDeletePreamble({ peerId, address }) {
+    let preambleFound = false;
+    let preambleErrorMsg = '';
+    this.preambles.forEach(preamble => {
+      if (preamble.peerId === peerId || preamble.address === address) {
+        preambleFound = true;
+        if (preamble.peerId === peerId
+            && preamble.address !== address) preambleErrorMsg = 'Assigned peerId\'s address doesn\t match!';
+        if (preamble.address === address
+            && preamble.peerId !== peerId) preambleErrorMsg = 'Assigned address\'s peerId doesn\t match!';
+      }
+    });
+    if (!preambleFound) throw new Error('preamble not found!');
+    if (preambleErrorMsg !== '') throw new Error(preambleErrorMsg);
+    this.preambles = this.preambles.filter(r => !(r.peerId === peerId && r.address === address));
+  }
+
   async createPeer({
     peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers,
   }) {
@@ -275,11 +292,22 @@ module.exports = class WireGuard {
     if (!WireGuardHelper.checkField('dns', dns)) throw new Error('DNS error.');
     if (!WireGuardHelper.checkField('mtu', mtu)) throw new Error('MTU error.');
 
-    // TODO: add check for incoming id and address
     if (peerId === null || address === null) {
       const { p, a } = await this.peerCreatePreamble();
       peerId = p;
       address = a;
+    } else {
+      let preambleErrorMsg = '';
+      this.preambles.forEach(preamble => {
+        if (preamble.peerId === peerId || preamble.address === address) {
+          if (preamble.peerId === peerId
+              && preamble.address !== address) preambleErrorMsg = 'Assigned peerId\'s address doesn\t match!';
+          if (preamble.address === address
+              && preamble.peerId !== peerId) preambleErrorMsg = 'Assigned address\'s peerId doesn\t match!';
+          if ((new Date()).getTime() > preamble.expiration) preambleErrorMsg = 'This preamble entry is expired!';
+        }
+      });
+      if (preambleErrorMsg !== '') throw new Error(preambleErrorMsg);
     }
     // Create Peer
     config.peers[peerId] = {

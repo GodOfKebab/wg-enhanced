@@ -443,6 +443,13 @@ new Vue({
         // enable the root server as default
         this.peerCreateAttachedPeerIds = ['root'];
         this.peerCreateIsConnectionEnabled['root'] = true;
+      } else if (mode === 'delete-preamble') {
+        await this.api.deletePreamble({ peerId: this.peerCreatePeerId, address: this.peerCreateAddress });
+
+        // Reset the peerId, address and expiration time
+        this.peerCreatePeerId = '';
+        this.peerCreateAddress = '';
+        this.peerCreatePreambleExpiration = (new Date()).getTime();
       }
     },
     createPeer() {
