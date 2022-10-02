@@ -127,6 +127,10 @@ ${connectionDetails.persistentKeepalive.enabled ? `PersistentKeepalive = ${conne
     return `${peer2}*${peer1}`;
   }
 
+  static getConnectionPeers(connectionId) {
+    return { a: connectionId.split('*')[0], b: connectionId.split('*')[1] };
+  }
+
 }
 
 try {

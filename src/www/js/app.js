@@ -299,24 +299,72 @@ new Vue({
 
       if (this.initializedGraph) return;
       try {
-        // Random tree
-        const N = 300;
-        const gData = {
-          nodes: [...Array(N).keys()].map(i => ({ id: i })),
-          links: [...Array(N).keys()]
-            .filter(id => id)
-            .map(id => ({
-              source: id,
-              target: Math.round(Math.random() * (id - 1)),
-            })),
-        };
-
-        const Graph = ForceGraph()(document.getElementById('graph'))
+        const connectionsCount = {};
+        const forceG = { nodes: [], links: [] };
+        for (const [connectionId] of Object.entries(this.network.connections)) {
+          const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+          forceG.links.push({ source: a, target: b });
+          forceG.links.push({ source: b, target: a });
+          if (a in connectionsCount) {
+            connectionsCount[a] += 1;
+          } else {
+            connectionsCount[a] = 0;
+          }
+          if (b in connectionsCount) {
+            connectionsCount[b] += 1;
+          } else {
+            connectionsCount[b] = 0;
+          }
+        }
+        for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
+          forceG.nodes.push({
+            id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, val: connectionsCount[peerId],
+          });
+        }
+        const graph = ForceGraph()(document.getElementById('graph'))
+          .height(document.getElementById('graph').clientHeight)
+          .width(document.getElementById('graph').clientWidth)
+          .d3Force('center', null)
+          .zoomToFit(100, 20)
+          .nodeId('id')
+          .nodeVal('val')
+          .nodeLabel('name')
+          .nodeAutoColorBy('mobility')
+          .linkSource('source')
+          .linkTarget('target')
           .linkDirectionalParticles(2)
-          .graphData(gData);
+          .cooldownTicks(10)
+          .graphData(forceG);
+
+        graph.onEngineStop(() => graph.zoomToFit(400, 20));
+        graph.onBackgroundClick(() => graph.zoomToFit(400, 20));
+        graph.onNodeClick(node => {
+          // Center/zoom on node
+          graph.centerAt(node.x, node.y, 1000);
+          graph.zoom(8, 2000);
+
+          this.peerEditWindowHandler('init', { peerId: node.id });
+          this.peerConfigWindow = 'edit';
+          this.peerConfigId = node.id;
+        });
+
         this.initializedGraph = true;
       } catch (e) {
+        console.log(e);
       }
+    },
+    roundedImage(ctx, x,y,width,height,radius){
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
     },
     login(e) {
       e.preventDefault();
