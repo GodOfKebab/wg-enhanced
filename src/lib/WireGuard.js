@@ -151,8 +151,8 @@ module.exports = class WireGuard {
     // By default, set all these to null
     Object.keys(config.connections).forEach(peerConnectionId => {
       config.connections[peerConnectionId].latestHandshakeAt = null;
-      config.connections[peerConnectionId].transferRx = null;
-      config.connections[peerConnectionId].transferTx = null;
+      config.connections[peerConnectionId].transferRx = 0;
+      config.connections[peerConnectionId].transferTx = 0;
     });
 
     // Loop WireGuard status to fill the above values

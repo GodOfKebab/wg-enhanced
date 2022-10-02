@@ -36,6 +36,7 @@ new Vue({
     requiresPassword: null,
 
     initializedGraph: false,
+    graph: null,
 
     network: { peers: { root: { address: '' } }, connections: {} },
 
@@ -222,12 +223,13 @@ new Vue({
       });
       if (this.wireguardStatus !== 'up') return;
 
+      let detectedChange = false;
       // Get the network-wide config
       await this.api.getNetwork().then(network => {
         const staticPeers = {};
         const roamingPeers = {};
 
-        // start append to network.connections
+        // start appending from network.connections
         for (const [connectionId, connectionDetails] of Object.entries(network.connections)) {
           // only parse the connections including root
           if (connectionId.includes('root') && connectionDetails.enabled) {
@@ -275,8 +277,6 @@ new Vue({
             roamingPeers[peerId] = peerDetails;
           }
         }
-        this.staticPeers = staticPeers;
-        this.roamingPeers = roamingPeers;
         // end append to network.peers
 
         // Check for changes
@@ -287,6 +287,9 @@ new Vue({
         });
         if (JSON.stringify(this.network) !== JSON.stringify(network)) {
           this.network = network;
+          this.staticPeers = staticPeers;
+          this.roamingPeers = roamingPeers;
+          detectedChange = true;
         }
       }).catch(err => {
         if (err.toString() === 'TypeError: Load failed') {
@@ -297,75 +300,49 @@ new Vue({
         }
       });
 
-      if (this.initializedGraph) return;
-      try {
-        const connectionsCount = {};
-        const forceG = { nodes: [], links: [] };
-        for (const [connectionId] of Object.entries(this.network.connections)) {
-          const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
-          forceG.links.push({ source: a, target: b });
-          forceG.links.push({ source: b, target: a });
-          if (a in connectionsCount) {
-            connectionsCount[a] += 1;
-          } else {
-            connectionsCount[a] = 0;
-          }
-          if (b in connectionsCount) {
-            connectionsCount[b] += 1;
-          } else {
-            connectionsCount[b] = 0;
-          }
-        }
-        for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
-          forceG.nodes.push({
-            id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, val: connectionsCount[peerId],
+      if (!this.initializedGraph) {
+        try {
+          this.graph = ForceGraph()(document.getElementById('graph'))
+            .height(document.getElementById('graph').clientHeight)
+            .width(document.getElementById('graph').clientWidth)
+            .d3Force('center', null)
+            .zoomToFit(100, 20)
+            .nodeId('id')
+            .nodeVal('val')
+            .nodeLabel('name')
+            .nodeAutoColorBy('mobility')
+            .linkSource('source')
+            .linkTarget('target')
+            .linkDirectionalParticles('particleCount')
+            .cooldownTicks(10);
+
+          this.graph.onEngineStop(() => this.graph.zoomToFit(400, 20));
+          this.graph.onBackgroundClick(() => this.graph.zoomToFit(400, 20));
+          this.graph.onNodeClick(node => {
+            // Center/zoom on node
+            this.graph.centerAt(node.x, node.y, 400);
+            this.graph.zoom(8, 400);
+
+            this.peerEditWindowHandler('init', { peerId: node.id });
+            this.peerConfigWindow = 'edit';
+            this.peerConfigId = node.id;
           });
+
+          this.initializedGraph = true;
+        } catch (e) {
+          console.log(e);
         }
-        const graph = ForceGraph()(document.getElementById('graph'))
-          .height(document.getElementById('graph').clientHeight)
-          .width(document.getElementById('graph').clientWidth)
-          .d3Force('center', null)
-          .zoomToFit(100, 20)
-          .nodeId('id')
-          .nodeVal('val')
-          .nodeLabel('name')
-          .nodeAutoColorBy('mobility')
-          .linkSource('source')
-          .linkTarget('target')
-          .linkDirectionalParticles(2)
-          .cooldownTicks(10)
-          .graphData(forceG);
+      }
 
-        graph.onEngineStop(() => graph.zoomToFit(400, 20));
-        graph.onBackgroundClick(() => graph.zoomToFit(400, 20));
-        graph.onNodeClick(node => {
-          // Center/zoom on node
-          graph.centerAt(node.x, node.y, 1000);
-          graph.zoom(8, 2000);
-
-          this.peerEditWindowHandler('init', { peerId: node.id });
-          this.peerConfigWindow = 'edit';
-          this.peerConfigId = node.id;
-        });
-
-        this.initializedGraph = true;
-      } catch (e) {
-        console.log(e);
+      if (detectedChange) {
+        try {
+          this.graph.graphData(this.forceGraphComputed);
+        } catch (e) {
+          console.log(e);
+        }
       }
     },
-    roundedImage(ctx, x,y,width,height,radius){
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + width - radius, y);
-      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-      ctx.lineTo(x + width, y + height - radius);
-      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-      ctx.lineTo(x + radius, y + height);
-      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-      ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y);
-      ctx.closePath();
-    },
+
     login(e) {
       e.preventDefault();
 
@@ -1191,6 +1168,28 @@ new Vue({
         this.peerRemovedConnections ? removedFields : {},
         true,
       ];
+    },
+    forceGraphComputed() {
+      const peerSize = {};
+      Object.keys(this.network.peers).forEach(peerId => {
+        peerSize[peerId] = 1;
+      });
+      const forceG = { nodes: [], links: [] };
+      for (const [connectionId, connectionDetails] of Object.entries(this.network.connections)) {
+        const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+        forceG.links.push({ source: a, target: b, particleCount: connectionDetails.enabled ? 1 : 0 });
+        forceG.links.push({ source: b, target: a, particleCount: connectionDetails.enabled ? 1 : 0 });
+        for (const ab of [a, b]) {
+          peerSize[ab] += Object.keys(this.staticPeers).includes(ab) ? 1 : 0.25;
+          peerSize[ab] += connectionDetails.enabled ? 0.5 : 0.125;
+        }
+      }
+      for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
+        forceG.nodes.push({
+          id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, val: peerSize[peerId],
+        });
+      }
+      return forceG;
     },
   },
   filters: {
