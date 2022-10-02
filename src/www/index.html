@@ -220,7 +220,7 @@
 
                       <!-- Transfer TX -->
                       <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled" :title="'Total Download: ' + bytes(network.connections[getConnectionId('root', peerId)].transferTx)">
+                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled && peersPersist[getConnectionId('root', peerId)].transferTxCurrent" :title="'Total Download: ' + bytes(network.connections[getConnectionId('root', peerId)].transferTx)">
                           ·
                           <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                fill="currentColor">
@@ -234,7 +234,7 @@
 
                       <!-- Transfer RX -->
                       <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled" :title="'Total Upload: ' + bytes(network.connections[getConnectionId('root', peerId)].transferRx)">
+                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled && peersPersist[getConnectionId('root', peerId)].transferRxCurrent > 0" :title="'Total Upload: ' + bytes(network.connections[getConnectionId('root', peerId)].transferRx)">
                           ·
                           <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                fill="currentColor">
@@ -445,7 +445,7 @@
 
                       <!-- Transfer TX -->
                       <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled" :title="'Total Download: ' + bytes(network.connections[getConnectionId('root', peerId)].transferTx)">
+                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled && peersPersist[getConnectionId('root', peerId)].transferTxCurrent > 0" :title="'Total Download: ' + bytes(network.connections[getConnectionId('root', peerId)].transferTx)">
                           ·
                           <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -459,7 +459,7 @@
 
                       <!-- Transfer RX -->
                       <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled" :title="'Total Upload: ' + bytes(network.connections[getConnectionId('root', peerId)].transferRx)">
+                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled && peersPersist[getConnectionId('root', peerId)].transferRxCurrent > 0" :title="'Total Upload: ' + bytes(network.connections[getConnectionId('root', peerId)].transferRx)">
                           ·
                           <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor">
