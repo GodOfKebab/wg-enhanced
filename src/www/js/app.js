@@ -353,6 +353,7 @@ new Vue({
 
           this.initializedGraph = true;
         } catch (e) {
+          console.log('my error: ');
           console.log(e);
         }
       }
@@ -1239,7 +1240,7 @@ new Vue({
       this.refresh().catch(error => {
         console.log(error);
       });
-    }, 1000);
+    }, 5000);
 
     // Promise.resolve().then(async () => {
     //   const currentRelease = await this.api.getRelease();
