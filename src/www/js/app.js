@@ -303,9 +303,14 @@ new Vue({
       if (!this.initializedGraph) {
         try {
           this.graph = ForceGraph()(document.getElementById('graph'))
-            .nodeCanvasObject(({ icon, x, y }, ctx) => {
-              console.log(icon);
-              ctx.drawImage(icon, x - 6, y - 6, 12, 12);
+            .nodeCanvasObject(({ icon, val, x, y }, ctx) => {
+              const size = val * 5;
+              ctx.drawImage(icon, x - size / 2, y - size / 2, size, size);
+            })
+            .nodePointerAreaPaint((node, color, ctx) => {
+              const size = node.val * 5;
+              ctx.fillStyle = color;
+              ctx.fillRect(node.x - size / 2, node.y - size / 2, size, size); // draw square as pointer trap
             })
             .height(document.getElementById('graph').clientHeight)
             .width(document.getElementById('graph').clientWidth)
@@ -772,15 +777,12 @@ new Vue({
         }
       }
     },
-    getGraphNodeIcon(src) {
-      const size = 80;
-      const image = new Image();
-      image.src = src;
+    getGraphNodeIcon(image, size, background) {
       const tmpCanvas = document.createElement('canvas');
       const tmpCtx = tmpCanvas.getContext('2d');
 
-      tmpCanvas.width = image.width;
-      tmpCanvas.height = image.height;
+      tmpCanvas.width = size;
+      tmpCanvas.height = size;
 
       // draw the cached images to temporary canvas and return the context
       tmpCtx.save();
@@ -788,7 +790,13 @@ new Vue({
       tmpCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true);
       tmpCtx.closePath();
       tmpCtx.clip();
-      tmpCtx.drawImage(image, 0, 0, size, size);
+      if (background) {
+        tmpCtx.fillStyle = 'rgb(249 250 251)';
+        tmpCtx.fillRect(0, 0, size, size);
+        tmpCtx.drawImage(image, size / 4, size / 4, size / 2, size / 2);
+      } else {
+        tmpCtx.drawImage(image, 0, 0, size, size);
+      }
       tmpCtx.closePath();
       tmpCtx.restore();
       // 80, 6, 6, 12, 12
@@ -1205,18 +1213,20 @@ new Vue({
       const forceG = { nodes: [], links: [] };
       for (const [connectionId, connectionDetails] of Object.entries(this.network.connections)) {
         const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
-        forceG.links.push({ source: a, target: b, particleCount: connectionDetails.enabled ? 1 : 0 });
-        forceG.links.push({ source: b, target: a, particleCount: connectionDetails.enabled ? 1 : 0 });
+        forceG.links.push({ source: a, target: b, particleCount: connectionDetails.enabled ? 0.25 : 0 });
+        forceG.links.push({ source: b, target: a, particleCount: connectionDetails.enabled ? 0.25 : 0 });
         for (const ab of [a, b]) {
-          peerSize[ab] += Object.keys(this.staticPeers).includes(ab) ? 1 : 0.25;
-          peerSize[ab] += connectionDetails.enabled ? 0.5 : 0.125;
+          peerSize[ab] += Object.keys(this.staticPeers).includes(ab) ? 0.25 : 0.0625;
+          peerSize[ab] += connectionDetails.enabled ? 0.125 : 0.03125;
         }
       }
 
       for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
         let icon = peerDetails.mobility === 'static' ? this.forceGraphStaticPeerIcon : this.forceGraphRoamingPeerIcon;
         if (Object.keys(this.peerAvatars).includes(peerId)) {
-          icon = this.getGraphNodeIcon(this.peerAvatars[peerId]);
+          const image = new Image();
+          image.src = this.peerAvatars[peerId];
+          icon = this.getGraphNodeIcon(image, 80, false);
         }
         forceG.nodes.push({
           id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, val: peerSize[peerId], icon,
@@ -1225,10 +1235,14 @@ new Vue({
       return forceG;
     },
     forceGraphStaticPeerIcon() {
-      return this.getGraphNodeIcon(staticPeerIconSrc);
+      const image = new Image();
+      image.src = staticPeerIconSrc;
+      return this.getGraphNodeIcon(image, 80, true);
     },
     forceGraphRoamingPeerIcon() {
-      return this.getGraphNodeIcon(roamingPeerIconSrc);
+      const image = new Image();
+      image.src = roamingPeerIconSrc;
+      return this.getGraphNodeIcon(image, 80, true);
     },
   },
   filters: {
