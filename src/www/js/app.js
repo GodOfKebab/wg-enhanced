@@ -303,28 +303,9 @@ new Vue({
       if (!this.initializedGraph) {
         try {
           this.graph = ForceGraph()(document.getElementById('graph'))
-            .nodeCanvasObject(({ x, y }, ctx) => {
-              const size = 80;
-              const image = new Image();
-              image.src = `https://www.gravatar.com/avatar/${md5('yasar8000@gmail.com')}?d=blank`;
-              const tmpCanvas = document.createElement('canvas');
-              const tmpCtx = tmpCanvas.getContext('2d');
-
-              tmpCanvas.width = image.width;
-              tmpCanvas.height = image.height;
-
-              // draw the cached images to temporary canvas and return the context
-              tmpCtx.save();
-              tmpCtx.beginPath();
-              tmpCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI*2, true);
-              tmpCtx.closePath();
-              tmpCtx.clip();
-              tmpCtx.drawImage(image, 0, 0, size, size);
-              tmpCtx.closePath();
-              tmpCtx.restore();
-              // 80, 6, 6, 12, 12
-              // 40, 3, 3, 12, 12
-              ctx.drawImage(tmpCanvas, x - 6, y - 6, 12, 12);
+            .nodeCanvasObject(({ icon, x, y }, ctx) => {
+              console.log(icon);
+              ctx.drawImage(icon, x - 6, y - 6, 12, 12);
             })
             .height(document.getElementById('graph').clientHeight)
             .width(document.getElementById('graph').clientWidth)
@@ -791,6 +772,29 @@ new Vue({
         }
       }
     },
+    getGraphNodeIcon(src) {
+      const size = 80;
+      const image = new Image();
+      image.src = src;
+      const tmpCanvas = document.createElement('canvas');
+      const tmpCtx = tmpCanvas.getContext('2d');
+
+      tmpCanvas.width = image.width;
+      tmpCanvas.height = image.height;
+
+      // draw the cached images to temporary canvas and return the context
+      tmpCtx.save();
+      tmpCtx.beginPath();
+      tmpCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true);
+      tmpCtx.closePath();
+      tmpCtx.clip();
+      tmpCtx.drawImage(image, 0, 0, size, size);
+      tmpCtx.closePath();
+      tmpCtx.restore();
+      // 80, 6, 6, 12, 12
+      // 40, 3, 3, 12, 12
+      return tmpCanvas;
+    },
   },
   computed: {
     peerCreateNameColor() {
@@ -1208,12 +1212,23 @@ new Vue({
           peerSize[ab] += connectionDetails.enabled ? 0.5 : 0.125;
         }
       }
+
       for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
+        let icon = peerDetails.mobility === 'static' ? this.forceGraphStaticPeerIcon : this.forceGraphRoamingPeerIcon;
+        if (Object.keys(this.peerAvatars).includes(peerId)) {
+          icon = this.getGraphNodeIcon(this.peerAvatars[peerId]);
+        }
         forceG.nodes.push({
-          id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, val: peerSize[peerId],
+          id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, val: peerSize[peerId], icon,
         });
       }
       return forceG;
+    },
+    forceGraphStaticPeerIcon() {
+      return this.getGraphNodeIcon(staticPeerIconSrc);
+    },
+    forceGraphRoamingPeerIcon() {
+      return this.getGraphNodeIcon(roamingPeerIconSrc);
     },
   },
   filters: {
