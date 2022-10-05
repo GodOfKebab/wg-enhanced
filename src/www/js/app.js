@@ -41,6 +41,8 @@ new Vue({
     network: { peers: { root: { address: '' } }, connections: {} },
 
     peerAvatars: {},
+    peerAvatarSources: {},
+    peerAvatarCanvases: {},
     peersPersist: {},
     peerDeleteId: null,
     peerConfigId: null,
@@ -226,9 +228,6 @@ new Vue({
       let detectedChange = false;
       // Get the network-wide config
       await this.api.getNetwork().then(network => {
-        const staticPeers = {};
-        const roamingPeers = {};
-
         // start appending from network.connections
         for (const [connectionId, connectionDetails] of Object.entries(network.connections)) {
           // only parse the connections including root
@@ -265,19 +264,29 @@ new Vue({
         }
         // end append to network.connections
 
-        // start append to network.peers
+        const staticPeers = {};
+        const roamingPeers = {};
         for (const [peerId, peerDetails] of Object.entries(network.peers)) {
-          if (peerDetails.name.includes('@') && peerDetails.name.includes('.')) {
-            this.peerAvatars[peerId] = `https://www.gravatar.com/avatar/${md5(peerDetails.name)}?d=blank`;
-          }
-
           if (peerDetails.mobility === 'static') {
             staticPeers[peerId] = peerDetails;
           } else if (peerDetails.mobility === 'roaming') {
             roamingPeers[peerId] = peerDetails;
           }
+
+          // if icons are already computed, pass
+          if (Object.keys(this.peerAvatarCanvases).includes(peerId)) continue;
+          this.peerAvatars[peerId] = new Image();
+          // eslint-disable-next-line func-names
+          this.peerAvatars[peerId].onload = () => {
+            this.peerAvatarCanvases[peerId] = this.getGraphNodeIcon(this.peerAvatars[peerId], 80);
+            if (this.graph) this.graph.d3ReheatSimulation();
+          };
+          if (peerDetails.name.includes('@') && peerDetails.name.includes('.')) {
+            this.peerAvatars[peerId].src = `https://www.gravatar.com/avatar/${md5(peerDetails.name)}?d=blank`;
+          } else {
+            this.peerAvatars[peerId].src = peerDetails.mobility === 'static' ? staticPeerIconSrc : roamingPeerIconSrc;
+          }
         }
-        // end append to network.peers
 
         // Check for changes
         Object.keys(network.connections).forEach(connectionId => {
@@ -304,7 +313,13 @@ new Vue({
         try {
           this.graph = ForceGraph()(document.getElementById('graph'))
             .nodeCanvasObject((node, ctx) => {
-              ctx.drawImage(node.icon, node.x - node.size / 2, node.y - node.size / 2, node.size, node.size);
+              if (this.peerAvatarCanvases[node.id]) {
+                ctx.drawImage(this.peerAvatarCanvases[node.id], node.x - node.size / 2, node.y - node.size / 2, node.size, node.size);
+              } else {
+                const img = new Image();
+                img.src = node.mobility === 'static' ? staticPeerIconSrc : roamingPeerIconSrc;
+                ctx.drawImage(this.getGraphNodeIcon(img, 80), node.x - node.size / 2, node.y - node.size / 2, node.size, node.size);
+              }
             })
             .nodePointerAreaPaint((node, color, ctx) => {
               ctx.beginPath();
@@ -776,7 +791,7 @@ new Vue({
         }
       }
     },
-    getGraphNodeIcon(image, size, background) {
+    getGraphNodeIcon(image, size) {
       const tmpCanvas = document.createElement('canvas');
       const tmpCtx = tmpCanvas.getContext('2d');
 
@@ -789,7 +804,7 @@ new Vue({
       tmpCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true);
       tmpCtx.closePath();
       tmpCtx.clip();
-      if (background) {
+      if (image.src === staticPeerIconSrc || image.src === roamingPeerIconSrc) {
         tmpCtx.fillStyle = 'rgb(249 250 251)';
         tmpCtx.fillRect(0, 0, size, size);
         tmpCtx.drawImage(image, size / 4, size / 4, size / 2, size / 2);
@@ -1217,27 +1232,18 @@ new Vue({
       }
 
       for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
-        let icon = peerDetails.mobility === 'static' ? this.forceGraphStaticPeerIcon : this.forceGraphRoamingPeerIcon;
-        if (Object.keys(this.peerAvatars).includes(peerId)) {
-          const image = new Image();
-          image.src = this.peerAvatars[peerId];
-          icon = this.getGraphNodeIcon(image, 80, false);
-        }
+        // let icon = peerDetails.mobility === 'static' ? staticPeerIconSrc : roamingPeerIconSrc;
+        // let icon = peerDetails.mobility === 'static' ? this.forceGraphStaticPeerIcon : this.forceGraphRoamingPeerIcon;
+        // if (Object.keys(this.peerAvatarSources).includes(peerId)) {
+        //   const image = new Image();
+        //   image.src = this.peerAvatarSources[peerId];
+        //   icon = this.getGraphNodeIcon(image, 80, false);
+        // }
         forceG.nodes.push({
-          id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, size: Math.sqrt(peerSize[peerId]) * 7, icon,
+          id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, size: Math.sqrt(peerSize[peerId]) * 7, icon: this.peerAvatarCanvases[peerId],
         });
       }
       return forceG;
-    },
-    forceGraphStaticPeerIcon() {
-      const image = new Image();
-      image.src = staticPeerIconSrc;
-      return this.getGraphNodeIcon(image, 80, true);
-    },
-    forceGraphRoamingPeerIcon() {
-      const image = new Image();
-      image.src = roamingPeerIconSrc;
-      return this.getGraphNodeIcon(image, 80, true);
     },
   },
   filters: {
