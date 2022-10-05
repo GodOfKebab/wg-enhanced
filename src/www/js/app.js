@@ -303,21 +303,20 @@ new Vue({
       if (!this.initializedGraph) {
         try {
           this.graph = ForceGraph()(document.getElementById('graph'))
-            .nodeCanvasObject(({ icon, val, x, y }, ctx) => {
-              const size = val * 5;
-              ctx.drawImage(icon, x - size / 2, y - size / 2, size, size);
+            .nodeCanvasObject((node, ctx) => {
+              ctx.drawImage(node.icon, node.x - node.size / 2, node.y - node.size / 2, node.size, node.size);
             })
             .nodePointerAreaPaint((node, color, ctx) => {
-              const size = node.val * 5;
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, node.size / 2, 0, Math.PI * 2, true);
               ctx.fillStyle = color;
-              ctx.fillRect(node.x - size / 2, node.y - size / 2, size, size); // draw square as pointer trap
+              ctx.fill();
             })
             .height(document.getElementById('graph').clientHeight)
             .width(document.getElementById('graph').clientWidth)
             .d3Force('center', null)
             .zoomToFit(100, 20)
             .nodeId('id')
-            .nodeVal('val')
             .nodeLabel('name')
             .nodeAutoColorBy('mobility')
             .linkSource('source')
@@ -797,10 +796,6 @@ new Vue({
       } else {
         tmpCtx.drawImage(image, 0, 0, size, size);
       }
-      tmpCtx.closePath();
-      tmpCtx.restore();
-      // 80, 6, 6, 12, 12
-      // 40, 3, 3, 12, 12
       return tmpCanvas;
     },
   },
@@ -1229,7 +1224,7 @@ new Vue({
           icon = this.getGraphNodeIcon(image, 80, false);
         }
         forceG.nodes.push({
-          id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, val: peerSize[peerId], icon,
+          id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, size: Math.sqrt(peerSize[peerId]) * 7, icon,
         });
       }
       return forceG;
