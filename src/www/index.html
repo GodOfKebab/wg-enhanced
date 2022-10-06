@@ -147,8 +147,8 @@
 <!--                </div>-->
 
                 <div class="relative p-5 z-10 flex flex-row">
-                  <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
-                    <img v-if="peerAvatarSources[peerId]" :src="peerAvatarSources[peerId]" class="w-10 rounded-full absolute top-0 left-0" />
+                  <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative" :id="`avatarDiv.${peerId}`">
+                    <img v-if="peerAvatars[peerId].src !== staticPeerIconSrc" :src="peerAvatars[peerId].src" class="w-10 rounded-full absolute top-0 left-0" />
                     <img v-else class="w-4 m-3 absolute top-0 left-0" :src="staticPeerIconSrc">
 
                     <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
@@ -368,8 +368,8 @@
 <!--                </div>-->
 
                 <div class="relative p-5 z-10 flex flex-row">
-                  <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
-                    <img v-if="peerAvatarSources[peerId]" :src="peerAvatarSources[peerId]" class="w-10 rounded-full absolute top-0 left-0" />
+                  <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative" :id="`avatarDiv.${peerId}`">
+                    <img v-if="peerAvatars[peerId].src !== roamingPeerIconSrc" :src="peerAvatars[peerId].src" class="w-10 rounded-full absolute top-0 left-0" />
                     <img v-else class="w-4 m-3 rounded-full absolute top-0 left-0" :src="roamingPeerIconSrc">
                     <!-- TODO: add this somewhere on the website <a href="https://icons8.com/icon/97937/cellular-network">Cellular Network icon by Icons8</a>-->
 

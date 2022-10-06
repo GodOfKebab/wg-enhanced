@@ -278,7 +278,7 @@ new Vue({
           this.peerAvatars[peerId] = new Image();
           // eslint-disable-next-line func-names
           this.peerAvatars[peerId].onload = () => {
-            this.peerAvatarCanvases[peerId] = this.getGraphNodeIcon(this.peerAvatars[peerId], 80);
+            this.peerAvatarCanvases[peerId] = this.getGraphNodeIcon(this.peerAvatars[peerId]);
             if (this.graph) this.graph.d3ReheatSimulation();
           };
           if (peerDetails.name.includes('@') && peerDetails.name.includes('.')) {
@@ -318,7 +318,7 @@ new Vue({
               } else {
                 const img = new Image();
                 img.src = node.mobility === 'static' ? staticPeerIconSrc : roamingPeerIconSrc;
-                ctx.drawImage(this.getGraphNodeIcon(img, 80), node.x - node.size / 2, node.y - node.size / 2, node.size, node.size);
+                ctx.drawImage(this.getGraphNodeIcon(img), node.x - node.size / 2, node.y - node.size / 2, node.size, node.size);
               }
             })
             .nodePointerAreaPaint((node, color, ctx) => {
@@ -336,7 +336,9 @@ new Vue({
             .nodeAutoColorBy('mobility')
             .linkSource('source')
             .linkTarget('target')
+            .linkAutoColorBy('color')
             .linkDirectionalParticles('particleCount')
+            .linkWidth('strength')
             .cooldownTicks(10);
 
           this.graph.onEngineStop(() => this.graph.zoomToFit(400, 20));
@@ -791,7 +793,8 @@ new Vue({
         }
       }
     },
-    getGraphNodeIcon(image, size) {
+    getGraphNodeIcon(image) {
+      const size = image.src === staticPeerIconSrc || image.src === roamingPeerIconSrc ? 96 * 2 : 80;
       const tmpCanvas = document.createElement('canvas');
       const tmpCtx = tmpCanvas.getContext('2d');
 
@@ -1222,23 +1225,34 @@ new Vue({
       });
       const forceG = { nodes: [], links: [] };
       for (const [connectionId, connectionDetails] of Object.entries(this.network.connections)) {
-        const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
-        forceG.links.push({ source: a, target: b, particleCount: connectionDetails.enabled ? 0.25 : 0 });
-        forceG.links.push({ source: b, target: a, particleCount: connectionDetails.enabled ? 0.25 : 0 });
-        for (const ab of [a, b]) {
-          peerSize[ab] += Object.keys(this.staticPeers).includes(ab) ? 0.25 : 0.0625;
-          peerSize[ab] += connectionDetails.enabled ? 0.125 : 0.03125;
+        if (connectionDetails.enabled) {
+          const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+          const linkColorStrength = 1
+              + Object.keys(this.staticPeers).includes(a)
+              + Object.keys(this.staticPeers).includes(b);
+          let color = '';
+          // eslint-disable-next-line default-case
+          switch (linkColorStrength) {
+            case 1:
+              color = 'rgb(229 231 235)';
+              break;
+            case 2:
+              color = 'rgb(209 213 219)';
+              break;
+            case 3:
+              color = 'rgb(107 114 128)';
+              break;
+          }
+          forceG.links.push({ source: a, target: b, particleCount: 0, color, strength: linkColorStrength });
+          forceG.links.push({ source: b, target: a, particleCount: 0, color, strength: linkColorStrength });
+          for (const ab of [a, b]) {
+            peerSize[ab] += Object.keys(this.staticPeers).includes(ab) ? 0.25 : 0.0625;
+            peerSize[ab] += connectionDetails.enabled ? 0.125 : 0.03125;
+          }
         }
       }
 
       for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
-        // let icon = peerDetails.mobility === 'static' ? staticPeerIconSrc : roamingPeerIconSrc;
-        // let icon = peerDetails.mobility === 'static' ? this.forceGraphStaticPeerIcon : this.forceGraphRoamingPeerIcon;
-        // if (Object.keys(this.peerAvatarSources).includes(peerId)) {
-        //   const image = new Image();
-        //   image.src = this.peerAvatarSources[peerId];
-        //   icon = this.getGraphNodeIcon(image, 80, false);
-        // }
         forceG.nodes.push({
           id: peerId, name: peerDetails.name, mobility: peerDetails.mobility, size: Math.sqrt(peerSize[peerId]) * 7, icon: this.peerAvatarCanvases[peerId],
         });
