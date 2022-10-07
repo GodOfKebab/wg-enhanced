@@ -907,6 +907,20 @@ new Vue({
       this.peerEditAssignedColor.dnsmtu.div = this.peerEditDNS.enabled || this.peerEditMTU.enabled ? ((this.peerEditDNS.enabled && this.peerEditAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-200') || (this.peerEditMTU.enabled && this.peerEditAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       return this.peerEditAssignedColor.dnsmtu;
     },
+    peerEditConfigColor() {
+      // let color = 'bg-white';
+      let error = false;
+      let changeDetected = false;
+      error ||= this.peerEditNameColor === 'bg-red-200';
+      changeDetected ||= this.peerEditNameColor === 'bg-green-200';
+      error ||= this.peerEditAddressColor === 'bg-red-200';
+      changeDetected ||= this.peerEditAddressColor === 'bg-green-200';
+      error ||= this.peerEditEndpointColor === 'bg-red-200';
+      changeDetected ||= this.peerEditEndpointColor === 'bg-green-200';
+      error ||= this.peerEditDNSMTUColor.div === 'bg-red-50';
+      changeDetected ||= this.peerEditDNSMTUColor.div === 'bg-green-50';
+      return error ? 'bg-red-50' : changeDetected ? 'bg-green-100' : 'bg-green-50';
+    },
     peerEditAttachablePeerIds() {
       const staticPeers = [];
       Object.keys(this.staticPeers).forEach(peerId => {

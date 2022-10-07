@@ -918,47 +918,100 @@
                     <!-- edit config -->
                     <div v-show="peerConfigWindow === 'edit'" class="mt-2 w-full overflow-auto h-96">
                      <!-- Peer config edit -->
-                      <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto">
-                        <div v-for="peerConfigKey in ['name', 'address', 'publicKey', 'privateKey', 'endpoint', 'createdAt', 'updatedAt']"
-                             class="relative">
-                          <div class="flex grid grid-cols-3 text-sm">
-                            <div class="col-span-1">
-                              <span class="text-gray-800">
-                                  <strong>{{ peerConfigKey }}</strong>
-                              </span>
-                            </div>
+<!--                      <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto">-->
+<!--                        <div v-for="peerConfigKey in ['name', 'address', 'endpoint']"-->
+<!--                             class="relative">-->
+<!--                          <div class="flex grid grid-cols-3 text-sm">-->
+<!--                            <div class="col-span-1">-->
+<!--                              <span class="text-gray-800">-->
+<!--                                  <strong>{{ peerConfigKey }}</strong>-->
+<!--                              </span>-->
+<!--                            </div>-->
 
-                            <div class="col-span-2 text-sm">
-                              <input v-if="peerConfigKey === 'name'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditName" id="peerConfigEditData.name" :class="[peerEditNameColor]">
-                              <input v-else-if="peerConfigKey === 'address'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditAddress" id="peerConfigEditData.address" :class="[peerEditAddressColor]">
-                              <div v-else-if="peerConfigKey === 'endpoint'">
-                                <label for="peerConfigEditData.endpointToggle" class="inline-flex relative items-center cursor-pointer align-middle">
-                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.endpointToggle" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static';" :checked="peerEditMobility === 'static'">
-                                  <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>
-                                </label>
-                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditEndpoint" id="peerConfigEditData.endpoint" :class="[peerEditMobility === 'static' ? peerEditEndpointColor : 'bg-gray-100']" :disabled="peerEditMobility !== 'static'">
-                              </div>
-                              <span v-else-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mr-1 pl-1">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
-                              <span v-else class="text-gray-800 text-xs mr-1 pl-1">{{ network.peers[peerConfigId][peerConfigKey] }}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+<!--                            <div class="col-span-2 text-sm">-->
+<!--                              <input v-if="peerConfigKey === 'name'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditName" id="peerConfigEditData.name" :class="[peerEditNameColor]">-->
+<!--                              <input v-else-if="peerConfigKey === 'address'" class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditAddress" id="peerConfigEditData.address" :class="[peerEditAddressColor]">-->
+<!--                              <div v-else-if="peerConfigKey === 'endpoint'">-->
+<!--                                <label for="peerConfigEditData.endpointToggle" class="inline-flex relative items-center cursor-pointer align-middle">-->
+<!--                                  <input type="checkbox" class="sr-only peer" id="peerConfigEditData.endpointToggle" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static';" :checked="peerEditMobility === 'static'">-->
+<!--                                  <div class="w-5 h-3 bg-red-600 rounded-full peer peer-focus:ring-1 peer-focus:ring-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-green-600"></div>-->
+<!--                                </label>-->
+<!--                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1" v-model="peerEditEndpoint" id="peerConfigEditData.endpoint" :class="[peerEditMobility === 'static' ? peerEditEndpointColor : 'bg-gray-100']" :disabled="peerEditMobility !== 'static'">-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                        </div>-->
+<!--                      </div>-->
 
-                      <div class="m-2 p-1 shadow-md border rounded" :class="[peerEditDNSMTUColor.div]">
-                        <div class="text-gray-800">
-                          Configure DNS and MTU:
+                      <div class="m-2 p-1 shadow-md border rounded" :class="[peerEditConfigColor]">
+<!--                        <div class="text-gray-800">-->
+<!--                          Configure Peer:-->
+<!--                        </div>-->
+
+<!--                        <div class="flex grid grid-cols-2">-->
+<!--                          <div class="truncate mr-2">-->
+<!--                            <div class="form-check truncate">-->
+<!--                              <label>-->
+<!--                                <span class="text-gray-800 cursor-pointer text-xs">-->
+<!--                                  <strong class="text-sm">Name: </strong>-->
+<!--                                </span>-->
+<!--                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;">-->
+<!--                              </label>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                          <div class="truncate mr-2">-->
+<!--                            <div class="form-check truncate">-->
+<!--                              <label>-->
+<!--                                <span class="text-gray-800 cursor-pointer text-xs">-->
+<!--                                  <strong class="text-sm">Address: </strong>-->
+<!--                                </span>-->
+<!--                                <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;">-->
+<!--                              </label>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                        </div>-->
+
+                        <div class="my-0.5 truncate flex items-center">
+                          <span class="text-gray-800 text-xs mr-1">
+                            <strong class="text-sm">Name:</strong>
+                          </span>
+                          <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
+                                 type="text" placeholder="Name"
+                                 v-model="peerEditName" :class="[peerEditNameColor]"/>
                         </div>
-                        <div class="flex grid grid-cols-2">
-                          <div class="truncate mr-2">
+                        <div class="mb-0.5 truncate flex items-center">
+                          <span class="text-gray-800 text-xs mr-1">
+                            <strong class="text-sm">Address:</strong>
+                          </span>
+                          <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
+                                 type="text" placeholder="Address (e.g. 10.8.0.12)"
+                                 v-model="peerEditAddress" :class="[peerEditAddressColor]"/>
+                        </div>
+
+                        <div class="form-check truncate flex items-center">
+                          <label class="flex-none">
+                            <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static';" :checked="peerEditMobility === 'static'">
+                            <span class="text-gray-800 cursor-pointer text-xs mr-1">
+                              <strong class="text-sm">Static Endpoint:</strong>
+                          </span>
+                          </label>
+                          <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
+                                 type="text" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)"
+                                 v-model="peerEditEndpoint"
+                                 :class="[peerEditMobility === 'static' ? peerEditEndpointColor : 'bg-gray-100']"
+                                 :disabled="peerEditMobility !== 'static'"/>
+                        </div>
+
+                        <div class="flex grid grid-cols-2 gap-2">
+                          <div class="truncate">
                             <div class="form-check truncate">
                               <label>
-                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditDNS.enabled">
+                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerEditDNS.enabled">
                                 <span class="text-gray-800 cursor-pointer text-xs">
                                     <strong class="text-sm">DNS: </strong>
                                   </span>
                               </label>
-                              <input list="inputDNSListEdit" name="inputDNS" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerEditDNS.value" :disabled="!peerEditDNS.enabled" :class="[peerEditDNSMTUColor.dnsInput]">
+                              <input list="inputDNSListEdit" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerEditDNS.value" :disabled="!peerEditDNS.enabled" :class="[peerEditDNSMTUColor.dnsInput]">
                               <datalist id="inputDNSListEdit">
                                 <option :value="network.peers.root.address">
                                   Forward all DNS related traffic to {{network.peers.root.address}}
@@ -966,15 +1019,15 @@
                               </datalist>
                             </div>
                           </div>
-                          <div class="truncate mr-2">
+                          <div class="truncate">
                             <div class="form-check truncate">
                               <label>
-                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditMTU.enabled">
+                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerEditMTU.enabled">
                                 <span class="text-gray-800 cursor-pointer text-xs">
                                     <strong class="text-sm">MTU: </strong>
                                   </span>
                               </label>
-                              <input list="inputMTUListEdit" name="inputMTU" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerEditMTU.value" :disabled="!peerEditMTU.enabled" :class="[peerEditDNSMTUColor.mtuInput]">
+                              <input list="inputMTUListEdit" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerEditMTU.value" :disabled="!peerEditMTU.enabled" :class="[peerEditDNSMTUColor.mtuInput]">
                               <datalist id="inputMTUListEdit">
                                 <option :value="1420">
                                   TODO
@@ -984,6 +1037,64 @@
                           </div>
                         </div>
                       </div>
+
+                      <div class="m-2 p-1 shadow-md border rounded bg-green-50 overflow-x-auto">
+                        <div v-for="peerConfigKey in ['publicKey', 'privateKey', 'createdAt', 'updatedAt']"
+                             class="relative">
+                          <div class="flex grid grid-cols-10 text-sm">
+                            <div class="col-span-2">
+                              <span class="text-gray-800">
+                                  <strong>{{ peerConfigKey }}</strong>
+                              </span>
+                            </div>
+                            <div class="col-span-8 text-sm whitespace-nowrap">
+                              <span class="text-gray-800 text-xs">:</span>
+                              <span v-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mx-1 pr-4">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
+                              <span v-else class="text-gray-800 text-xs mx-1 pr-4">{{ network.peers[peerConfigId][peerConfigKey] }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+<!--                      <div class="m-2 p-1 shadow-md border rounded" :class="[peerEditDNSMTUColor.div]">-->
+<!--                        <div class="text-gray-800">-->
+<!--                          Configure DNS and MTU:-->
+<!--                        </div>-->
+<!--                        <div class="flex grid grid-cols-2">-->
+<!--                          <div class="truncate mr-2">-->
+<!--                            <div class="form-check truncate">-->
+<!--                              <label>-->
+<!--                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditDNS.enabled">-->
+<!--                                <span class="text-gray-800 cursor-pointer text-xs">-->
+<!--                                    <strong class="text-sm">DNS: </strong>-->
+<!--                                  </span>-->
+<!--                              </label>-->
+<!--                              <input list="inputDNSListEdit" name="inputDNS" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerEditDNS.value" :disabled="!peerEditDNS.enabled" :class="[peerEditDNSMTUColor.dnsInput]">-->
+<!--                              <datalist id="inputDNSListEdit">-->
+<!--                                <option :value="network.peers.root.address">-->
+<!--                                  Forward all DNS related traffic to {{network.peers.root.address}}-->
+<!--                                </option>-->
+<!--                              </datalist>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                          <div class="truncate mr-2">-->
+<!--                            <div class="form-check truncate">-->
+<!--                              <label>-->
+<!--                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditMTU.enabled">-->
+<!--                                <span class="text-gray-800 cursor-pointer text-xs">-->
+<!--                                    <strong class="text-sm">MTU: </strong>-->
+<!--                                  </span>-->
+<!--                              </label>-->
+<!--                              <input list="inputMTUListEdit" name="inputMTU" class="text-gray-800 text-xs mr-1 rounded-md pl-1 disabled:bg-gray-100" style="width: 25vw;" placeholder="click to see recommendations" v-model.trim="peerEditMTU.value" :disabled="!peerEditMTU.enabled" :class="[peerEditDNSMTUColor.mtuInput]">-->
+<!--                              <datalist id="inputMTUListEdit">-->
+<!--                                <option :value="1420">-->
+<!--                                  TODO-->
+<!--                                </option>-->
+<!--                              </datalist>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                        </div>-->
+<!--                      </div>-->
 
                       <!-- Peer's connections edit -->
                       <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0 || peerEditAttachablePeerIds.roamingPeers.length > 0" class="m-2 p-1 shadow-md border rounded" :class="[peerEditAttachedPeersCountDivColor]">
