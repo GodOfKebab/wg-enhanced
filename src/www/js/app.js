@@ -210,6 +210,7 @@ new Vue({
     },
     async refresh() {
       if (!this.authenticated) return;
+      if (document.hidden) return;
 
       // Get WirGuard Server Status
       await this.api.getWirGuardStatus().then(wgStatus => {
@@ -228,6 +229,7 @@ new Vue({
       let detectedChange = false;
       // Get the network-wide config
       await this.api.getNetwork().then(network => {
+        console.log('refreshing');
         // start appending from network.connections
         for (const [connectionId, connectionDetails] of Object.entries(network.connections)) {
           // only parse the connections including root
@@ -1307,7 +1309,7 @@ new Vue({
       this.refresh().catch(error => {
         console.log(error);
       });
-    }, 5000);
+    }, 1000);
 
     // Promise.resolve().then(async () => {
     //   const currentRelease = await this.api.getRelease();
