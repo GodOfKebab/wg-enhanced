@@ -43,11 +43,26 @@
     .special-fill-edit:hover > svg > path{
       stroke: rgb(243 244 246);
     }
-    .highlight-remove-box:hover > div > button{
+    .highlight-remove-box:hover > div > .remove-button-itself{
       opacity: 0.2;
     }
-    .highlight-remove-box:hover > div > button:hover{
+    .highlight-remove-box:hover > div > .remove-button-itself:hover{
       opacity: 1.0;
+    }
+    .highlight-undo-box:hover > div > .undo-button-itself{
+      opacity: 0.2;
+    }
+    .highlight-undo-box:hover > div > .undo-button-itself:hover{
+      opacity: 1.0;
+    }
+    .dont-highlight-undo-box:hover > div > .undo-button-itself{
+      opacity: 0;
+    }
+    .highlight-undo-box:hover > div > .undo-button-itself > img{
+      filter: invert(0.2);
+    }
+    .highlight-undo-box:hover > div > .undo-button-itself:hover > img{
+      filter: invert(1.0);
     }
   </style>
 </head>
@@ -699,7 +714,7 @@
                         <div v-if="Object.keys(staticPeers).length" v-for="(peerDetails, peerId) in staticPeers" class="relative">
                           <div v-if="peerCreateAttachedPeerIds.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap highlight-remove-box" :class="[peerCreateConnectionColor.attachedPeerDiv[peerId]]">
                             <div class="inline-block float-right absolute z-20 right-[0.5rem] top-[0.25rem]">
-                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition"
+                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition remove-button-itself"
                                       title="Remove Connection" @click="peerCreateAttachedPeerIds.splice(peerCreateAttachedPeerIds.indexOf(peerId), 1)">
                                 <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                   <path fill-rule="evenodd"
@@ -971,24 +986,41 @@
 <!--                          </div>-->
 <!--                        </div>-->
 
-                        <div class="my-0.5 truncate flex items-center">
+                        <div class="my-0.5 truncate flex items-center relative" :class="[peerEditNameColor !== 'bg-white' ? 'highlight-undo-box' : '']">
                           <span class="text-gray-800 text-xs mr-1">
                             <strong class="text-sm">Name:</strong>
                           </span>
                           <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
                                  type="text" placeholder="Name"
                                  v-model="peerEditName" :class="[peerEditNameColor]"/>
+                          <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-300 hover:text-white opacity-0 transition undo-button-itself"
+                                    title="Undo Changes"
+                                    :disabled="peerEditNameColor === 'bg-white'"
+                                    @click="peerEditName = network.peers[peerConfigId].name">
+                              <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                            </button>
+                          </div>
                         </div>
-                        <div class="mb-0.5 truncate flex items-center">
+
+                        <div class="mb-0.5 truncate flex items-center relative" :class="[peerEditAddressColor !== 'bg-white' ? 'highlight-undo-box' : '']">
                           <span class="text-gray-800 text-xs mr-1">
                             <strong class="text-sm">Address:</strong>
                           </span>
                           <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
                                  type="text" placeholder="Address (e.g. 10.8.0.12)"
                                  v-model="peerEditAddress" :class="[peerEditAddressColor]"/>
+                          <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-300 hover:text-white opacity-0 transition undo-button-itself"
+                                    title="Undo Changes"
+                                    :disabled="peerEditAddressColor === 'bg-white'"
+                                    @click="peerEditAddress = network.peers[peerConfigId].address">
+                              <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                            </button>
+                          </div>
                         </div>
 
-                        <div class="form-check truncate flex items-center">
+                        <div class="form-check truncate flex items-center relative" :class="[peerEditEndpoint !== network.peers[peerConfigId].endpoint || peerEditMobility !== network.peers[peerConfigId].mobility ? 'highlight-undo-box' : '']">
                           <label class="flex-none">
                             <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static';" :checked="peerEditMobility === 'static'">
                             <span class="text-gray-800 cursor-pointer text-xs mr-1">
@@ -998,8 +1030,16 @@
                           <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
                                  type="text" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)"
                                  v-model="peerEditEndpoint"
-                                 :class="[peerEditMobility === 'static' ? peerEditEndpointColor : 'bg-gray-100']"
+                                 :class="[peerEditEndpointColor]"
                                  :disabled="peerEditMobility !== 'static'"/>
+                          <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-300 hover:text-white opacity-0 transition undo-button-itself"
+                                    title="Undo Changes"
+                                    :disabled="peerEditEndpoint === network.peers[peerConfigId].endpoint && peerEditMobility === network.peers[peerConfigId].mobility"
+                                    @click="peerEditEndpoint = network.peers[peerConfigId].endpoint; peerEditMobility = network.peers[peerConfigId].mobility;">
+                              <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                            </button>
+                          </div>
                         </div>
 
                         <div class="flex grid grid-cols-2 gap-2">
@@ -1150,9 +1190,9 @@
                       </div>
 
                       <!-- Peer's connections in boxes -->
-                      <div v-for="connectionId in peerEditConnectionIds" class="relative highlight-remove-box">
+                      <div v-for="connectionId in peerEditConnectionIds" class="relative highlight-remove-box" :class="[!peerEditResetConnectionFieldsDisabled[connectionId] ? 'highlight-undo-box' : '']">
                         <div class="inline-block float-right absolute z-20 right-[1rem] top-[0.25rem]">
-                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition"
+                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition remove-button-itself"
                                   title="Remove Connection"
                                   @click="peerEditStaticConnectionIds.includes(connectionId) ? peerEditStaticConnectionIds.splice(peerEditStaticConnectionIds.indexOf(connectionId), 1) : peerEditRoamingConnectionIds.splice(peerEditRoamingConnectionIds.indexOf(connectionId), 1)">
                             <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -1160,6 +1200,14 @@
                                     d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                                     clip-rule="evenodd" />
                             </svg>
+                          </button>
+                        </div>
+                        <div class="inline-block float-right absolute z-20 right-[2.75rem] top-[0.25rem]">
+                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-300 hover:text-white opacity-0 transition undo-button-itself"
+                                  title="Undo Changes"
+                                  @click="peerEditResetConnectionFields(connectionId)"
+                                  :disabled="peerEditResetConnectionFieldsDisabled[connectionId]">
+                            <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
                           </button>
                         </div>
                         <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap relative" :class="[peerEditConnectionColor.div[connectionId]]">

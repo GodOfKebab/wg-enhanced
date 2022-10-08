@@ -818,6 +818,24 @@ new Vue({
       }
       return tmpCanvas;
     },
+    peerEditResetConnectionFields(connectionId) {
+      if (Object.keys(this.network.connections).includes(connectionId)) {
+        this.peerEditIsConnectionEnabled[connectionId] = this.network.connections[connectionId].enabled;
+        this.peerEditPersistentKeepaliveEnabledData[connectionId] = this.network.connections[connectionId].persistentKeepalive.enabled;
+        this.peerEditPersistentKeepaliveValueData[connectionId] = this.network.connections[connectionId].persistentKeepalive.value;
+        this.peerEditAllowedIPsAtoB[connectionId] = this.network.connections[connectionId].allowedIPsAtoB;
+        this.peerEditAllowedIPsBtoA[connectionId] = this.network.connections[connectionId].allowedIPsBtoA;
+        this.peerEditConnectionColorRefresh += 1;
+      } else {
+        this.peerEditIsConnectionEnabled[connectionId] = true;
+        this.peerEditPersistentKeepaliveEnabledData[connectionId] = false;
+        this.peerEditPersistentKeepaliveValueData[connectionId] = '25';
+        const { a , b } = WireGuardHelper.getConnectionPeers(connectionId);
+        this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[a].address}/32`;
+        this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[b].address}/32`;
+        this.peerEditConnectionColorRefresh += 1;
+      }
+    },
   },
   computed: {
     peerCreateNameColor() {
@@ -898,8 +916,8 @@ new Vue({
     },
     peerEditEndpointColor() {
       // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.endpoint = this.peerEditEndpoint !== this.network.peers[this.peerConfigId].endpoint
-        ? (WireGuardHelper.checkField('endpoint', this.peerEditEndpoint) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+      this.peerEditAssignedColor.endpoint = this.peerEditMobility === 'static' ? this.peerEditEndpoint !== this.network.peers[this.peerConfigId].endpoint
+        ? (WireGuardHelper.checkField('endpoint', this.peerEditEndpoint) ? 'bg-green-200' : 'bg-red-200') : 'bg-white' : 'bg-gray-100';
       return this.peerEditAssignedColor.endpoint;
     },
     peerEditDNSMTUColor() {
@@ -1023,6 +1041,7 @@ new Vue({
               ? (WireGuardHelper.checkField('persistentKeepalive', this.peerEditPersistentKeepaliveValueData[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
             error ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] === 'bg-red-200';
             change ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] !== 'bg-white';
+            change ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
           } else {
             this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200';
             error ||= this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] === 'bg-red-200';
@@ -1033,9 +1052,10 @@ new Vue({
             this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] = WireGuardHelper.checkField('persistentKeepalive', this.peerEditPersistentKeepaliveValueData[connectionId]) ? 'bg-green-200' : 'bg-red-200';
             error ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] === 'bg-red-200';
             change ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] !== 'bg-white';
+            change ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
           }
           // eslint-disable-next-line no-nested-ternary
-          this.peerEditAssignedColor.connections.div[connectionId] = this.peerEditIsConnectionEnabled[connectionId] && !error ? change ? 'bg-green-100' : 'bg-green-50' : 'bg-red-50';
+          this.peerEditAssignedColor.connections.div[connectionId] = !error ? this.peerEditIsConnectionEnabled[connectionId] ? change ? 'bg-green-100' : 'bg-green-50' : 'bg-red-50' : 'bg-red-100';
         } catch (e) {
           console.log(e);
           this.peerEditAssignedColor.connections.div[connectionId] = 'bg-red-50';
@@ -1242,6 +1262,29 @@ new Vue({
         this.peerRemovedConnections ? removedFields : {},
         true,
       ];
+    },
+    peerEditResetConnectionFieldsDisabled() {
+      this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;
+      const resetFields = {};
+      for (const connectionId of [...this.peerEditStaticConnectionIds, ...this.peerEditRoamingConnectionIds]) {
+        let changed = false;
+        if (Object.keys(this.network.connections).includes(connectionId)) {
+          changed ||= this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled;
+          changed ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
+          changed ||= this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value;
+          changed ||= this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB;
+          changed ||= this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA;
+        } else {
+          changed ||= this.peerEditIsConnectionEnabled[connectionId] !== true;
+          changed ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== false;
+          changed ||= this.peerEditPersistentKeepaliveValueData[connectionId] !== '25';
+          const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+          changed ||= this.peerEditAllowedIPsAtoB[connectionId] !== `${this.network.peers[a].address}/32`;
+          changed ||= this.peerEditAllowedIPsBtoA[connectionId] !== `${this.network.peers[b].address}/32`;
+        }
+        resetFields[connectionId] = !changed;
+      }
+      return resetFields;
     },
     forceGraphComputed() {
       const peerSize = {};
