@@ -712,7 +712,7 @@
                         </div>
 
                         <div v-if="Object.keys(staticPeers).length" v-for="(peerDetails, peerId) in staticPeers" class="relative">
-                          <div v-if="peerCreateAttachedPeerIds.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap highlight-remove-box" :class="[peerCreateConnectionColor.attachedPeerDiv[peerId]]">
+                          <div v-if="peerCreateAttachedPeerIds.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap highlight-remove-box" :class="[peerCreateConnectionColor.attachedPeerDiv[peerId], peerCreateResetConnectionFieldsDisabled[peerId] ? '' : 'highlight-undo-box']">
                             <div class="inline-block float-right absolute z-20 right-[0.5rem] top-[0.25rem]">
                               <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition remove-button-itself"
                                       title="Remove Connection" @click="peerCreateAttachedPeerIds.splice(peerCreateAttachedPeerIds.indexOf(peerId), 1)">
@@ -721,6 +721,14 @@
                                         d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                                         clip-rule="evenodd" />
                                 </svg>
+                              </button>
+                            </div>
+                            <div class="inline-block float-right absolute z-20 right-[2.25rem] top-[0.25rem]">
+                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                                      title="Undo Changes"
+                                      @click="peerCreateResetConnectionFields(peerId)"
+                                      :disabled="peerCreateResetConnectionFieldsDisabled[peerId]">
+                                <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
                               </button>
                             </div>
                             <div class=" ml-1">
@@ -1153,7 +1161,7 @@
 <!--                      </div>-->
 
                       <!-- Peer's connections edit -->
-                      <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0 || peerEditAttachablePeerIds.roamingPeers.length > 0" class="m-2 p-1 shadow-md border rounded relative" :class="[peerEditAttachedPeersCountDivColor, JSON.stringify([...peerEditStaticConnectionIds, ...peerEditRoamingConnectionIds]) !== JSON.stringify(Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId))) ? 'highlight-undo-box' : '']">
+                      <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0 || peerEditAttachablePeerIds.roamingPeers.length > 0" class="m-2 p-1 shadow-md border rounded relative" :class="[peerEditAttachedPeersCountDivColor, Object.keys(this.peerEditChangedFieldsCompute[1]).length + Object.keys(this.peerEditChangedFieldsCompute[2]).length === 0 ? '' : 'highlight-undo-box']">
                         <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0">
                           <div class="text-gray-800">
                             Attached static peers:
@@ -1206,7 +1214,7 @@
                         <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                           <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
                                   title="Undo Changes"
-                                  :disabled="JSON.stringify([...peerEditStaticConnectionIds, ...peerEditRoamingConnectionIds]) === JSON.stringify(Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId)))"
+                                  :disabled="Object.keys(this.peerEditChangedFieldsCompute[1]).length + Object.keys(this.peerEditChangedFieldsCompute[2]).length === 0"
                                   @click="peerEditStaticConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId)); peerEditRoamingConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId));">
                             <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
                           </button>
@@ -1230,7 +1238,7 @@
                           <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
                                   title="Undo Changes"
                                   @click="peerEditResetConnectionFields(connectionId)"
-                                  :disabled="peerEditResetConnectionFieldsDisabled[connectionId]">
+                                  :disabled="Object.keys(peerEditResetConnectionFieldsDisabled).includes(connectionId) ? peerEditResetConnectionFieldsDisabled[connectionId] : true">
                             <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
                           </button>
                         </div>

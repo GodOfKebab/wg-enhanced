@@ -831,10 +831,19 @@ new Vue({
         this.peerEditPersistentKeepaliveEnabledData[connectionId] = false;
         this.peerEditPersistentKeepaliveValueData[connectionId] = '25';
         const { a , b } = WireGuardHelper.getConnectionPeers(connectionId);
-        this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[a].address}/32`;
-        this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[b].address}/32`;
+        this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[b].address}/32`;
+        this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[a].address}/32`;
         this.peerEditConnectionColorRefresh += 1;
       }
+    },
+    peerCreateResetConnectionFields(peerId) {
+      this.peerCreateIsConnectionEnabled[peerId] = true;
+      this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
+      this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
+      const { a, b } = WireGuardHelper.getConnectionPeers(peerId);
+      this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
+      this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
+      this.peerCreateConnectionColorRefresh += 1;
     },
   },
   computed: {
@@ -1279,10 +1288,24 @@ new Vue({
           changed ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== false;
           changed ||= this.peerEditPersistentKeepaliveValueData[connectionId] !== '25';
           const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
-          changed ||= this.peerEditAllowedIPsAtoB[connectionId] !== `${this.network.peers[a].address}/32`;
-          changed ||= this.peerEditAllowedIPsBtoA[connectionId] !== `${this.network.peers[b].address}/32`;
+          changed ||= this.peerEditAllowedIPsAtoB[connectionId] !== `${this.network.peers[b].address}/32`;
+          changed ||= this.peerEditAllowedIPsBtoA[connectionId] !== `${this.network.peers[a].address}/32`;
         }
         resetFields[connectionId] = !changed;
+      }
+      return resetFields;
+    },
+    peerCreateResetConnectionFieldsDisabled() {
+      this.peerCreateConnectionColorRefresh &&= this.peerCreateConnectionColorRefresh;
+      const resetFields = {};
+      for (const peerId of this.peerCreateAttachedPeerIds) {
+        let changed = false;
+        changed ||= this.peerCreateIsConnectionEnabled[peerId] !== true;
+        changed ||= this.peerCreatePersistentKeepaliveEnabledData[peerId] !== false;
+        changed ||= this.peerCreatePersistentKeepaliveValueData[peerId] !== '25';
+        changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== (this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0');
+        changed ||= this.peerCreateAllowedIPsOldToNew[peerId] !== `${this.peerCreateAddress}/32`;
+        resetFields[peerId] = !changed;
       }
       return resetFields;
     },
