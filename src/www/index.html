@@ -654,7 +654,7 @@
                           </div>
                           <div class="flex grid grid-cols-2">
                             <div class="truncate mr-2">
-                              <div class="form-check truncate">
+                              <div class="form-check truncate relative" :class="[peerCreateDNS.enabled !== false || peerCreateDNS.value !== '' ? 'highlight-undo-box' : '']">
                                 <label>
                                   <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerCreateDNS.enabled">
                                   <span class="text-gray-800 cursor-pointer text-xs">
@@ -667,10 +667,18 @@
                                     Forward all DNS related traffic to {{network.peers.root.address}}
                                   </option>
                                 </datalist>
+                                <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                                  <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                                          title="Undo Changes"
+                                          :disabled="peerCreateDNS.enabled === false && peerCreateDNS.value === ''"
+                                          @click="peerCreateDNS.enabled = false; peerCreateDNS.value = '';">
+                                    <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                                  </button>
+                                </div>
                               </div>
                             </div>
                             <div class="truncate mr-2">
-                              <div class="form-check truncate">
+                              <div class="form-check truncate relative" :class="[peerCreateMTU.enabled !== false || peerCreateMTU.value !== '' ? 'highlight-undo-box' : '']">
                                 <label>
                                   <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerCreateMTU.enabled">
                                   <span class="text-gray-800 cursor-pointer text-xs">
@@ -683,12 +691,20 @@
                                     TODO
                                   </option>
                                 </datalist>
+                                <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                                  <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                                          title="Undo Changes"
+                                          :disabled="peerCreateMTU.enabled === false && peerCreateMTU.value === ''"
+                                          @click="peerCreateMTU.enabled = false; peerCreateMTU.value = '';">
+                                    <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div class="my-2 p-1 shadow-md border rounded" id="attachPeersDiv" :class="[peerCreateAttachedPeersCountDivColor]">
+                        <div class="my-2 p-1 shadow-md border rounded relative" id="attachPeersDiv" :class="[peerCreateAttachedPeersCountDivColor, JSON.stringify(peerCreateAttachedPeerIds) !== JSON.stringify(['root']) ? 'highlight-undo-box' : '']">
                           <div class="text-gray-800">
                             Attach to these static peers:
                           </div>
@@ -708,6 +724,14 @@
                                 </label>
                               </div>
                             </div>
+                          </div>
+                          <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                                    title="Undo Changes"
+                                    :disabled="JSON.stringify(peerCreateAttachedPeerIds) === JSON.stringify(['root'])"
+                                    @click="peerCreateAttachedPeerIds = ['root']">
+                              <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                            </button>
                           </div>
                         </div>
 
