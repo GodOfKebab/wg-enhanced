@@ -54,11 +54,13 @@ new Vue({
     peerCreateAddress: '',
     peerCreatePreambleExpiration: (new Date()).getTime(),
     peerCreateMobility: '',
+    peerCreateNoAddress: false,
     peerCreateEndpoint: '',
     peerCreateShowAdvance: '',
     peerCreateDNS: { enabled: null, value: '' },
     peerCreateMTU: { enabled: null, value: '' },
-    peerCreateAttachedPeerIds: [],
+    peerCreateAttachedStaticPeerIds: [],
+    peerCreateAttachedRoamingPeerIds: [],
     peerCreateIsConnectionEnabled: {},
     peerCreatePersistentKeepaliveEnabledData: {},
     peerCreatePersistentKeepaliveValueData: {},
@@ -229,7 +231,6 @@ new Vue({
       let detectedChange = false;
       // Get the network-wide config
       await this.api.getNetwork().then(network => {
-        console.log('refreshing');
         // start appending from network.connections
         for (const [connectionId, connectionDetails] of Object.entries(network.connections)) {
           // only parse the connections including root
@@ -493,19 +494,32 @@ new Vue({
     },
     async peerCreateWindowHandler(mode) {
       if (mode === 'init') {
+        if ((new Date()).getTime() > this.peerCreatePreambleExpiration) {
+          try {
+            const { peerId, address, expiration } = await this.api.preamblePeer({ });
+            this.peerCreatePeerId = peerId;
+            this.peerCreateAddress = address;
+            this.peerCreatePreambleExpiration = expiration;
+          } catch (e) {
+            this.peerCreateMobility = '';
+            this.peerCreateNoAddress = true;
+            return;
+          }
+          this.peerCreateNoAddress = false;
+        }
+
         this.peerCreateName = '';
         this.peerCreateEndpoint = '';
         this.peerCreateShowAdvance = false;
 
-        if ((new Date()).getTime() > this.peerCreatePreambleExpiration) {
-          const { peerId, address, expiration } = await this.api.preamblePeer({ });
-          this.peerCreatePeerId = peerId;
-          this.peerCreateAddress = address;
-          this.peerCreatePreambleExpiration = expiration;
-        }
-
         for (const peerId of Object.keys(this.staticPeers)) {
           this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
+          this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
+          this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
+          this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
+        }
+        for (const peerId of Object.keys(this.roamingPeers)) {
+          this.peerCreateAllowedIPsNewToOld[peerId] = `${this.network.peers[peerId].address}/32`;
           this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
           this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
           this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
@@ -517,7 +531,8 @@ new Vue({
         this.peerCreateMTU.value = '';
 
         // enable the root server as default
-        this.peerCreateAttachedPeerIds = ['root'];
+        this.peerCreateAttachedStaticPeerIds = ['root'];
+        this.peerCreateAttachedRoamingPeerIds = [];
         this.peerCreateIsConnectionEnabled['root'] = true;
       } else if (mode === 'delete-preamble') {
         await this.api.deletePreamble({ peerId: this.peerCreatePeerId, address: this.peerCreateAddress });
@@ -531,7 +546,7 @@ new Vue({
     createPeer() {
       const attachedPeersCompact = [];
 
-      for (const peerId of this.peerCreateAttachedPeerIds) {
+      for (const peerId of [...this.peerCreateAttachedStaticPeerIds, ...this.peerCreateAttachedRoamingPeerIds]) {
         attachedPeersCompact.push({
           peer: peerId,
           enabled: this.peerCreateIsConnectionEnabled[peerId],
@@ -840,9 +855,13 @@ new Vue({
       this.peerCreateIsConnectionEnabled[peerId] = true;
       this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
       this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
-      const { a, b } = WireGuardHelper.getConnectionPeers(peerId);
-      this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
-      this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
+      if (Object.keys(this.staticPeers).includes(peerId)) {
+        this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
+        this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
+      } else {
+        this.peerCreateAllowedIPsNewToOld[peerId] = `${this.network.peers[peerId].address}/32`;
+        this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
+      }
       this.peerCreateConnectionColorRefresh += 1;
     },
   },
@@ -862,9 +881,9 @@ new Vue({
       this.peerCreateAssignedColor.dnsmtu.div = this.peerCreateDNS.enabled || this.peerCreateMTU.enabled ? ((this.peerCreateDNS.enabled && this.peerCreateAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-200') || (this.peerCreateMTU.enabled && this.peerCreateAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       return this.peerCreateAssignedColor.dnsmtu;
     },
-    peerCreateSelectAll: {
+    peerCreateStaticSelectAll: {
       get() {
-        return this.staticPeers ? Object.keys(this.staticPeers).length === this.peerCreateAttachedPeerIds.length : false;
+        return this.staticPeers ? Object.keys(this.staticPeers).length === this.peerCreateAttachedStaticPeerIds.length : false;
       },
       set(value) {
         const attached = [];
@@ -872,22 +891,41 @@ new Vue({
         if (value) {
           Object.keys(this.staticPeers).forEach(peerId => {
             attached.push(peerId);
-            if (!(peerId in this.peerCreateAttachedPeerIds)) {
+            if (!(peerId in this.peerCreateAttachedStaticPeerIds)) {
               this.peerCreateIsConnectionEnabled[peerId] = true;
             }
           });
         }
 
-        this.peerCreateAttachedPeerIds = attached;
+        this.peerCreateAttachedStaticPeerIds = attached;
+      },
+    },
+    peerCreateRoamingSelectAll: {
+      get() {
+        return this.roamingPeers ? Object.keys(this.roamingPeers).length === this.peerCreateAttachedRoamingPeerIds.length : false;
+      },
+      set(value) {
+        const attached = [];
+
+        if (value) {
+          Object.keys(this.roamingPeers).forEach(peerId => {
+            attached.push(peerId);
+            if (!(peerId in this.peerCreateAttachedRoamingPeerIds)) {
+              this.peerCreateIsConnectionEnabled[peerId] = true;
+            }
+          });
+        }
+
+        this.peerCreateAttachedRoamingPeerIds = attached;
       },
     },
     peerCreateAttachedPeersCountDivColor() {
-      this.peerCreateAssignedColor.connections.attachedPeerCountDiv = WireGuardHelper.checkField('peerCount', this.peerCreateAttachedPeerIds) ? 'bg-green-50' : 'bg-red-50';
+      this.peerCreateAssignedColor.connections.attachedPeerCountDiv = WireGuardHelper.checkField('peerCount', this.peerCreateAttachedStaticPeerIds) || WireGuardHelper.checkField('peerCount', this.peerCreateAttachedRoamingPeerIds) ? 'bg-green-50' : 'bg-red-50';
       return this.peerCreateAssignedColor.connections.attachedPeerCountDiv;
     },
     peerCreateConnectionColor() {
       this.peerCreateConnectionColorRefresh &&= this.peerCreateConnectionColorRefresh;
-      for (const peerId of this.peerCreateAttachedPeerIds) {
+      for (const peerId of [...this.peerCreateAttachedStaticPeerIds, ...this.peerCreateAttachedRoamingPeerIds]) {
         try {
           this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] = WireGuardHelper.checkField('allowedIPs', this.peerCreateAllowedIPsOldToNew[peerId]) ? 'bg-green-200' : 'bg-red-200';
           this.peerCreateAssignedColor.connections.allowedIPsNewToOld[peerId] = WireGuardHelper.checkField('allowedIPs', this.peerCreateAllowedIPsNewToOld[peerId]) ? 'bg-green-200' : 'bg-red-200';
@@ -1298,13 +1336,18 @@ new Vue({
     peerCreateResetConnectionFieldsDisabled() {
       this.peerCreateConnectionColorRefresh &&= this.peerCreateConnectionColorRefresh;
       const resetFields = {};
-      for (const peerId of this.peerCreateAttachedPeerIds) {
+      for (const peerId of [...this.peerCreateAttachedStaticPeerIds, ...this.peerCreateAttachedRoamingPeerIds]) {
         let changed = false;
         changed ||= this.peerCreateIsConnectionEnabled[peerId] !== true;
         changed ||= this.peerCreatePersistentKeepaliveEnabledData[peerId] !== false;
         changed ||= this.peerCreatePersistentKeepaliveValueData[peerId] !== '25';
-        changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== (this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0');
-        changed ||= this.peerCreateAllowedIPsOldToNew[peerId] !== `${this.peerCreateAddress}/32`;
+        if (this.peerCreateAttachedStaticPeerIds.includes(peerId)) {
+          changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== (this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0');
+          changed ||= this.peerCreateAllowedIPsOldToNew[peerId] !== `${this.peerCreateAddress}/32`;
+        } else {
+          changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== `${this.network.peers[peerId].address}/32`;
+          changed ||= this.peerCreateAllowedIPsOldToNew[peerId] !== `${this.peerCreateAddress}/32`;
+        }
         resetFields[peerId] = !changed;
       }
       return resetFields;
