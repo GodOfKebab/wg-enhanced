@@ -230,15 +230,9 @@ module.exports = class WireGuard {
     if (this.preambles.length >= 100) throw new Error('No address can be reserved.');
 
     // Calculate next IP
-    for (let i = 2; i < 255; i++) {
-      const testAddress = WG_DEFAULT_ADDRESS.replace('x', i);
-      const peer = Object.values(config.peers).find(p => p.address === testAddress);
-
-      if (!peer && this.preambles.every(p => p.address !== testAddress)) {
-        preamble.address = testAddress;
-        break;
-      }
-    }
+    const takenAddresses = Object.entries(config.peers).map(p => p[1].address);
+    takenAddresses.push('10.8.0.0');
+    preamble.address = Util.getNextAvailableAddress('10.8.0.0/24', takenAddresses);
     if (!preamble.address) throw new Error('Maximum number of peers reached.');
 
     preamble.peerId = uuid.v4();
