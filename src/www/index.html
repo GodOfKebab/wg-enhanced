@@ -1131,7 +1131,7 @@
                             <strong class="text-sm">Address:</strong>
                           </span>
                           <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
-                                 type="text" placeholder="Address (e.g. 10.8.0.12)"
+                                 type="text" :placeholder="`Address (e.g. ${WireGuardHelper.getNextAvailableAddress(network)})`"
                                  v-model="peerEditAddress" :class="[peerEditAddressColor]"/>
                           <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
                             <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"

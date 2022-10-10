@@ -513,7 +513,7 @@ new Vue({
         this.peerCreateShowAdvance = false;
 
         for (const peerId of Object.keys(this.staticPeers)) {
-          this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
+          this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0';
           this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
           this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
           this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
@@ -845,7 +845,7 @@ new Vue({
         this.peerEditIsConnectionEnabled[connectionId] = true;
         this.peerEditPersistentKeepaliveEnabledData[connectionId] = false;
         this.peerEditPersistentKeepaliveValueData[connectionId] = '25';
-        const { a , b } = WireGuardHelper.getConnectionPeers(connectionId);
+        const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
         this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[b].address}/32`;
         this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[a].address}/32`;
         this.peerEditConnectionColorRefresh += 1;
@@ -856,7 +856,7 @@ new Vue({
       this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
       this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
       if (Object.keys(this.staticPeers).includes(peerId)) {
-        this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0';
+        this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0';
         this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
       } else {
         this.peerCreateAllowedIPsNewToOld[peerId] = `${this.network.peers[peerId].address}/32`;
@@ -975,7 +975,6 @@ new Vue({
       return this.peerEditAssignedColor.dnsmtu;
     },
     peerEditConfigColor() {
-      // let color = 'bg-white';
       let error = false;
       let changeDetected = false;
       error ||= this.peerEditNameColor === 'bg-red-200';
@@ -986,6 +985,7 @@ new Vue({
       changeDetected ||= this.peerEditEndpointColor === 'bg-green-200';
       error ||= this.peerEditDNSMTUColor.div === 'bg-red-50';
       changeDetected ||= this.peerEditDNSMTUColor.div === 'bg-green-50';
+      // eslint-disable-next-line no-nested-ternary
       return error ? 'bg-red-50' : changeDetected ? 'bg-green-100' : 'bg-green-50';
     },
     peerEditAttachablePeerIds() {
@@ -1342,7 +1342,7 @@ new Vue({
         changed ||= this.peerCreatePersistentKeepaliveEnabledData[peerId] !== false;
         changed ||= this.peerCreatePersistentKeepaliveValueData[peerId] !== '25';
         if (this.peerCreateAttachedStaticPeerIds.includes(peerId)) {
-          changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== (this.peerCreateMobility === 'static' ? '10.8.0.1/24' : '0.0.0.0/0');
+          changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== (this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0');
           changed ||= this.peerCreateAllowedIPsOldToNew[peerId] !== `${this.peerCreateAddress}/32`;
         } else {
           changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== `${this.network.peers[peerId].address}/32`;
@@ -1377,8 +1377,12 @@ new Vue({
               color = 'rgb(107 114 128)';
               break;
           }
-          forceG.links.push({ source: a, target: b, particleCount: 0, color, strength: linkColorStrength });
-          forceG.links.push({ source: b, target: a, particleCount: 0, color, strength: linkColorStrength });
+          forceG.links.push({
+            source: a, target: b, particleCount: 0, color, strength: linkColorStrength,
+          });
+          forceG.links.push({
+            source: b, target: a, particleCount: 0, color, strength: linkColorStrength,
+          });
           for (const ab of [a, b]) {
             peerSize[ab] += Object.keys(this.staticPeers).includes(ab) ? 0.25 : 0.0625;
             peerSize[ab] += connectionDetails.enabled ? 0.125 : 0.03125;

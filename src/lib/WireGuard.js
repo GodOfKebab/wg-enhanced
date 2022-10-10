@@ -18,7 +18,7 @@ const {
   WG_PORT,
   WG_MTU,
   WG_DEFAULT_DNS,
-  WG_DEFAULT_ADDRESS,
+  WG_SUBNET,
   WG_PERSISTENT_KEEPALIVE,
   WG_POST_UP,
   WG_POST_DOWN,
@@ -48,10 +48,9 @@ module.exports = class WireGuard {
           const publicKey = await Util.exec(`echo ${privateKey} | wg pubkey`, {
             log: 'echo ***hidden*** | wg pubkey',
           });
-          const address = WG_DEFAULT_ADDRESS.replace('x', '1');
+          const address = WireGuardHelper.getNextAvailableAddress({ subnet: WG_SUBNET, peers: {} });
 
           config = {
-            connections: {},
             peers: {
               root: {
                 name: 'this-server',
@@ -72,6 +71,8 @@ module.exports = class WireGuard {
                 },
               },
             },
+            connections: {},
+            subnet: WG_SUBNET,
           };
           debug('Configuration generated.');
         }
@@ -106,7 +107,7 @@ module.exports = class WireGuard {
 
   async __saveConfig(config) {
     debug('Config saving...');
-    const strippedConfig = { peers: {}, connections: {} };
+    const strippedConfig = { peers: {}, connections: {}, subnet: config.subnet };
     for (const [peerId, peer] of Object.entries(config.peers)) {
       strippedConfig.peers[peerId] = {
         name: peer.name,
@@ -230,9 +231,8 @@ module.exports = class WireGuard {
     if (this.preambles.length >= 100) throw new Error('No address can be reserved.');
 
     // Calculate next IP
-    const takenAddresses = Object.entries(config.peers).map(p => p[1].address);
-    takenAddresses.push('10.8.0.0');
-    preamble.address = Util.getNextAvailableAddress('10.8.0.0/24', takenAddresses);
+    const takenAddresses = Object.values(config.peers).map(p => p.address);
+    preamble.address = WireGuardHelper.getNextAvailableAddress(config);
     if (!preamble.address) throw new Error('Maximum number of peers reached.');
 
     preamble.peerId = uuid.v4();
