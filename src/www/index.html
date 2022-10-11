@@ -717,7 +717,7 @@
                           <div class="text-gray-800 mb-0.5">
                             Configure Script Snippets:
                           </div>
-                          <div v-for="scriptField in ['PreUp', 'PreDown', 'PostUp', 'PostDown']">
+                          <div v-for="scriptField in ['PreUp', 'PostUp', 'PreDown', 'PostDown']">
                             <div class="form-check truncate flex items-center relative mb-0.5" :class="[peerCreateScripts[scriptField].value !== '' || peerCreateScripts[scriptField].enabled === true ? 'highlight-undo-box' : '']">
                               <label class="flex-none">
                                 <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="peerCreateScripts[scriptField].enabled = !peerCreateScripts[scriptField].enabled;" :checked="peerCreateScripts[scriptField].enabled">
@@ -1220,7 +1220,7 @@
                         <div class="text-gray-800 mb-0.5">
                           Configure Script Snippets:
                         </div>
-                        <div v-for="scriptField in ['PreUp', 'PreDown', 'PostUp', 'PostDown']">
+                        <div v-for="scriptField in ['PreUp', 'PostUp', 'PreDown', 'PostDown']">
                           <div class="form-check truncate flex items-center relative mb-0.5" :class="[peerEditScripts[scriptField].value !== '' || peerEditScripts[scriptField].enabled === true ? 'highlight-undo-box' : '']">
                             <label class="flex-none">
                               <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="peerEditScripts[scriptField].enabled = !peerEditScripts[scriptField].enabled;" :checked="peerEditScripts[scriptField].enabled">

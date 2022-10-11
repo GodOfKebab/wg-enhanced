@@ -84,8 +84,8 @@ new Vue({
       scripts: {
         div: 'bg-white',
         PreUp: 'bg-white',
-        PreDown: 'bg-white',
         PostUp: 'bg-white',
+        PreDown: 'bg-white',
         PostDown: 'bg-white',
       },
       connections: {
@@ -141,8 +141,8 @@ new Vue({
       scripts: {
         div: 'bg-white',
         PreUp: 'bg-white',
-        PreDown: 'bg-white',
         PostUp: 'bg-white',
+        PreDown: 'bg-white',
         PostDown: 'bg-white',
       },
       connections: {
@@ -622,10 +622,10 @@ new Vue({
         this.peerEditMTU.value = this.network.peers[peerId]['mtu'].value;
         this.peerEditScripts.PreUp.enabled = this.network.peers[peerId].scripts.PreUp.enabled;
         this.peerEditScripts.PreUp.value = this.network.peers[peerId].scripts.PreUp.value;
-        this.peerEditScripts.PreDown.enabled = this.network.peers[peerId].scripts.PreDown.enabled;
-        this.peerEditScripts.PreDown.value = this.network.peers[peerId].scripts.PreDown.value;
         this.peerEditScripts.PostUp.enabled = this.network.peers[peerId].scripts.PostUp.enabled;
         this.peerEditScripts.PostUp.value = this.network.peers[peerId].scripts.PostUp.value;
+        this.peerEditScripts.PreDown.enabled = this.network.peers[peerId].scripts.PreDown.enabled;
+        this.peerEditScripts.PreDown.value = this.network.peers[peerId].scripts.PreDown.value;
         this.peerEditScripts.PostDown.enabled = this.network.peers[peerId].scripts.PostDown.enabled;
         this.peerEditScripts.PostDown.value = this.network.peers[peerId].scripts.PostDown.value;
 
@@ -918,17 +918,17 @@ new Vue({
     },
     peerCreateScriptsColor() {
       this.peerCreateAssignedColor.scripts.PreUp = WireGuardHelper.checkField('script', this.peerCreateScripts.PreUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerCreateAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerCreateScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       this.peerCreateAssignedColor.scripts.PostUp = WireGuardHelper.checkField('script', this.peerCreateScripts.PostUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerCreateAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerCreateScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       this.peerCreateAssignedColor.scripts.PostDown = WireGuardHelper.checkField('script', this.peerCreateScripts.PostDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       // eslint-disable-next-line no-nested-ternary
       this.peerCreateAssignedColor.scripts.div = (this.peerCreateScripts.PreUp.enabled
-      || this.peerCreateScripts.PreDown.enabled
       || this.peerCreateScripts.PostUp.enabled
+      || this.peerCreateScripts.PreDown.enabled
       || this.peerCreateScripts.PostDown.enabled)
         ? (((this.peerCreateScripts.PreUp.enabled && this.peerCreateAssignedColor.scripts.PreUp === 'enabled:bg-red-200')
-              || (this.peerCreateScripts.PreDown.enabled && this.peerCreateAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
               || (this.peerCreateScripts.PostUp.enabled && this.peerCreateAssignedColor.scripts.PostUp === 'enabled:bg-red-200')
+              || (this.peerCreateScripts.PreDown.enabled && this.peerCreateAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
               || (this.peerCreateScripts.PostDown.enabled && this.peerCreateAssignedColor.scripts.PostDown === 'enabled:bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       return this.peerCreateAssignedColor.scripts;
     },
@@ -1028,17 +1028,17 @@ new Vue({
     },
     peerEditScriptsColor() {
       this.peerEditAssignedColor.scripts.PreUp = WireGuardHelper.checkField('script', this.peerEditScripts.PreUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerEditAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerEditScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       this.peerEditAssignedColor.scripts.PostUp = WireGuardHelper.checkField('script', this.peerEditScripts.PostUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerEditAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerEditScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       this.peerEditAssignedColor.scripts.PostDown = WireGuardHelper.checkField('script', this.peerEditScripts.PostDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       // eslint-disable-next-line no-nested-ternary
       this.peerEditAssignedColor.scripts.div = (this.peerEditScripts.PreUp.enabled
-          || this.peerEditScripts.PreDown.enabled
           || this.peerEditScripts.PostUp.enabled
+          || this.peerEditScripts.PreDown.enabled
           || this.peerEditScripts.PostDown.enabled)
         ? (((this.peerEditScripts.PreUp.enabled && this.peerEditAssignedColor.scripts.PreUp === 'enabled:bg-red-200')
-              || (this.peerEditScripts.PreDown.enabled && this.peerEditAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
               || (this.peerEditScripts.PostUp.enabled && this.peerEditAssignedColor.scripts.PostUp === 'enabled:bg-red-200')
+              || (this.peerEditScripts.PreDown.enabled && this.peerEditAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
               || (this.peerEditScripts.PostDown.enabled && this.peerEditAssignedColor.scripts.PostDown === 'enabled:bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       return this.peerEditAssignedColor.scripts;
     },
@@ -1197,15 +1197,15 @@ new Vue({
         DNS: this.peerEditDNSMTUColor.dnsInput,
         MTU: this.peerEditDNSMTUColor.mtuInput,
         PreUp: this.peerEditScriptsColor.PreUp,
-        PreDown: this.peerEditScriptsColor.PreDown,
         PostUp: this.peerEditScriptsColor.PostUp,
+        PreDown: this.peerEditScriptsColor.PreDown,
         PostDown: this.peerEditScriptsColor.PostDown,
       })) {
         if ((field === 'DNS'
                 || field === 'MTU'
                 || field === 'PreUp'
-                || field === 'PreDown'
                 || field === 'PostUp'
+                || field === 'PreDown'
                 || field === 'PostDown')
             && (this.peerEditDNSMTUColor.div === 'bg-red-50'
             || this.peerEditScriptsColor.div === 'bg-red-50')) {
@@ -1218,10 +1218,10 @@ new Vue({
           if (field === 'PreUp' && this.peerEditScripts.PreUp.enabled) {
             peerErrorField = field;
           }
-          if (field === 'PreDown' && this.peerEditScripts.PreDown.enabled) {
+          if (field === 'PostUp' && this.peerEditScripts.PostUp.enabled) {
             peerErrorField = field;
           }
-          if (field === 'PostUp' && this.peerEditScripts.PostUp.enabled) {
+          if (field === 'PreDown' && this.peerEditScripts.PreDown.enabled) {
             peerErrorField = field;
           }
           if (field === 'PostDown' && this.peerEditScripts.PostDown.enabled) {
