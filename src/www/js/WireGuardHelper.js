@@ -119,6 +119,29 @@ ${connectionDetails.persistentKeepalive.enabled ? `PersistentKeepalive = ${conne
       return checkMTU;
     }
 
+    // check script
+    if (fieldName === 'script') {
+      let checkScript = fieldVariable.enabled === true || fieldVariable.enabled === false;
+      if (fieldVariable.enabled === true
+          && (typeof fieldVariable.value === 'string' || fieldVariable.value instanceof String)) {
+        checkScript &&= fieldVariable.value.match('^.*;$') !== null;
+      }
+      return checkScript;
+    }
+
+    // check scripts
+    if (fieldName === 'scripts') {
+      let checkScripts = true;
+      for (const scriptField of ['PreUp', 'PostUp', 'PreDown', 'PostDown']) {
+        if (Object.keys(fieldVariable).includes(scriptField)) {
+          checkScripts &&= WireGuardHelper.checkField('script', fieldVariable[scriptField]);
+        } else {
+          return false;
+        }
+      }
+      return checkScripts;
+    }
+
     return false;
   }
 

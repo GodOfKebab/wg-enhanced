@@ -23,7 +23,7 @@ function bytes(bytes, decimals, kib, maxunit) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
-// Vue.config.debug = true; Vue.config.devtools = true;
+Vue.config.debug = true; Vue.config.devtools = true;
 new Vue({
   el: '#app',
   components: {
@@ -56,6 +56,12 @@ new Vue({
     peerCreateMobility: '',
     peerCreateNoAddress: false,
     peerCreateEndpoint: '',
+    peerCreateScripts: {
+      PreUp: { enabled: false, value: '' },
+      PostUp: { enabled: false, value: '' },
+      PreDown: { enabled: false, value: '' },
+      PostDown: { enabled: false, value: '' },
+    },
     peerCreateShowAdvance: '',
     peerCreateDNS: { enabled: null, value: '' },
     peerCreateMTU: { enabled: null, value: '' },
@@ -74,6 +80,13 @@ new Vue({
         div: 'bg-white',
         dnsInput: 'bg-white',
         mtuInput: 'bg-white',
+      },
+      scripts: {
+        div: 'bg-white',
+        PreUp: 'bg-white',
+        PreDown: 'bg-white',
+        PostUp: 'bg-white',
+        PostDown: 'bg-white',
       },
       connections: {
         attachedPeerCountDiv: 'bg-white',
@@ -95,6 +108,12 @@ new Vue({
     peerEditEndpoint: '',
     peerEditDNS: { enabled: null, value: '' },
     peerEditMTU: { enabled: null, value: '' },
+    peerEditScripts: {
+      PreUp: { enabled: false, value: '' },
+      PostUp: { enabled: false, value: '' },
+      PreDown: { enabled: false, value: '' },
+      PostDown: { enabled: false, value: '' },
+    },
     peerEditStaticConnectionIds: [],
     peerEditRoamingConnectionIds: [],
     peerEditNewConnectionIds: [],
@@ -118,6 +137,13 @@ new Vue({
         div: 'bg-white',
         dnsInput: 'bg-white',
         mtuInput: 'bg-white',
+      },
+      scripts: {
+        div: 'bg-white',
+        PreUp: 'bg-white',
+        PreDown: 'bg-white',
+        PostUp: 'bg-white',
+        PostDown: 'bg-white',
       },
       connections: {
         attachedPeerCountDiv: 'bg-white',
@@ -569,11 +595,12 @@ new Vue({
       const peerId = this.peerCreatePeerId;
       const address = this.peerCreateAddress;
       const name = this.peerCreateName;
-      const endpoint = this.peerCreateEndpoint;
       const mobility = this.peerCreateMobility;
+      const endpoint = this.peerCreateEndpoint;
+      const scripts = this.peerCreateScripts;
 
       this.api.createPeer({
-        peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers: attachedPeersCompact,
+        peerId, address, name, mobility, dns, mtu, endpoint, scripts, attachedPeers: attachedPeersCompact,
       }).catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
 
@@ -593,6 +620,14 @@ new Vue({
         this.peerEditDNS.value = this.network.peers[peerId]['dns'].value;
         this.peerEditMTU.enabled = this.network.peers[peerId]['mtu'].enabled;
         this.peerEditMTU.value = this.network.peers[peerId]['mtu'].value;
+        this.peerEditScripts.PreUp.enabled = this.network.peers[peerId].scripts.PreUp.enabled;
+        this.peerEditScripts.PreUp.value = this.network.peers[peerId].scripts.PreUp.value;
+        this.peerEditScripts.PreDown.enabled = this.network.peers[peerId].scripts.PreDown.enabled;
+        this.peerEditScripts.PreDown.value = this.network.peers[peerId].scripts.PreDown.value;
+        this.peerEditScripts.PostUp.enabled = this.network.peers[peerId].scripts.PostUp.enabled;
+        this.peerEditScripts.PostUp.value = this.network.peers[peerId].scripts.PostUp.value;
+        this.peerEditScripts.PostDown.enabled = this.network.peers[peerId].scripts.PostDown.enabled;
+        this.peerEditScripts.PostDown.value = this.network.peers[peerId].scripts.PostDown.value;
 
         // store all the connections related to this peer
         this.peerEditIsConnectionEnabled = {};
@@ -881,6 +916,22 @@ new Vue({
       this.peerCreateAssignedColor.dnsmtu.div = this.peerCreateDNS.enabled || this.peerCreateMTU.enabled ? ((this.peerCreateDNS.enabled && this.peerCreateAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-200') || (this.peerCreateMTU.enabled && this.peerCreateAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       return this.peerCreateAssignedColor.dnsmtu;
     },
+    peerCreateScriptsColor() {
+      this.peerCreateAssignedColor.scripts.PreUp = WireGuardHelper.checkField('script', this.peerCreateScripts.PreUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerCreateAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerCreateScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerCreateAssignedColor.scripts.PostUp = WireGuardHelper.checkField('script', this.peerCreateScripts.PostUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerCreateAssignedColor.scripts.PostDown = WireGuardHelper.checkField('script', this.peerCreateScripts.PostDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      // eslint-disable-next-line no-nested-ternary
+      this.peerCreateAssignedColor.scripts.div = (this.peerCreateScripts.PreUp.enabled
+      || this.peerCreateScripts.PreDown.enabled
+      || this.peerCreateScripts.PostUp.enabled
+      || this.peerCreateScripts.PostDown.enabled)
+        ? (((this.peerCreateScripts.PreUp.enabled && this.peerCreateAssignedColor.scripts.PreUp === 'enabled:bg-red-200')
+              || (this.peerCreateScripts.PreDown.enabled && this.peerCreateAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
+              || (this.peerCreateScripts.PostUp.enabled && this.peerCreateAssignedColor.scripts.PostUp === 'enabled:bg-red-200')
+              || (this.peerCreateScripts.PostDown.enabled && this.peerCreateAssignedColor.scripts.PostDown === 'enabled:bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      return this.peerCreateAssignedColor.scripts;
+    },
     peerCreateStaticSelectAll: {
       get() {
         return this.staticPeers ? Object.keys(this.staticPeers).length === this.peerCreateAttachedStaticPeerIds.length : false;
@@ -945,6 +996,7 @@ new Vue({
       return this.peerCreateNameColor !== 'bg-red-50'
           && !(this.peerCreateMobility === 'static' && this.peerCreateEndpointColor === 'bg-red-50')
           && this.peerCreateDNSMTUColor.div !== 'bg-red-50'
+          && this.peerCreateScriptsColor.div !== 'bg-red-50'
           && this.peerCreateAttachedPeersCountDivColor !== 'bg-red-50'
           && Object.values(this.peerCreateConnectionColor.allowedIPsOldToNew).every(color => color === 'bg-green-200')
           && Object.values(this.peerCreateConnectionColor.allowedIPsNewToOld).every(color => color === 'bg-green-200');
@@ -974,6 +1026,22 @@ new Vue({
       this.peerEditAssignedColor.dnsmtu.div = this.peerEditDNS.enabled || this.peerEditMTU.enabled ? ((this.peerEditDNS.enabled && this.peerEditAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-200') || (this.peerEditMTU.enabled && this.peerEditAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       return this.peerEditAssignedColor.dnsmtu;
     },
+    peerEditScriptsColor() {
+      this.peerEditAssignedColor.scripts.PreUp = WireGuardHelper.checkField('script', this.peerEditScripts.PreUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerEditAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerEditScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerEditAssignedColor.scripts.PostUp = WireGuardHelper.checkField('script', this.peerEditScripts.PostUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      this.peerEditAssignedColor.scripts.PostDown = WireGuardHelper.checkField('script', this.peerEditScripts.PostDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      // eslint-disable-next-line no-nested-ternary
+      this.peerEditAssignedColor.scripts.div = (this.peerEditScripts.PreUp.enabled
+          || this.peerEditScripts.PreDown.enabled
+          || this.peerEditScripts.PostUp.enabled
+          || this.peerEditScripts.PostDown.enabled)
+        ? (((this.peerEditScripts.PreUp.enabled && this.peerEditAssignedColor.scripts.PreUp === 'enabled:bg-red-200')
+              || (this.peerEditScripts.PreDown.enabled && this.peerEditAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
+              || (this.peerEditScripts.PostUp.enabled && this.peerEditAssignedColor.scripts.PostUp === 'enabled:bg-red-200')
+              || (this.peerEditScripts.PostDown.enabled && this.peerEditAssignedColor.scripts.PostDown === 'enabled:bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      return this.peerEditAssignedColor.scripts;
+    },
     peerEditConfigColor() {
       let error = false;
       let changeDetected = false;
@@ -983,8 +1051,6 @@ new Vue({
       changeDetected ||= this.peerEditAddressColor === 'bg-green-200';
       error ||= this.peerEditEndpointColor === 'bg-red-200';
       changeDetected ||= this.peerEditEndpointColor === 'bg-green-200';
-      error ||= this.peerEditDNSMTUColor.div === 'bg-red-50';
-      changeDetected ||= this.peerEditDNSMTUColor.div === 'bg-green-50';
       // eslint-disable-next-line no-nested-ternary
       return error ? 'bg-red-50' : changeDetected ? 'bg-green-100' : 'bg-green-50';
     },
@@ -1130,12 +1196,35 @@ new Vue({
         endpoint: this.peerEditEndpointColor,
         DNS: this.peerEditDNSMTUColor.dnsInput,
         MTU: this.peerEditDNSMTUColor.mtuInput,
+        PreUp: this.peerEditScriptsColor.PreUp,
+        PreDown: this.peerEditScriptsColor.PreDown,
+        PostUp: this.peerEditScriptsColor.PostUp,
+        PostDown: this.peerEditScriptsColor.PostDown,
       })) {
-        if ((field === 'DNS' || field === 'MTU') && this.peerEditDNSMTUColor.div === 'bg-red-50') {
+        if ((field === 'DNS'
+                || field === 'MTU'
+                || field === 'PreUp'
+                || field === 'PreDown'
+                || field === 'PostUp'
+                || field === 'PostDown')
+            && (this.peerEditDNSMTUColor.div === 'bg-red-50'
+            || this.peerEditScriptsColor.div === 'bg-red-50')) {
           if (field === 'DNS' && this.peerEditDNS.enabled) {
             peerErrorField = field;
           }
           if (field === 'MTU' && this.peerEditMTU.enabled) {
+            peerErrorField = field;
+          }
+          if (field === 'PreUp' && this.peerEditScripts.PreUp.enabled) {
+            peerErrorField = field;
+          }
+          if (field === 'PreDown' && this.peerEditScripts.PreDown.enabled) {
+            peerErrorField = field;
+          }
+          if (field === 'PostUp' && this.peerEditScripts.PostUp.enabled) {
+            peerErrorField = field;
+          }
+          if (field === 'PostDown' && this.peerEditScripts.PostDown.enabled) {
             peerErrorField = field;
           }
           errorNotFound = false;

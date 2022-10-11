@@ -61,13 +61,13 @@ module.exports = class WireGuard {
                 updatedAt: new Date(),
                 mobility: 'static',
                 endpoint: `${WG_HOST}:${WG_PORT}`,
-                dns: {
-                  enabled: false,
-                  value: '',
-                },
-                mtu: {
-                  enabled: false,
-                  value: '',
+                dns: { enabled: false, value: '' },
+                mtu: { enabled: false, value: '' },
+                scripts: {
+                  PreUp: { enabled: false, value: '' },
+                  PostUp: { enabled: false, value: '' },
+                  PreDown: { enabled: false, value: '' },
+                  PostDown: { enabled: false, value: '' },
                 },
               },
             },
@@ -120,6 +120,7 @@ module.exports = class WireGuard {
         endpoint: peer.endpoint,
         dns: peer.dns,
         mtu: peer.mtu,
+        scripts: peer.scripts,
       };
     }
     for (const [connectionId, connection] of Object.entries(config.connections)) {
@@ -231,7 +232,6 @@ module.exports = class WireGuard {
     if (this.preambles.length >= 100) throw new Error('No address can be reserved.');
 
     // Calculate next IP
-    const takenAddresses = Object.values(config.peers).map(p => p.address);
     preamble.address = WireGuardHelper.getNextAvailableAddress(config);
     if (!preamble.address) throw new Error('Maximum number of peers reached.');
 
@@ -260,7 +260,7 @@ module.exports = class WireGuard {
   }
 
   async createPeer({
-    peerId, address, name, mobility, dns, mtu, endpoint, attachedPeers,
+    peerId, address, name, mobility, dns, mtu, endpoint, scripts, attachedPeers,
   }) {
     if (!name) throw new Error('Missing: Name : str');
 
@@ -285,6 +285,8 @@ module.exports = class WireGuard {
 
     if (!WireGuardHelper.checkField('dns', dns)) throw new Error('DNS error.');
     if (!WireGuardHelper.checkField('mtu', mtu)) throw new Error('MTU error.');
+
+    if (!WireGuardHelper.checkField('scripts', scripts)) throw new Error('PreUp, PostUp, PreDown, PostDown scripts error.');
 
     if (peerId === null || address === null) {
       const { p, a } = await this.peerCreatePreamble();
@@ -313,6 +315,7 @@ module.exports = class WireGuard {
       endpoint,
       dns,
       mtu,
+      scripts,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
