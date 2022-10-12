@@ -133,7 +133,7 @@ ${connectionDetails.persistentKeepalive.enabled ? `PersistentKeepalive = ${conne
       let checkScripts = true;
       for (const scriptField of ['PreUp', 'PostUp', 'PreDown', 'PostDown']) {
         if (Object.keys(fieldVariable).includes(scriptField)) {
-          if (fieldVariable.enabled) {
+          if (fieldVariable[scriptField].enabled) {
             checkScripts &&= WireGuardHelper.checkField('script', fieldVariable[scriptField]);
           }
         } else {
