@@ -1020,26 +1020,49 @@ new Vue({
       return this.peerEditAssignedColor.endpoint;
     },
     peerEditDNSMTUColor() {
-      this.peerEditAssignedColor.dnsmtu.dnsInput = WireGuardHelper.checkField('dns', { enabled: true, value: this.peerEditDNS.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerEditAssignedColor.dnsmtu.mtuInput = WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerEditMTU.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      let error = false;
+      let changeDetected = false;
       // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.dnsmtu.div = this.peerEditDNS.enabled || this.peerEditMTU.enabled ? ((this.peerEditDNS.enabled && this.peerEditAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-200') || (this.peerEditMTU.enabled && this.peerEditAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      this.peerEditAssignedColor.dnsmtu.dnsInput = (this.network.peers[this.peerConfigId].dns.value === '' || this.peerEditDNS.value !== this.network.peers[this.peerConfigId].dns.value)
+        ? (WireGuardHelper.checkField('dns', { enabled: true, value: this.peerEditDNS.value }) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+      // eslint-disable-next-line no-nested-ternary
+      this.peerEditAssignedColor.dnsmtu.mtuInput = (this.network.peers[this.peerConfigId].mtu.value === '' || this.peerEditMTU.value !== this.network.peers[this.peerConfigId].mtu.value)
+        ? (WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerEditMTU.value }) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+
+      error ||= this.peerEditDNS.enabled && this.peerEditAssignedColor.dnsmtu.dnsInput === 'bg-red-200';
+      changeDetected ||= this.peerEditAssignedColor.dnsmtu.dnsInput === 'bg-green-200';
+      error ||= this.peerEditMTU.enabled && this.peerEditAssignedColor.dnsmtu.mtuInput === 'bg-red-200';
+      changeDetected ||= this.peerEditAssignedColor.dnsmtu.mtuInput === 'bg-green-200';
+      // eslint-disable-next-line no-nested-ternary
+      this.peerEditAssignedColor.dnsmtu.div = this.peerEditDNS.enabled || this.peerEditMTU.enabled ? error ? 'bg-red-50' : changeDetected ? 'bg-green-100' : 'bg-green-50' : 'bg-gray-100';
       return this.peerEditAssignedColor.dnsmtu;
     },
     peerEditScriptsColor() {
-      this.peerEditAssignedColor.scripts.PreUp = WireGuardHelper.checkField('script', this.peerEditScripts.PreUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerEditAssignedColor.scripts.PostUp = WireGuardHelper.checkField('script', this.peerEditScripts.PostUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerEditAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerEditScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerEditAssignedColor.scripts.PostDown = WireGuardHelper.checkField('script', this.peerEditScripts.PostDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      let anyEnabled = false;
+      let error = false;
+      let changeDetected = false;
+      for (const script of ['PreUp', 'PreDown', 'PostUp', 'PostDown']) {
+        // eslint-disable-next-line no-nested-ternary
+        this.peerEditAssignedColor.scripts[script] = (this.network.peers[this.peerConfigId].scripts[script].value === '' || this.peerEditScripts[script].value !== this.network.peers[this.peerConfigId].scripts[script].value) ? WireGuardHelper.checkField('script', this.peerEditScripts[script]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+        error ||= this.peerEditScripts[script].enabled && this.peerEditAssignedColor.scripts[script] === 'bg-red-200';
+        changeDetected ||= this.peerEditAssignedColor.scripts[script] === 'bg-green-200';
+        anyEnabled ||= this.peerEditScripts[script].enabled;
+      }
+      // // eslint-disable-next-line no-nested-ternary
+      // this.peerEditAssignedColor.scripts.PreUp = (this.network.peers[this.peerConfigId].scripts.PreUp.value === '' || this.peerEditScripts.PreUp.value !== this.network.peers[this.peerConfigId].scripts.PreUp.value) ? WireGuardHelper.checkField('script', this.peerEditScripts.PreUp) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+      // this.peerEditAssignedColor.scripts.PostUp = WireGuardHelper.checkField('script', this.peerEditScripts.PostUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      // this.peerEditAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerEditScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
+      // this.peerEditAssignedColor.scripts.PostDown = WireGuardHelper.checkField('script', this.peerEditScripts.PostDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.scripts.div = (this.peerEditScripts.PreUp.enabled
-          || this.peerEditScripts.PostUp.enabled
-          || this.peerEditScripts.PreDown.enabled
-          || this.peerEditScripts.PostDown.enabled)
-        ? (((this.peerEditScripts.PreUp.enabled && this.peerEditAssignedColor.scripts.PreUp === 'enabled:bg-red-200')
-              || (this.peerEditScripts.PostUp.enabled && this.peerEditAssignedColor.scripts.PostUp === 'enabled:bg-red-200')
-              || (this.peerEditScripts.PreDown.enabled && this.peerEditAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
-              || (this.peerEditScripts.PostDown.enabled && this.peerEditAssignedColor.scripts.PostDown === 'enabled:bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      // this.peerEditAssignedColor.scripts.div = (this.peerEditScripts.PreUp.enabled
+      //     || this.peerEditScripts.PostUp.enabled
+      //     || this.peerEditScripts.PreDown.enabled
+      //     || this.peerEditScripts.PostDown.enabled)
+      //   ? (((this.peerEditScripts.PreUp.enabled && this.peerEditAssignedColor.scripts.PreUp === 'enabled:bg-red-200')
+      //         || (this.peerEditScripts.PostUp.enabled && this.peerEditAssignedColor.scripts.PostUp === 'enabled:bg-red-200')
+      //         || (this.peerEditScripts.PreDown.enabled && this.peerEditAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
+      //         || (this.peerEditScripts.PostDown.enabled && this.peerEditAssignedColor.scripts.PostDown === 'enabled:bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      this.peerEditAssignedColor.scripts.div = anyEnabled ? error ? 'bg-red-50' : changeDetected ? 'bg-green-100' : 'bg-green-50' : 'bg-gray-100';
       return this.peerEditAssignedColor.scripts;
     },
     peerEditConfigColor() {
@@ -1194,53 +1217,91 @@ new Vue({
         name: this.peerEditNameColor,
         address: this.peerEditAddressColor,
         endpoint: this.peerEditEndpointColor,
-        DNS: this.peerEditDNSMTUColor.dnsInput,
-        MTU: this.peerEditDNSMTUColor.mtuInput,
-        PreUp: this.peerEditScriptsColor.PreUp,
-        PostUp: this.peerEditScriptsColor.PostUp,
-        PreDown: this.peerEditScriptsColor.PreDown,
-        PostDown: this.peerEditScriptsColor.PostDown,
       })) {
-        if ((field === 'DNS'
-                || field === 'MTU'
-                || field === 'PreUp'
-                || field === 'PostUp'
-                || field === 'PreDown'
-                || field === 'PostDown')
-            && (this.peerEditDNSMTUColor.div === 'bg-red-50'
-            || this.peerEditScriptsColor.div === 'bg-red-50')) {
-          if (field === 'DNS' && this.peerEditDNS.enabled) {
-            peerErrorField = field;
-          }
-          if (field === 'MTU' && this.peerEditMTU.enabled) {
-            peerErrorField = field;
-          }
-          if (field === 'PreUp' && this.peerEditScripts.PreUp.enabled) {
-            peerErrorField = field;
-          }
-          if (field === 'PostUp' && this.peerEditScripts.PostUp.enabled) {
-            peerErrorField = field;
-          }
-          if (field === 'PreDown' && this.peerEditScripts.PreDown.enabled) {
-            peerErrorField = field;
-          }
-          if (field === 'PostDown' && this.peerEditScripts.PostDown.enabled) {
-            peerErrorField = field;
-          }
-          errorNotFound = false;
-        } else if (peerEditFieldColor === 'bg-red-200') {
+        if (peerEditFieldColor === 'bg-red-200') {
           peerErrorField = field;
           errorNotFound = false;
         }
-        if (field === 'endpoint') {
-          changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
-        } else if (field === 'DNS') {
-          changeDetectedPeer ||= this.peerEditDNS.enabled !== this.network.peers[this.peerConfigId].dns.enabled;
-        } else if (field === 'MTU') {
-          changeDetectedPeer ||= this.peerEditMTU.enabled !== this.network.peers[this.peerConfigId].mtu.enabled;
-        }
-        changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200' || peerEditFieldColor === 'enabled:bg-green-200';
+        changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200';
       }
+      changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
+      if (this.peerEditDNSMTUColor.div === 'bg-red-50') {
+        peerErrorField = this.peerEditDNS.enabled && this.peerEditDNSMTUColor.dnsInput === 'bg-red-200' ? 'DNS' : peerErrorField;
+        peerErrorField = this.peerEditMTU.enabled && this.peerEditDNSMTUColor.mtuInput === 'bg-red-200' ? 'MTU' : peerErrorField;
+        errorNotFound = false;
+      }
+      if (this.peerEditScriptsColor.div === 'bg-red-50') {
+        for (const script of ['PreUp', 'PreDown', 'PostUp', 'PostDown']) {
+          peerErrorField = this.peerEditScripts[script].enabled && this.peerEditScriptsColor[script] === 'bg-red-200' ? script : peerErrorField;
+        }
+        errorNotFound = false;
+      }
+      for (const peerEditFieldColor of [
+        this.peerEditDNSMTUColor.dnsInput,
+        this.peerEditDNSMTUColor.mtuInput,
+        this.peerEditScriptsColor.PreUp,
+        this.peerEditScriptsColor.PostUp,
+        this.peerEditScriptsColor.PreDown,
+        this.peerEditScriptsColor.PostDown,
+      ]) {
+        changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200';
+      }
+
+
+      // for (const [field, peerEditFieldColor] of Object.entries({
+      //   name: this.peerEditNameColor,
+      //   address: this.peerEditAddressColor,
+      //   endpoint: this.peerEditEndpointColor,
+      //   DNS: this.peerEditDNSMTUColor.dnsInput,
+      //   MTU: this.peerEditDNSMTUColor.mtuInput,
+      //   PreUp: this.peerEditScriptsColor.PreUp,
+      //   PostUp: this.peerEditScriptsColor.PostUp,
+      //   PreDown: this.peerEditScriptsColor.PreDown,
+      //   PostDown: this.peerEditScriptsColor.PostDown,
+      // })) {
+      //   console.log(this.peerEditDNSMTUColor.div);
+      //   console.log(this.peerEditDNS.enabled);
+      //   console.log(this.peerEditMTU.enabled);
+      //   if ((field === 'DNS'
+      //           || field === 'MTU'
+      //           || field === 'PreUp'
+      //           || field === 'PostUp'
+      //           || field === 'PreDown'
+      //           || field === 'PostDown')
+      //       && (this.peerEditDNSMTUColor.div === 'bg-red-50'
+      //       || this.peerEditScriptsColor.div === 'bg-red-50')) {
+      //     if (field === 'DNS' && this.peerEditDNS.enabled) {
+      //       peerErrorField = field;
+      //     }
+      //     if (field === 'MTU' && this.peerEditMTU.enabled) {
+      //       peerErrorField = field;
+      //     }
+      //     if (field === 'PreUp' && this.peerEditScripts.PreUp.enabled) {
+      //       peerErrorField = field;
+      //     }
+      //     if (field === 'PostUp' && this.peerEditScripts.PostUp.enabled) {
+      //       peerErrorField = field;
+      //     }
+      //     if (field === 'PreDown' && this.peerEditScripts.PreDown.enabled) {
+      //       peerErrorField = field;
+      //     }
+      //     if (field === 'PostDown' && this.peerEditScripts.PostDown.enabled) {
+      //       peerErrorField = field;
+      //     }
+      //     errorNotFound = false;
+      //   } else if (peerEditFieldColor === 'bg-red-200') {
+      //     peerErrorField = field;
+      //     errorNotFound = false;
+      //   }
+      //   if (field === 'endpoint') {
+      //     changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
+      //   } else if (field === 'DNS') {
+      //     changeDetectedPeer ||= this.peerEditDNS.enabled !== this.network.peers[this.peerConfigId].dns.enabled;
+      //   } else if (field === 'MTU') {
+      //     changeDetectedPeer ||= this.peerEditMTU.enabled !== this.network.peers[this.peerConfigId].mtu.enabled;
+      //   }
+      //   changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200' || peerEditFieldColor === 'enabled:bg-green-200';
+      // }
 
       if (!errorNotFound) {
         return [
