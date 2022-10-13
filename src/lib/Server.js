@@ -157,6 +157,11 @@ module.exports = class Server {
         const { mtu } = req.body;
         return WireGuard.updatePeerMTU({ peerId, mtu });
       }))
+      .put('/api/wireguard/peer/:peerId/scripts', Util.promisify(async req => {
+        const { peerId } = req.params;
+        const { scripts } = req.body;
+        return WireGuard.updatePeerScripts({ peerId, scripts });
+      }))
       .put('/api/wireguard/connection/:connectionId/enable', Util.promisify(async req => {
         const { connectionId } = req.params;
         return WireGuard.enableConnection({ connectionId, enabled: true });

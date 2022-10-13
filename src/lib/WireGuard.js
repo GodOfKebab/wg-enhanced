@@ -498,6 +498,29 @@ module.exports = class WireGuard {
     await this.saveConfig();
   }
 
+  async updatePeerScripts({ peerId, scripts }) {
+    const config = await this.getConfig();
+    if (!await this.getPeer({ peerId })) return;
+
+    for (const [peerScriptField, peerConfigValue] of Object.entries({
+      PreUp: config.peers[peerId].scripts.PreUp,
+      PostUp: config.peers[peerId].scripts.PostUp,
+      PreDown: config.peers[peerId].scripts.PreDown,
+      PostDown: config.peers[peerId].scripts.PostDown,
+    })) {
+      if (Object.keys(scripts).includes(peerScriptField)) {
+        if (!('enabled' in scripts[peerScriptField])) scripts[peerScriptField].enabled = peerConfigValue.enabled;
+        if (!('value' in scripts[peerScriptField])) scripts[peerScriptField].value = peerConfigValue.value;
+      } else {
+        scripts[peerScriptField] = peerConfigValue;
+      }
+    }
+    config.peers[peerId].scripts = scripts;
+    config.peers[peerId].updatedAt = new Date();
+
+    await this.saveConfig();
+  }
+
   async enableConnection({ connectionId, enabled }) {
     const config = await this.getConfig();
     if (!await this.getConnection({ connectionId })) return;

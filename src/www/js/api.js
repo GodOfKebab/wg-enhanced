@@ -177,6 +177,14 @@ class API {
     });
   }
 
+  async updatePeerScripts({ peerId, scripts }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/peer/${peerId}/scripts/`,
+      body: { scripts },
+    });
+  }
+
   async enableConnection({ connectionId }) {
     return this.call({
       method: 'put',

@@ -474,6 +474,11 @@ new Vue({
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
+    updatePeerScripts(peerId, scripts) {
+      this.api.updatePeerScripts({ peerId, scripts })
+        .catch(err => alert(err.message || err.toString()))
+        .finally(() => this.refresh().catch(console.error));
+    },
     enableConnection(connectionId, enabled) {
       if (enabled) {
         this.api.enableConnection({ connectionId })
@@ -709,6 +714,7 @@ new Vue({
         endpoint: this.network.peers[this.peerConfigId].endpoint,
         dns: this.network.peers[this.peerConfigId].dns,
         mtu: this.network.peers[this.peerConfigId].mtu,
+        scripts: this.network.peers[this.peerConfigId].scripts,
       };
       this.peerEditOldConfig.connections = {};
       for (const [connectionId, connection] of Object.entries(this.network.connections)) {
@@ -731,6 +737,12 @@ new Vue({
             if (field === 'dns' || field === 'mtu') {
               for (const [fieldDNSMTU, valueDNSMTU] of Object.entries(value)) {
                 this.peerEditNewConfig.peers[this.peerConfigId][field][fieldDNSMTU] = valueDNSMTU;
+              }
+            } else if (field === 'scripts') {
+              for (const [scriptField, scriptValue] of Object.entries(value)) {
+                for (const [scriptSubField, scriptSubValue] of Object.entries(scriptValue)) {
+                  this.peerEditNewConfig.peers[this.peerConfigId]['scripts'][scriptField][scriptSubField] = scriptSubValue;
+                }
               }
             } else {
               this.peerEditNewConfig.peers[this.peerConfigId][field] = value;
@@ -790,6 +802,9 @@ new Vue({
                 break;
               case 'mtu':
                 this.updatePeerMTU(this.peerConfigId, value);
+                break;
+              case 'scripts':
+                this.updatePeerScripts(this.peerConfigId, value);
                 break;
               default:
                 break;
@@ -1206,18 +1221,23 @@ new Vue({
         peerErrorField = this.peerEditEndpointColor === 'bg-red-200' ? 'endpoint' : peerErrorField;
         errorNotFound = false;
       }
+      changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
       if (this.peerEditDNSMTUColor.div === 'bg-red-50') {
         peerErrorField = this.peerEditDNS.enabled && this.peerEditDNSMTUColor.dnsInput === 'bg-red-200' ? 'dns' : peerErrorField;
         peerErrorField = this.peerEditMTU.enabled && this.peerEditDNSMTUColor.mtuInput === 'bg-red-200' ? 'mtu' : peerErrorField;
         errorNotFound = false;
       }
+      changeDetectedPeer ||= this.peerEditDNS.enabled !== this.network.peers[this.peerConfigId].dns.enabled;
+      changeDetectedPeer ||= this.peerEditMTU.enabled !== this.network.peers[this.peerConfigId].mtu.enabled;
       if (this.peerEditScriptsColor.div === 'bg-red-50') {
         for (const script of ['PreUp', 'PreDown', 'PostUp', 'PostDown']) {
           peerErrorField = this.peerEditScripts[script].enabled && this.peerEditScriptsColor[script] === 'bg-red-200' ? script : peerErrorField;
         }
         errorNotFound = false;
       }
-      changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
+      for (const script of ['PreUp', 'PreDown', 'PostUp', 'PostDown']) {
+        changeDetectedPeer ||= this.peerEditScripts[script].enabled !== this.network.peers[this.peerConfigId]['scripts'][script].enabled;
+      }
       for (const peerEditFieldColor of [
         this.peerEditNameColor,
         this.peerEditAddressColor,
