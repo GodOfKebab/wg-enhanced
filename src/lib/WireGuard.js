@@ -16,14 +16,12 @@ const {
   WG_PATH,
   WG_HOST,
   WG_PORT,
-  WG_MTU,
-  WG_DEFAULT_DNS,
   WG_SUBNET,
-  WG_PERSISTENT_KEEPALIVE,
   WG_PRE_UP,
   WG_POST_UP,
   WG_PRE_DOWN,
   WG_POST_DOWN,
+  WG_NETWORK_DEFAULTS,
 } = require('../config');
 
 module.exports = class WireGuard {
@@ -193,6 +191,7 @@ module.exports = class WireGuard {
         config.connections[clientConnectionId].transferTx = Number(transferTx);
       });
 
+    config.defaults = WG_NETWORK_DEFAULTS;
     return config;
   }
 

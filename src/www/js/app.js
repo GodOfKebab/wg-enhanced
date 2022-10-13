@@ -546,20 +546,19 @@ new Vue({
         for (const peerId of Object.keys(this.staticPeers)) {
           this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0';
           this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
-          this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
-          this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
+          this.peerCreatePersistentKeepaliveEnabledData[peerId] = this.network.defaults.connections.persistentKeepalive.enabled;
+          this.peerCreatePersistentKeepaliveValueData[peerId] = this.network.defaults.connections.persistentKeepalive.value;
         }
         for (const peerId of Object.keys(this.roamingPeers)) {
           this.peerCreateAllowedIPsNewToOld[peerId] = `${this.network.peers[peerId].address}/32`;
           this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
-          this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
-          this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
+          this.peerCreatePersistentKeepaliveEnabledData[peerId] = this.network.defaults.connections.persistentKeepalive.enabled;
+          this.peerCreatePersistentKeepaliveValueData[peerId] = this.network.defaults.connections.persistentKeepalive.value;
         }
 
-        this.peerCreateDNS.enabled = false;
-        this.peerCreateMTU.enabled = false;
-        this.peerCreateDNS.value = '';
-        this.peerCreateMTU.value = '';
+        this.peerCreateDNS = this.network.defaults.peers.dns;
+        this.peerCreateMTU = this.network.defaults.peers.mtu;
+        this.peerCreateScripts = this.network.defaults.peers.scripts;
 
         // enable the root server as default
         this.peerCreateAttachedStaticPeerIds = ['root'];
@@ -678,8 +677,8 @@ new Vue({
             this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[peerId].address}/32`;
             this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[this.peerConfigId].address}/32`;
           }
-          this.peerEditPersistentKeepaliveEnabledData[connectionId] = false;
-          this.peerEditPersistentKeepaliveValueData[connectionId] = '25';
+          this.peerEditPersistentKeepaliveEnabledData[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
+          this.peerEditPersistentKeepaliveValueData[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
         }
       }
 
@@ -695,8 +694,8 @@ new Vue({
               this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[peerId].address}/32`;
               this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[this.peerConfigId].address}/32`;
             }
-            this.peerEditPersistentKeepaliveEnabledData[connectionId] = false;
-            this.peerEditPersistentKeepaliveValueData[connectionId] = '25';
+            this.peerEditPersistentKeepaliveEnabledData[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
+            this.peerEditPersistentKeepaliveValueData[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
           }
         }
       }
@@ -893,8 +892,8 @@ new Vue({
         this.peerEditConnectionColorRefresh += 1;
       } else {
         this.peerEditIsConnectionEnabled[connectionId] = true;
-        this.peerEditPersistentKeepaliveEnabledData[connectionId] = false;
-        this.peerEditPersistentKeepaliveValueData[connectionId] = '25';
+        this.peerEditPersistentKeepaliveEnabledData[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
+        this.peerEditPersistentKeepaliveValueData[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
         const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
         this.peerEditAllowedIPsAtoB[connectionId] = `${this.network.peers[b].address}/32`;
         this.peerEditAllowedIPsBtoA[connectionId] = `${this.network.peers[a].address}/32`;
@@ -903,8 +902,8 @@ new Vue({
     },
     peerCreateResetConnectionFields(peerId) {
       this.peerCreateIsConnectionEnabled[peerId] = true;
-      this.peerCreatePersistentKeepaliveEnabledData[peerId] = false;
-      this.peerCreatePersistentKeepaliveValueData[peerId] = '25';
+      this.peerCreatePersistentKeepaliveEnabledData[peerId] = this.network.defaults.connections.persistentKeepalive.enabled;
+      this.peerCreatePersistentKeepaliveValueData[peerId] = this.network.defaults.connections.persistentKeepalive.value;
       if (Object.keys(this.staticPeers).includes(peerId)) {
         this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0';
         this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
@@ -1445,8 +1444,8 @@ new Vue({
           changed ||= this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA;
         } else {
           changed ||= this.peerEditIsConnectionEnabled[connectionId] !== true;
-          changed ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== false;
-          changed ||= this.peerEditPersistentKeepaliveValueData[connectionId] !== '25';
+          changed ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.defaults.connections.persistentKeepalive.enabled;
+          changed ||= this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.defaults.connections.persistentKeepalive.value;
           const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
           changed ||= this.peerEditAllowedIPsAtoB[connectionId] !== `${this.network.peers[b].address}/32`;
           changed ||= this.peerEditAllowedIPsBtoA[connectionId] !== `${this.network.peers[a].address}/32`;
@@ -1461,8 +1460,8 @@ new Vue({
       for (const peerId of [...this.peerCreateAttachedStaticPeerIds, ...this.peerCreateAttachedRoamingPeerIds]) {
         let changed = false;
         changed ||= this.peerCreateIsConnectionEnabled[peerId] !== true;
-        changed ||= this.peerCreatePersistentKeepaliveEnabledData[peerId] !== false;
-        changed ||= this.peerCreatePersistentKeepaliveValueData[peerId] !== '25';
+        changed ||= this.peerCreatePersistentKeepaliveEnabledData[peerId] !== this.network.defaults.connections.persistentKeepalive.enabled;
+        changed ||= this.peerCreatePersistentKeepaliveValueData[peerId] !== this.network.defaults.connections.persistentKeepalive.value;
         if (this.peerCreateAttachedStaticPeerIds.includes(peerId)) {
           changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== (this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0');
           changed ||= this.peerCreateAllowedIPsOldToNew[peerId] !== `${this.peerCreateAddress}/32`;
