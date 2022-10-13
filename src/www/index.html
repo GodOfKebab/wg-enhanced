@@ -57,12 +57,13 @@
     }
     .dont-highlight-undo-box:hover > div > .undo-button-itself{
       opacity: 0;
+      filter: invert(1.0);
     }
     .highlight-undo-box:hover > div > .undo-button-itself > img{
-      filter: invert(0.2);
+      filter: invert(0.8);
     }
     .highlight-undo-box:hover > div > .undo-button-itself:hover > img{
-      filter: invert(1.0);
+      filter: invert(0);
     }
   </style>
 </head>
@@ -677,7 +678,7 @@
                                           title="Undo Changes"
                                           :disabled="peerCreateDNS.enabled === false && peerCreateDNS.value === ''"
                                           @click="peerCreateDNS.enabled = false; peerCreateDNS.value = '';">
-                                    <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                                    <img class="w-4" :src="returnIconSrc"/>
                                   </button>
                                 </div>
                               </div>
@@ -705,7 +706,7 @@
                                           title="Undo Changes"
                                           :disabled="peerCreateMTU.enabled === false && peerCreateMTU.value === ''"
                                           @click="peerCreateMTU.enabled = false; peerCreateMTU.value = '';">
-                                    <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                                    <img class="w-4" :src="returnIconSrc"/>
                                   </button>
                                 </div>
                               </div>
@@ -735,7 +736,7 @@
                                         title="Undo Changes"
                                         :disabled="peerCreateScripts[scriptField].value === '' && peerCreateScripts[scriptField].enabled === false"
                                         @click="peerCreateScripts[scriptField].value = ''; peerCreateScripts[scriptField].enabled = false;">
-                                  <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                                  <img class="w-4" :src="returnIconSrc"/>
                                 </button>
                               </div>
                             </div>
@@ -797,7 +798,7 @@
                                     title="Undo Changes"
                                     :disabled="JSON.stringify(peerCreateAttachedStaticPeerIds) === JSON.stringify(['root']) && peerCreateAttachedRoamingPeerIds.length === 0"
                                     @click="peerCreateAttachedStaticPeerIds = ['root']; peerCreateAttachedRoamingPeerIds = []">
-                              <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                              <img class="w-4" :src="returnIconSrc"/>
                             </button>
                           </div>
                         </div>
@@ -819,7 +820,7 @@
                                       title="Undo Changes"
                                       @click="peerCreateResetConnectionFields(peerId)"
                                       :disabled="peerCreateResetConnectionFieldsDisabled[peerId]">
-                                <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                                <img class="w-4" :src="returnIconSrc"/>
                               </button>
                             </div>
                             <div class=" ml-1">
@@ -1112,7 +1113,7 @@
                                     title="Undo Changes"
                                     :disabled="peerEditNameColor === 'bg-white'"
                                     @click="peerEditName = network.peers[peerConfigId].name">
-                              <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                              <img class="w-4" :src="returnIconSrc"/>
                             </button>
                           </div>
                         </div>
@@ -1129,7 +1130,7 @@
                                     title="Undo Changes"
                                     :disabled="peerEditAddressColor === 'bg-white'"
                                     @click="peerEditAddress = network.peers[peerConfigId].address">
-                              <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                              <img class="w-4" :src="returnIconSrc"/>
                             </button>
                           </div>
                         </div>
@@ -1151,7 +1152,7 @@
                                     title="Undo Changes"
                                     :disabled="peerEditEndpoint === network.peers[peerConfigId].endpoint && peerEditMobility === network.peers[peerConfigId].mobility"
                                     @click="peerEditEndpoint = network.peers[peerConfigId].endpoint; peerEditMobility = network.peers[peerConfigId].mobility;">
-                              <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                              <img class="w-4" :src="returnIconSrc"/>
                             </button>
                           </div>
                         </div>
@@ -1185,7 +1186,7 @@
                                         title="Undo Changes"
                                         :disabled="peerEditDNS.enabled === network.peers[peerConfigId].dns.enabled && peerEditDNS.value === network.peers[peerConfigId].dns.value"
                                         @click="peerEditDNS.enabled = network.peers[peerConfigId].dns.enabled; peerEditDNS.value = network.peers[peerConfigId].dns.value;">
-                                  <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                                  <img class="w-4" :src="returnIconSrc"/>
                                 </button>
                               </div>
                             </div>
@@ -1213,7 +1214,7 @@
                                         title="Undo Changes"
                                         :disabled="peerEditMTU.enabled === network.peers[peerConfigId].mtu.enabled && peerEditMTU.value === network.peers[peerConfigId].mtu.value"
                                         @click="peerEditMTU.enabled = network.peers[peerConfigId].mtu.enabled; peerEditMTU.value = network.peers[peerConfigId].mtu.value;">
-                                  <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                                  <img class="w-4" :src="returnIconSrc"/>
                                 </button>
                               </div>
                             </div>
@@ -1243,7 +1244,7 @@
                                       title="Undo Changes"
                                       :disabled="peerEditScripts[scriptField].value === network.peers[peerConfigId].scripts[scriptField].value && peerEditScripts[scriptField].enabled === network.peers[peerConfigId].scripts[scriptField].enabled"
                                       @click="peerEditScripts[scriptField].value = network.peers[peerConfigId].scripts[scriptField].value; peerEditScripts[scriptField].enabled = network.peers[peerConfigId].scripts[scriptField].enabled;">
-                                <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                                <img class="w-4" :src="returnIconSrc"/>
                               </button>
                             </div>
                           </div>
@@ -1324,7 +1325,7 @@
                                   title="Undo Changes"
                                   :disabled="Object.keys(this.peerEditChangedFieldsCompute[1]).length + Object.keys(this.peerEditChangedFieldsCompute[2]).length === 0"
                                   @click="peerEditStaticConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId)); peerEditRoamingConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId));">
-                            <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                            <img class="w-4" :src="returnIconSrc"/>
                           </button>
                         </div>
                       </div>
@@ -1347,7 +1348,7 @@
                                   title="Undo Changes"
                                   @click="peerEditResetConnectionFields(connectionId)"
                                   :disabled="Object.keys(peerEditResetConnectionFieldsDisabled).includes(connectionId) ? peerEditResetConnectionFieldsDisabled[connectionId] : true">
-                            <img class="w-4" src="https://img.icons8.com/sf-black/50/undefined/return.png"/>
+                            <img class="w-4" :src="returnIconSrc"/>
                           </button>
                         </div>
                         <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap relative" :class="[peerEditConnectionColor.div[connectionId]]">
@@ -1717,6 +1718,7 @@
   <script>
     const staticPeerIconSrc = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAABmJLR0QA/wD/AP+gvaeTAAABE0lEQVR4nO3cwQqCQBRAUYv+/5dr0cZCCBW9U52zFAayy4MGc6YJAAD4N5eFa/cNa85c/+1e7v9afQqeBIgJEBMgJkBMgJgAsduGNUf/Tv+0Txjdqu/HBMQEiAkQEyAmQEyAmAAxAWICxASICRATICZATICYALGl5wFH/++HGRMQEyAmQEyAmAAxAWICxASICRATICZATICYADEBYgLEBIgJEBMgJkBMgJgAMQFiAsQEiAkQEyAmQEyAmAAxAWICxLacF7TXr58LuooJiAkQEyAmQEyAmAAxAWLFPmDte8R79w1Dv7dsAmICxASICRATICZATIBYsQ94d/TzgaHPNzIBMQFiAsQEiAkQEyAmAAAAwMkeLOcKqUkVgK8AAAAASUVORK5CYII=";
     const roamingPeerIconSrc = "data:image/png;base64,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";
+    const returnIconSrc = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAADnUlEQVR4nO2aTYgcRRTHf5VNsolrCH6BHrxIRDwoKn6RCILBCIKrcYmIN/EiRokfV0EF8SQYPCiCHjxIDksC7kGjiBJF9KQo6EEEZXMRNhGNSja72fw89A7Ozk73VPfUfKj1O/VMvX7/97qqul5XN2QymUwmk8lkMv9LwiCcqhcBtwOTwOchhPlB6Iwl6rR6wn84rT466riGgrpPXXY9y+oNo45voKgz6lKX5Fu8OOoYu7EhhRN1BjgEbKowOz+F1tih3t+j51vcM+pYk6PujUx+dtSxJke9W12MSP6oumXU8SalRvIfjHvytQshdRqYBTb3MF0CXgcWG8TV4i/gZ+CrEMJ3ffhJg7pbPRPR84PgR/Vl9epRJb9FPT6i5NtZVt9QLxv2Bbh1xIl3cspiOvZFnULIfsUSsw04oj7Tj5Pom6DF3fwH4PJ+BAfE/hDCa01OjB4BIYRF4GGKu/u4cVC9o8mJ47wMTlGMtp3AJRH2vwBXhhD+bKgXj3qvccvh+/ZZCKkTFoXXNxF6z6XKMSaw+4x7DnhPnUygt8li+aviDzVmtKTBETwMqW/30HoylVZsQLGPw32v2at6W60uyI6l0KkbVK/dINWDCfUeq9A5Y40pl2RHKIRwGHgIOFthlvLufBg4V9K2GdiRUCseqzdFr0+sNV8xCvbE+kkyAlqEEGaBGeBE29+LwBMhhK9TagELFW1TsU42JghkDSGEOfUq1r4YOZ5aB7iwou30APTGB/WCkqnW4rpYX0mnwBCZpnz0nqV4aPtvom5Uv6/o/S/r+Ps3joCXgKptsblhBTJU1KA+W9HzWuxUj+N+RX+o11i8X+jFK3V9N/o+QN0O3AVsBT4NIfxUYncFsItie/tYCOFkid21wC2sXdomgEuB24CYIuo3YEeZRjLUO9Xf2676svp0F7unXPt8sGBHhaZuUN+K6NlenFMfGGjiqwFvV0+WBLCrzW6nutLFbsHi65GW3eMJkld9oWlOdVeBPXSvwAKwr+333hLfF1NUiC1maup341Xg+aYn1y2Fz6tom2g7rqrFp0qO67JEsRv8Zh8+ao+Aj4CVkraPS47bWQI+a/v9SU39FkeBG/tNvhHqgdU53847auiwO9Rhs6Ie6LDZZtxmpxY31Dkbbn+X0XQZvAl4kGIZ/BB4N4Sw7s2RxaczuymWwSMhhC+62EwCjwA3s36K/QrMA99SLLenmsSbyWQymUwmk8lkMpkO/gaqnPszgET66wAAAABJRU5ErkJggg=="
   </script>
 
 
