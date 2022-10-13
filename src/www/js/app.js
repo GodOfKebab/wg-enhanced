@@ -1048,20 +1048,7 @@ new Vue({
         changeDetected ||= this.peerEditAssignedColor.scripts[script] === 'bg-green-200';
         anyEnabled ||= this.peerEditScripts[script].enabled;
       }
-      // // eslint-disable-next-line no-nested-ternary
-      // this.peerEditAssignedColor.scripts.PreUp = (this.network.peers[this.peerConfigId].scripts.PreUp.value === '' || this.peerEditScripts.PreUp.value !== this.network.peers[this.peerConfigId].scripts.PreUp.value) ? WireGuardHelper.checkField('script', this.peerEditScripts.PreUp) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
-      // this.peerEditAssignedColor.scripts.PostUp = WireGuardHelper.checkField('script', this.peerEditScripts.PostUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      // this.peerEditAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerEditScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      // this.peerEditAssignedColor.scripts.PostDown = WireGuardHelper.checkField('script', this.peerEditScripts.PostDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
       // eslint-disable-next-line no-nested-ternary
-      // this.peerEditAssignedColor.scripts.div = (this.peerEditScripts.PreUp.enabled
-      //     || this.peerEditScripts.PostUp.enabled
-      //     || this.peerEditScripts.PreDown.enabled
-      //     || this.peerEditScripts.PostDown.enabled)
-      //   ? (((this.peerEditScripts.PreUp.enabled && this.peerEditAssignedColor.scripts.PreUp === 'enabled:bg-red-200')
-      //         || (this.peerEditScripts.PostUp.enabled && this.peerEditAssignedColor.scripts.PostUp === 'enabled:bg-red-200')
-      //         || (this.peerEditScripts.PreDown.enabled && this.peerEditAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
-      //         || (this.peerEditScripts.PostDown.enabled && this.peerEditAssignedColor.scripts.PostDown === 'enabled:bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       this.peerEditAssignedColor.scripts.div = anyEnabled ? error ? 'bg-red-50' : changeDetected ? 'bg-green-100' : 'bg-green-50' : 'bg-gray-100';
       return this.peerEditAssignedColor.scripts;
     },
@@ -1213,21 +1200,15 @@ new Vue({
 
       let peerErrorField = '';
       // check errors
-      for (const [field, peerEditFieldColor] of Object.entries({
-        name: this.peerEditNameColor,
-        address: this.peerEditAddressColor,
-        endpoint: this.peerEditEndpointColor,
-      })) {
-        if (peerEditFieldColor === 'bg-red-200') {
-          peerErrorField = field;
-          errorNotFound = false;
-        }
-        changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200';
+      if (this.peerEditConfigColor.div === 'bg-red-50') {
+        peerErrorField = this.peerEditNameColor === 'bg-red-200' ? 'name' : peerErrorField;
+        peerErrorField = this.peerEditAddressColor === 'bg-red-200' ? 'address' : peerErrorField;
+        peerErrorField = this.peerEditEndpointColor === 'bg-red-200' ? 'endpoint' : peerErrorField;
+        errorNotFound = false;
       }
-      changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
       if (this.peerEditDNSMTUColor.div === 'bg-red-50') {
-        peerErrorField = this.peerEditDNS.enabled && this.peerEditDNSMTUColor.dnsInput === 'bg-red-200' ? 'DNS' : peerErrorField;
-        peerErrorField = this.peerEditMTU.enabled && this.peerEditDNSMTUColor.mtuInput === 'bg-red-200' ? 'MTU' : peerErrorField;
+        peerErrorField = this.peerEditDNS.enabled && this.peerEditDNSMTUColor.dnsInput === 'bg-red-200' ? 'dns' : peerErrorField;
+        peerErrorField = this.peerEditMTU.enabled && this.peerEditDNSMTUColor.mtuInput === 'bg-red-200' ? 'mtu' : peerErrorField;
         errorNotFound = false;
       }
       if (this.peerEditScriptsColor.div === 'bg-red-50') {
@@ -1236,7 +1217,11 @@ new Vue({
         }
         errorNotFound = false;
       }
+      changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
       for (const peerEditFieldColor of [
+        this.peerEditNameColor,
+        this.peerEditAddressColor,
+        this.peerEditEndpointColor,
         this.peerEditDNSMTUColor.dnsInput,
         this.peerEditDNSMTUColor.mtuInput,
         this.peerEditScriptsColor.PreUp,
@@ -1246,62 +1231,6 @@ new Vue({
       ]) {
         changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200';
       }
-
-
-      // for (const [field, peerEditFieldColor] of Object.entries({
-      //   name: this.peerEditNameColor,
-      //   address: this.peerEditAddressColor,
-      //   endpoint: this.peerEditEndpointColor,
-      //   DNS: this.peerEditDNSMTUColor.dnsInput,
-      //   MTU: this.peerEditDNSMTUColor.mtuInput,
-      //   PreUp: this.peerEditScriptsColor.PreUp,
-      //   PostUp: this.peerEditScriptsColor.PostUp,
-      //   PreDown: this.peerEditScriptsColor.PreDown,
-      //   PostDown: this.peerEditScriptsColor.PostDown,
-      // })) {
-      //   console.log(this.peerEditDNSMTUColor.div);
-      //   console.log(this.peerEditDNS.enabled);
-      //   console.log(this.peerEditMTU.enabled);
-      //   if ((field === 'DNS'
-      //           || field === 'MTU'
-      //           || field === 'PreUp'
-      //           || field === 'PostUp'
-      //           || field === 'PreDown'
-      //           || field === 'PostDown')
-      //       && (this.peerEditDNSMTUColor.div === 'bg-red-50'
-      //       || this.peerEditScriptsColor.div === 'bg-red-50')) {
-      //     if (field === 'DNS' && this.peerEditDNS.enabled) {
-      //       peerErrorField = field;
-      //     }
-      //     if (field === 'MTU' && this.peerEditMTU.enabled) {
-      //       peerErrorField = field;
-      //     }
-      //     if (field === 'PreUp' && this.peerEditScripts.PreUp.enabled) {
-      //       peerErrorField = field;
-      //     }
-      //     if (field === 'PostUp' && this.peerEditScripts.PostUp.enabled) {
-      //       peerErrorField = field;
-      //     }
-      //     if (field === 'PreDown' && this.peerEditScripts.PreDown.enabled) {
-      //       peerErrorField = field;
-      //     }
-      //     if (field === 'PostDown' && this.peerEditScripts.PostDown.enabled) {
-      //       peerErrorField = field;
-      //     }
-      //     errorNotFound = false;
-      //   } else if (peerEditFieldColor === 'bg-red-200') {
-      //     peerErrorField = field;
-      //     errorNotFound = false;
-      //   }
-      //   if (field === 'endpoint') {
-      //     changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
-      //   } else if (field === 'DNS') {
-      //     changeDetectedPeer ||= this.peerEditDNS.enabled !== this.network.peers[this.peerConfigId].dns.enabled;
-      //   } else if (field === 'MTU') {
-      //     changeDetectedPeer ||= this.peerEditMTU.enabled !== this.network.peers[this.peerConfigId].mtu.enabled;
-      //   }
-      //   changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200' || peerEditFieldColor === 'enabled:bg-green-200';
-      // }
 
       if (!errorNotFound) {
         return [
@@ -1320,24 +1249,47 @@ new Vue({
           address: this.peerEditAddress,
           mobility: this.peerEditMobility,
           endpoint: this.peerEditEndpoint,
+        })) {
+          if (peerConfigValue !== this.network.peers[this.peerConfigId][peerConfigField]) {
+            changedFields.peers[this.peerConfigId][peerConfigField] = peerConfigValue;
+          }
+        }
+
+        for (const [peerConfigField, peerConfigValue] of Object.entries({
           dns: this.peerEditDNS,
           mtu: this.peerEditMTU,
         })) {
-          if (peerConfigField === 'dns' || peerConfigField === 'mtu') {
-            const changedDNSMTUFields = {};
-            if (peerConfigValue.enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled) {
-              changedDNSMTUFields['enabled'] = peerConfigValue.enabled;
+          const changedDNSMTUFields = {};
+          for (const subField of ['enabled', 'value']) {
+            if (peerConfigValue[subField] !== this.network.peers[this.peerConfigId][peerConfigField][subField]) {
+              changedDNSMTUFields[subField] = peerConfigValue[subField];
             }
-            if (peerConfigValue.value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
-              changedDNSMTUFields['value'] = peerConfigValue.value;
-            }
-            if (peerConfigValue.enabled !== this.network.peers[this.peerConfigId][peerConfigField].enabled
-                || peerConfigValue.value !== this.network.peers[this.peerConfigId][peerConfigField].value) {
-              changedFields.peers[this.peerConfigId][peerConfigField] = changedDNSMTUFields;
-            }
-          } else if (peerConfigValue !== this.network.peers[this.peerConfigId][peerConfigField]) {
-            changedFields.peers[this.peerConfigId][peerConfigField] = peerConfigValue;
           }
+          if (Object.keys(changedDNSMTUFields).length > 0) {
+            changedFields.peers[this.peerConfigId][peerConfigField] = changedDNSMTUFields;
+          }
+        }
+
+        const changedScriptFields = {};
+        for (const [peerScriptField, peerConfigValue] of Object.entries({
+          PreUp: this.peerEditScripts.PreUp,
+          PostUp: this.peerEditScripts.PostUp,
+          PreDown: this.peerEditScripts.PreDown,
+          PostDown: this.peerEditScripts.PostDown,
+        })) {
+          const changedSubScriptFields = {};
+          for (const subField of ['enabled', 'value']) {
+            if (peerConfigValue[subField] !== this.network.peers[this.peerConfigId]['scripts'][peerScriptField][subField]) {
+              changedSubScriptFields[subField] = peerConfigValue[subField];
+            }
+          }
+          if (Object.keys(changedSubScriptFields).includes('enabled')
+              || Object.keys(changedSubScriptFields).includes('value')) {
+            changedScriptFields[peerScriptField] = changedSubScriptFields;
+          }
+        }
+        if (Object.keys(changedScriptFields).length > 0) {
+          changedFields.peers[this.peerConfigId].scripts = changedScriptFields;
         }
       }
 
