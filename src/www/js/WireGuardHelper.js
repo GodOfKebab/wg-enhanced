@@ -127,7 +127,7 @@ ${connectionDetails.persistentKeepalive.enabled ? `PersistentKeepalive = ${conne
     if (fieldName === 'script') {
       let checkScript = fieldVariable.enabled === true || fieldVariable.enabled === false;
       if ((typeof fieldVariable.value === 'string' || fieldVariable.value instanceof String)) {
-        checkScript &&= fieldVariable.value.match('^.*;$') !== null;
+        checkScript &&= fieldVariable.value.match('^.*;\\s*$') !== null;
       }
       return checkScript;
     }
