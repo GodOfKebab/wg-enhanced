@@ -20,7 +20,9 @@ const {
   WG_DEFAULT_DNS,
   WG_SUBNET,
   WG_PERSISTENT_KEEPALIVE,
+  WG_PRE_UP,
   WG_POST_UP,
+  WG_PRE_DOWN,
   WG_POST_DOWN,
 } = require('../config');
 
@@ -64,10 +66,10 @@ module.exports = class WireGuard {
                 dns: { enabled: false, value: '' },
                 mtu: { enabled: false, value: '' },
                 scripts: {
-                  PreUp: { enabled: false, value: '' },
-                  PostUp: { enabled: false, value: '' },
-                  PreDown: { enabled: false, value: '' },
-                  PostDown: { enabled: false, value: '' },
+                  PreUp: { enabled: WG_PRE_UP.length > 0, value: WG_PRE_UP },
+                  PostUp: { enabled: WG_POST_UP.length > 0, value: WG_POST_UP },
+                  PreDown: { enabled: WG_PRE_DOWN.length > 0, value: WG_PRE_DOWN },
+                  PostDown: { enabled: WG_POST_DOWN.length > 0, value: WG_POST_DOWN },
                 },
               },
             },
@@ -86,10 +88,6 @@ module.exports = class WireGuard {
 
           throw err;
         });
-        // await Util.exec(`iptables -t nat -A POSTROUTING -s ${WG_DEFAULT_ADDRESS.replace('x', '0')}/24 -o eth0 -j MASQUERADE`);
-        // await Util.exec('iptables -A INPUT -p udp -m udp --dport 51820 -j ACCEPT');
-        // await Util.exec(`iptables -A FORWARD -i ${WG_INTERFACE} -j ACCEPT`);
-        // await Util.exec(`iptables -A FORWARD -o ${WG_INTERFACE} -j ACCEPT`);
         await this.__syncConfig();
 
         return config;

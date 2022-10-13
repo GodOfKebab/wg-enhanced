@@ -13,7 +13,11 @@ PrivateKey = ${peer.privateKey}
 Address = ${peer.address}/24
 ${peer.mobility === 'static' ? `ListenPort = ${peer.endpoint.toString().split(':')[1]}` : 'DEL'}
 ${peer.dns.enabled ? `DNS = ${peer.dns.value}` : 'DEL'}
-${peer.mtu.enabled ? `MTU = ${peer.mtu.value}` : 'DEL'}\n`.replaceAll('DEL\n', '');
+${peer.mtu.enabled ? `MTU = ${peer.mtu.value}` : 'DEL'}
+${peer.scripts.PreUp.enabled ? `PreUp = ${peer.scripts.PreUp.value}` : 'DEL'}
+${peer.scripts.PostUp.enabled ? `PostUp = ${peer.scripts.PostUp.value}` : 'DEL'}
+${peer.scripts.PreDown.enabled ? `PreDown = ${peer.scripts.PreDown.value}` : 'DEL'}
+${peer.scripts.PostDown.enabled ? `PostDown = ${peer.scripts.PostDown.value}` : 'DEL'}\n`.replaceAll('DEL\n', '');
 
     for (const [connectionPeers, connectionDetails] of Object.entries(network.connections)) {
       if (!connectionPeers.includes(peerId)) continue;
