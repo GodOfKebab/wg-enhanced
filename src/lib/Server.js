@@ -98,6 +98,10 @@ module.exports = class Server {
         res.header('Content-Type', 'application/json');
         res.send(JSON.stringify(await WireGuard.peerCreatePreamble()));
       }))
+      .get('/api/wireguard/keypair', Util.promisify(async (req, res) => {
+        res.header('Content-Type', 'application/json');
+        res.send(JSON.stringify(await WireGuard.getNewKeypair()));
+      }))
       .delete('/api/wireguard/peer/preamble/:peerId/:address', Util.promisify(async req => {
         const { peerId, address } = req.params;
         return WireGuard.peerDeletePreamble({ peerId, address });

@@ -63,7 +63,19 @@
       filter: invert(0.8);
     }
     .highlight-undo-box:hover > div > .undo-button-itself:hover > img{
+      opacity: 0.2;
       filter: invert(0);
+    }
+    .refresh-key > div > div > button {
+      padding: 0;
+      width: 0;
+    }
+    .refresh-key:hover > div > div > button {
+      padding: 1px;
+      width: 16px;
+    }
+    .refresh-key:hover > div > div > button:hover > img {
+      filter: invert(1.0);
     }
   </style>
 </head>
@@ -1254,7 +1266,7 @@
                       <div class="m-2 p-1 shadow-md border rounded bg-green-50 overflow-x-auto">
                         <div v-for="peerConfigKey in ['publicKey', 'privateKey', 'createdAt', 'updatedAt']"
                              class="relative">
-                          <div class="flex grid grid-cols-10 text-sm">
+                          <div class="flex grid grid-cols-10 text-sm refresh-key">
                             <div class="col-span-2">
                               <span class="text-gray-800">
                                   <strong>{{ peerConfigKey }}</strong>
@@ -1262,8 +1274,14 @@
                             </div>
                             <div class="col-span-8 text-sm whitespace-nowrap">
                               <span class="text-gray-800 text-xs">:</span>
-                              <span v-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs mx-1 pr-4">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</span>
-                              <span v-else class="text-gray-800 text-xs mx-1 pr-4">{{ network.peers[peerConfigId][peerConfigKey] }}</span>
+                              <div v-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs pr-4 inline-block">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</div>
+                              <div v-else class="pr-4 inline-block">
+                                <button class="align-middle rounded bg-gray-100 hover:bg-gray-600 hover:text-white transition-all" @click="refreshPeerEditKeys()">
+                                  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAACuklEQVR4nO3aT2gdVRTH8U/M05oYULB/pJqFrtwYA81Kk3WL6EoEd+Kf7txVcOWiuImWIkKRFnGhLXTlRiRFupRWcKeU4EaFxEXa0m5UmhBNurg+mKTvjXkzc+e+NPcLB97MY+45v3PvzL1z7pDJZDKZTCaTyexJRlMH8D+M4zWM4HriWJJwEZvYwCcYSxtO+ywJCejaImaSRtQyy7YmYBPrmMeDCeNqjV4J6NqPeLaug5G6DRTo4CAebrDNK3ii5P87eB9nhKS0Tgfv4Cr+1b+3YttlTEbWeg9PCsMwlejtdhtTURUXeAy/RBZUxeZjii5yriVBg9gqXowpusshYSpKLbhoP2O6iphOhWuO9bnuK3yBv6sE0ocFYWbpxwZO4wOsNei3lJPu7YElcd4rytYBv2GuroMHKlwz0ePcH8I02Bbn8Ty+r9tQlVsgJSs4jm+barDKCGiTnwq/v8ZzGhTP8I+AN/AWruFSDAfDnoBbOBXTQZVboNc091fdQFJRJQHfCdNQkYUGYtlVvC3MwzfwseG/le5LOsIq8CZ+FzplT/GerSvDDbwwaCPDvg4o4+i24xHhPWUgdnMCHtnhuVJiJuAloV73eEQftYnx9N6Ps3j1v+NZvBLBTyM0nYCX8bmtldxKhYq2aOoWGMen+EZ5GXvoaGIEzOFLPN1AWztlVO8y+J+DNlQnAfvwIU4oH0kP4UgNP9uZEPYinurx368N+illWihEpi6GFm0dB2KK7jIrlKBTC95un8UUXWS+JUGD2CIejSm6yJSwDZVadNd+wOGoinswKWxIphL9j1ARflPNcnyd7fERvIuPlH+6sqLZLatV4XuhNsvwpTwj9Ea/3lpOF1p7dIQXnzV7NAFdZoQncjEBS0kjSsCY8EnbhpCAC2nDSccUXrcHv+3LZDKZTCaTyWR2AXcB1rTY+3ASchcAAAAASUVORK5CYII=">
+                                </button>
+                                <span v-if="peerConfigKey === 'publicKey'" class="text-gray-800 text-xs">{{ peerEditPublicKey }}</span>
+                                <span v-else class="text-gray-800 text-xs">{{ peerEditPrivateKey }}</span>
+                              </div>
                             </div>
                           </div>
                         </div>

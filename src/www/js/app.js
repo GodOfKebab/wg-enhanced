@@ -114,6 +114,8 @@ new Vue({
       PreDown: { enabled: false, value: '' },
       PostDown: { enabled: false, value: '' },
     },
+    peerEditPublicKey: '',
+    peerEditPrivateKey: '',
     peerEditStaticConnectionIds: [],
     peerEditRoamingConnectionIds: [],
     peerEditNewConnectionIds: [],
@@ -632,6 +634,8 @@ new Vue({
         this.peerEditScripts.PreDown.value = this.network.peers[peerId].scripts.PreDown.value;
         this.peerEditScripts.PostDown.enabled = this.network.peers[peerId].scripts.PostDown.enabled;
         this.peerEditScripts.PostDown.value = this.network.peers[peerId].scripts.PostDown.value;
+        this.peerEditPublicKey = this.network.peers[peerId].publicKey;
+        this.peerEditPrivateKey = this.network.peers[peerId].privateKey;
 
         // store all the connections related to this peer
         this.peerEditIsConnectionEnabled = {};
@@ -912,6 +916,11 @@ new Vue({
         this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
       }
       this.peerCreateConnectionColorRefresh += 1;
+    },
+    async refreshPeerEditKeys() {
+      const { privateKey, publicKey } = await this.api.getNewKeyPairs();
+      this.peerEditPrivateKey = privateKey;
+      this.peerEditPublicKey = publicKey;
     },
   },
   computed: {
@@ -1250,6 +1259,8 @@ new Vue({
       ]) {
         changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200';
       }
+      changeDetectedPeer ||= this.network.peers[this.peerConfigId].publicKey !== this.peerEditPublicKey;
+      changeDetectedPeer ||= this.network.peers[this.peerConfigId].privateKey !== this.peerEditPrivateKey;
 
       if (!errorNotFound) {
         return [
@@ -1268,6 +1279,8 @@ new Vue({
           address: this.peerEditAddress,
           mobility: this.peerEditMobility,
           endpoint: this.peerEditEndpoint,
+          publicKey: this.peerEditPublicKey,
+          privateKey: this.peerEditPrivateKey,
         })) {
           if (peerConfigValue !== this.network.peers[this.peerConfigId][peerConfigField]) {
             changedFields.peers[this.peerConfigId][peerConfigField] = peerConfigValue;

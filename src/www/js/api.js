@@ -222,6 +222,13 @@ class API {
     });
   }
 
+  async getNewKeyPairs() {
+    return this.call({
+      method: 'get',
+      path: '/wireguard/keypair',
+    });
+  }
+
   async wireguardEnable() {
     return this.call({
       method: 'post',

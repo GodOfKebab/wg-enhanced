@@ -564,6 +564,14 @@ module.exports = class WireGuard {
     await this.saveConfig();
   }
 
+  async getNewKeypair() {
+    const privateKey = await Util.exec('wg genkey');
+    const publicKey = await Util.exec(`echo ${privateKey} | wg pubkey`, {
+      log: 'echo ***hidden*** | wg pubkey',
+    });
+    return { privateKey, publicKey };
+  }
+
   async getServerStatus() {
     const status = await Util.exec('wg', {
       log: false,
