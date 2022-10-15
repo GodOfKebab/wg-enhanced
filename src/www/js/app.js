@@ -481,6 +481,11 @@ new Vue({
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
+    updatePeerKeys(peerId, publicKey, privateKey) {
+      this.api.updatePeerKeys({ peerId, publicKey, privateKey })
+        .catch(err => alert(err.message || err.toString()))
+        .finally(() => this.refresh().catch(console.error));
+    },
     enableConnection(connectionId, enabled) {
       if (enabled) {
         this.api.enableConnection({ connectionId })
@@ -785,6 +790,8 @@ new Vue({
       if (Object.keys(changedFields).length > 0) {
         let mobilityValue = null;
         let endpointValue = null;
+        let publicKeyValue = null;
+        let privateKeyValue = null;
         if (Object.keys(changedFields.peers).length) {
           for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
             switch (field) {
@@ -809,12 +816,19 @@ new Vue({
               case 'scripts':
                 this.updatePeerScripts(this.peerConfigId, value);
                 break;
+              case 'publicKey':
+                publicKeyValue = value;
+                break;
+              case 'privateKey':
+                privateKeyValue = value;
+                break;
               default:
                 break;
             }
           }
         }
         if (mobilityValue || endpointValue) this.updatePeerEndpoint(this.peerConfigId, mobilityValue, endpointValue);
+        if (publicKeyValue || privateKeyValue) this.updatePeerKeys(this.peerConfigId, publicKeyValue, privateKeyValue);
 
         for (const [connectionId, connection] of Object.entries(changedFields.connections)) {
           let AtoBValue = null;
@@ -918,9 +932,9 @@ new Vue({
       this.peerCreateConnectionColorRefresh += 1;
     },
     async refreshPeerEditKeys() {
-      const { privateKey, publicKey } = await this.api.getNewKeyPairs();
-      this.peerEditPrivateKey = privateKey;
+      const { publicKey, privateKey } = await this.api.getNewKeyPairs();
       this.peerEditPublicKey = publicKey;
+      this.peerEditPrivateKey = privateKey;
     },
   },
   computed: {

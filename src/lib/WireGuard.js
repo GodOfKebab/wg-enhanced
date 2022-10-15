@@ -55,8 +55,8 @@ module.exports = class WireGuard {
               root: {
                 name: 'this-server',
                 address,
-                privateKey,
                 publicKey,
+                privateKey,
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 mobility: 'static',
@@ -108,8 +108,8 @@ module.exports = class WireGuard {
       strippedConfig.peers[peerId] = {
         name: peer.name,
         address: peer.address,
-        privateKey: peer.privateKey,
         publicKey: peer.publicKey,
+        privateKey: peer.privateKey,
         createdAt: peer.createdAt,
         updatedAt: peer.updatedAt,
         mobility: peer.mobility,
@@ -306,8 +306,8 @@ module.exports = class WireGuard {
     config.peers[peerId] = {
       name,
       address,
-      privateKey,
       publicKey,
+      privateKey,
       mobility,
       endpoint,
       dns,
@@ -518,6 +518,22 @@ module.exports = class WireGuard {
     await this.saveConfig();
   }
 
+  async updatePeerKeys({ peerId, publicKey, privateKey }) {
+    const config = await this.getConfig();
+    if (!await this.getPeer({ peerId })) return;
+
+    // TODO: add check for incoming keys
+    if (publicKey && privateKey) {
+      config.peers[peerId].publicKey = publicKey;
+      config.peers[peerId].privateKey = privateKey;
+    } else {
+      throw new Error('Couldn\'t parse incoming publicKey or privateKey');
+    }
+    config.peers[peerId].updatedAt = new Date();
+
+    await this.saveConfig();
+  }
+
   async enableConnection({ connectionId, enabled }) {
     const config = await this.getConfig();
     if (!await this.getConnection({ connectionId })) return;
@@ -569,7 +585,7 @@ module.exports = class WireGuard {
     const publicKey = await Util.exec(`echo ${privateKey} | wg pubkey`, {
       log: 'echo ***hidden*** | wg pubkey',
     });
-    return { privateKey, publicKey };
+    return { publicKey, privateKey };
   }
 
   async getServerStatus() {

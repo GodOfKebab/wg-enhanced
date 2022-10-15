@@ -185,6 +185,14 @@ class API {
     });
   }
 
+  async updatePeerKeys({ peerId, publicKey, privateKey }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/peer/${peerId}/keys/`,
+      body: { publicKey, privateKey },
+    });
+  }
+
   async enableConnection({ connectionId }) {
     return this.call({
       method: 'put',

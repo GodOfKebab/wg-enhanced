@@ -166,6 +166,11 @@ module.exports = class Server {
         const { scripts } = req.body;
         return WireGuard.updatePeerScripts({ peerId, scripts });
       }))
+      .put('/api/wireguard/peer/:peerId/keys', Util.promisify(async req => {
+        const { peerId } = req.params;
+        const { publicKey, privateKey } = req.body;
+        return WireGuard.updatePeerKeys({ peerId, publicKey, privateKey });
+      }))
       .put('/api/wireguard/connection/:connectionId/enable', Util.promisify(async req => {
         const { connectionId } = req.params;
         return WireGuard.enableConnection({ connectionId, enabled: true });
