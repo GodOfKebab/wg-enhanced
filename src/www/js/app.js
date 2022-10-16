@@ -116,6 +116,7 @@ new Vue({
     },
     peerEditPublicKey: '',
     peerEditPrivateKey: '',
+    peerEditConnectionPreSharedKeys: {},
     peerEditStaticConnectionIds: [],
     peerEditRoamingConnectionIds: [],
     peerEditNewConnectionIds: [],
@@ -655,6 +656,7 @@ new Vue({
             this.peerEditAllowedIPsBtoA[connectionId] = this.network.connections[connectionId].allowedIPsBtoA;
             this.peerEditPersistentKeepaliveEnabledData[connectionId] = this.network.connections[connectionId].persistentKeepalive.enabled;
             this.peerEditPersistentKeepaliveValueData[connectionId] = this.network.connections[connectionId].persistentKeepalive.value.toString();
+            this.peerEditConnectionPreSharedKeys[connectionId] = this.network.connections[connectionId].preSharedKey;
           }
         }
         // To enforce order of static > roaming connections when listed in the view
@@ -936,6 +938,11 @@ new Vue({
       this.peerEditPublicKey = publicKey;
       this.peerEditPrivateKey = privateKey;
     },
+    async refreshConnectionEditKeys(connectionId) {
+      const { preSharedKey } = await this.api.getNewPreSharedKey();
+      this.peerEditConnectionPreSharedKeys[connectionId] = preSharedKey;
+      this.peerEditConnectionColorRefresh += 1;
+    },
   },
   computed: {
     peerCreateNameColor() {
@@ -1202,6 +1209,7 @@ new Vue({
             error ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] === 'bg-red-200';
             change ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] !== 'bg-white';
             change ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
+            change ||= this.peerEditConnectionPreSharedKeys[connectionId] !== this.network.connections[connectionId].preSharedKey;
           } else {
             this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200';
             error ||= this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] === 'bg-red-200';
@@ -1359,6 +1367,7 @@ new Vue({
           }
           changeDetectedConnection ||= this.peerEditConnectionColor.persistentKeepalive[connectionId] === 'bg-green-200';
           changeDetectedConnection ||= this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled;
+          changeDetectedConnection ||= this.peerEditConnectionPreSharedKeys[connectionId] !== this.network.connections[connectionId].preSharedKey;
         } else {
           addDetectedPeer = true;
           for (const connectionField of ['allowedIPsAtoB', 'allowedIPsBtoA', 'persistentKeepalive']) {
@@ -1408,6 +1417,10 @@ new Vue({
               } else {
                 changedSubFields.persistentKeepalive = { value: this.peerEditPersistentKeepaliveValueData[connectionId] };
               }
+            }
+
+            if (this.peerEditConnectionPreSharedKeys[connectionId] !== this.network.connections[connectionId].preSharedKey) {
+              changedSubFields.preSharedKey = this.peerEditConnectionPreSharedKeys[connectionId];
             }
 
             if (Object.keys(changedSubFields).length > 0) {

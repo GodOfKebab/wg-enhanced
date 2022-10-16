@@ -237,6 +237,13 @@ class API {
     });
   }
 
+  async getNewPreSharedKey() {
+    return this.call({
+      method: 'get',
+      path: '/wireguard/preSharedKey',
+    });
+  }
+
   async wireguardEnable() {
     return this.call({
       method: 'post',

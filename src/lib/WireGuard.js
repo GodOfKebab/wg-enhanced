@@ -588,6 +588,10 @@ module.exports = class WireGuard {
     return { publicKey, privateKey };
   }
 
+  async getNewPreSharedKey() {
+    return { preSharedKey: await Util.exec('wg genpsk') };
+  }
+
   async getServerStatus() {
     const status = await Util.exec('wg', {
       log: false,
