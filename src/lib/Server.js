@@ -175,6 +175,11 @@ module.exports = class Server {
         const { publicKey, privateKey } = req.body;
         return WireGuard.updatePeerKeys({ peerId, publicKey, privateKey });
       }))
+      .put('/api/wireguard/connection/:connectionId/key', Util.promisify(async req => {
+        const { connectionId } = req.params;
+        const { preSharedKey } = req.body;
+        return WireGuard.updateConnectionKey({ connectionId, preSharedKey });
+      }))
       .put('/api/wireguard/connection/:connectionId/enable', Util.promisify(async req => {
         const { connectionId } = req.params;
         return WireGuard.enableConnection({ connectionId, enabled: true });

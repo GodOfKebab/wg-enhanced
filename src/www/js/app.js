@@ -487,6 +487,11 @@ new Vue({
         .catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
     },
+    updateConnectionKey(connectionId, preSharedKey) {
+      this.api.updateConnectionKey({ connectionId, preSharedKey })
+        .catch(err => alert(err.message || err.toString()))
+        .finally(() => this.refresh().catch(console.error));
+    },
     enableConnection(connectionId, enabled) {
       if (enabled) {
         this.api.enableConnection({ connectionId })
@@ -847,6 +852,9 @@ new Vue({
                 break;
               case 'allowedIPsBtoA':
                 BtoAValue = value;
+                break;
+              case 'preSharedKey':
+                this.updateConnectionKey(connectionId, value);
                 break;
               case 'persistentKeepalive':
                 if ('enabled' in value) persistentKeepaliveEnabled = value.enabled;

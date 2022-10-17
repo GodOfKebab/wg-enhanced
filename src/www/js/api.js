@@ -193,6 +193,14 @@ class API {
     });
   }
 
+  async updateConnectionKey({ connectionId, preSharedKey }) {
+    return this.call({
+      method: 'put',
+      path: `/wireguard/connection/${connectionId}/key/`,
+      body: { preSharedKey },
+    });
+  }
+
   async enableConnection({ connectionId }) {
     return this.call({
       method: 'put',

@@ -534,13 +534,31 @@ module.exports = class WireGuard {
     await this.saveConfig();
   }
 
+  async updateConnectionKey({ connectionId, preSharedKey }) {
+    const config = await this.getConfig();
+    if (!await this.getConnection({ connectionId })) return;
+
+    // TODO: add check for incoming keys
+    if (preSharedKey) {
+      config.connections[connectionId].preSharedKey = preSharedKey;
+    } else {
+      throw new Error('Couldn\'t parse incoming preSharedKey');
+    }
+    const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+    config.peers[a].updatedAt = new Date();
+    config.peers[b].updatedAt = new Date();
+
+    await this.saveConfig();
+  }
+
   async enableConnection({ connectionId, enabled }) {
     const config = await this.getConfig();
     if (!await this.getConnection({ connectionId })) return;
 
     config.connections[connectionId].enabled = enabled;
-    // TODO: get peerIds and update them.
-    // config.peers[peerId].updatedAt = new Date();
+    const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+    config.peers[a].updatedAt = new Date();
+    config.peers[b].updatedAt = new Date();
 
     await this.saveConfig();
   }
@@ -557,8 +575,9 @@ module.exports = class WireGuard {
       if (!WireGuardHelper.checkField('allowedIPs', BtoA)) throw new Error(`allowedIPs couldn't be parsed: ${BtoA}`);
       config.connections[connectionId].allowedIPsBtoA = BtoA;
     }
-    // TODO: get peerIds and update them.
-    // config.peers[peerId].updatedAt = new Date();
+    const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+    config.peers[a].updatedAt = new Date();
+    config.peers[b].updatedAt = new Date();
 
     await this.saveConfig();
   }
@@ -574,8 +593,9 @@ module.exports = class WireGuard {
       if (!WireGuardHelper.checkField('persistentKeepalive', value)) throw new Error(`PersistentKeepalive couldn't be parsed: ${value}`);
       config.connections[connectionId].persistentKeepalive.value = value;
     }
-    // TODO: get peerIds and update them.
-    // config.peers[peerId].updatedAt = new Date();
+    const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+    config.peers[a].updatedAt = new Date();
+    config.peers[b].updatedAt = new Date();
 
     await this.saveConfig();
   }
