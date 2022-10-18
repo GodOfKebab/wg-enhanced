@@ -917,6 +917,7 @@ new Vue({
         this.peerEditPersistentKeepaliveValueData[connectionId] = this.network.connections[connectionId].persistentKeepalive.value;
         this.peerEditAllowedIPsAtoB[connectionId] = this.network.connections[connectionId].allowedIPsAtoB;
         this.peerEditAllowedIPsBtoA[connectionId] = this.network.connections[connectionId].allowedIPsBtoA;
+        this.peerEditConnectionPreSharedKeys[connectionId] = this.network.connections[connectionId].preSharedKey;
         this.peerEditConnectionColorRefresh += 1;
       } else {
         this.peerEditIsConnectionEnabled[connectionId] = true;
@@ -1490,6 +1491,7 @@ new Vue({
           changed ||= this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value;
           changed ||= this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB;
           changed ||= this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA;
+          changed ||= this.peerEditConnectionPreSharedKeys[connectionId] !== this.network.connections[connectionId].preSharedKey;
         } else {
           changed ||= this.peerEditIsConnectionEnabled[connectionId] !== true;
           changed ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.defaults.connections.persistentKeepalive.enabled;

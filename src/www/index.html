@@ -64,16 +64,11 @@
     .highlight-undo-box:hover > div > .undo-button-itself:hover{
       opacity: 1.0;
     }
-    .dont-highlight-undo-box:hover > div > .undo-button-itself{
-      opacity: 0;
-      filter: invert(1.0);
-    }
     .highlight-undo-box:hover > div > .undo-button-itself > img{
       filter: invert(0.8);
     }
     .highlight-undo-box:hover > div > .undo-button-itself:hover > img{
-      opacity: 0.2;
-      filter: invert(0);
+      filter: invert(0.0);
     }
     .refresh-key > div > div > button {
       padding: 0;
@@ -695,7 +690,7 @@
                                   </option>
                                 </datalist>
                                 <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                                  <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                                  <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                           title="Undo Changes"
                                           :disabled="peerCreateDNS.enabled === false && peerCreateDNS.value === ''"
                                           @click="peerCreateDNS.enabled = false; peerCreateDNS.value = '';">
@@ -723,7 +718,7 @@
                                   </option>
                                 </datalist>
                                 <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                                  <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                                  <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                           title="Undo Changes"
                                           :disabled="peerCreateMTU.enabled === false && peerCreateMTU.value === ''"
                                           @click="peerCreateMTU.enabled = false; peerCreateMTU.value = '';">
@@ -753,7 +748,7 @@
                                      :class="[peerCreateScriptsColor[scriptField]]"
                                      :disabled="!peerCreateScripts[scriptField].enabled"/>
                               <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                         title="Undo Changes"
                                         :disabled="peerCreateScripts[scriptField].value === '' && peerCreateScripts[scriptField].enabled === false"
                                         @click="peerCreateScripts[scriptField].value = ''; peerCreateScripts[scriptField].enabled = false;">
@@ -815,7 +810,7 @@
                             </div>
                           </div>
                           <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                     title="Undo Changes"
                                     :disabled="JSON.stringify(peerCreateAttachedStaticPeerIds) === JSON.stringify(['root']) && peerCreateAttachedRoamingPeerIds.length === 0"
                                     @click="peerCreateAttachedStaticPeerIds = ['root']; peerCreateAttachedRoamingPeerIds = []">
@@ -837,7 +832,7 @@
                               </button>
                             </div>
                             <div class="inline-block float-right absolute z-20 right-[2.25rem] top-[0.25rem]">
-                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                       title="Undo Changes"
                                       @click="peerCreateResetConnectionFields(peerId)"
                                       :disabled="peerCreateResetConnectionFieldsDisabled[peerId]">
@@ -1130,7 +1125,7 @@
                                  type="text" placeholder="Name"
                                  v-model="peerEditName" :class="[peerEditNameColor]"/>
                           <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                     title="Undo Changes"
                                     :disabled="peerEditNameColor === 'bg-white'"
                                     @click="peerEditName = network.peers[peerConfigId].name">
@@ -1147,7 +1142,7 @@
                                  type="text" :placeholder="`Address (e.g. ${WireGuardHelper.getNextAvailableAddress(network)})`"
                                  v-model="peerEditAddress" :class="[peerEditAddressColor]"/>
                           <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                     title="Undo Changes"
                                     :disabled="peerEditAddressColor === 'bg-white'"
                                     @click="peerEditAddress = network.peers[peerConfigId].address">
@@ -1169,7 +1164,7 @@
                                  :class="[peerEditEndpointColor]"
                                  :disabled="peerEditMobility !== 'static'"/>
                           <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                     title="Undo Changes"
                                     :disabled="peerEditEndpoint === network.peers[peerConfigId].endpoint && peerEditMobility === network.peers[peerConfigId].mobility"
                                     @click="peerEditEndpoint = network.peers[peerConfigId].endpoint; peerEditMobility = network.peers[peerConfigId].mobility;">
@@ -1203,7 +1198,7 @@
                                 </option>
                               </datalist>
                               <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                         title="Undo Changes"
                                         :disabled="peerEditDNS.enabled === network.peers[peerConfigId].dns.enabled && peerEditDNS.value === network.peers[peerConfigId].dns.value"
                                         @click="peerEditDNS.enabled = network.peers[peerConfigId].dns.enabled; peerEditDNS.value = network.peers[peerConfigId].dns.value;">
@@ -1231,7 +1226,7 @@
                                 </option>
                               </datalist>
                               <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                         title="Undo Changes"
                                         :disabled="peerEditMTU.enabled === network.peers[peerConfigId].mtu.enabled && peerEditMTU.value === network.peers[peerConfigId].mtu.value"
                                         @click="peerEditMTU.enabled = network.peers[peerConfigId].mtu.enabled; peerEditMTU.value = network.peers[peerConfigId].mtu.value;">
@@ -1261,7 +1256,7 @@
                                    :class="[peerEditScriptsColor[scriptField]]"
                                    :disabled="!peerEditScripts[scriptField].enabled"/>
                             <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                       title="Undo Changes"
                                       :disabled="peerEditScripts[scriptField].value === network.peers[peerConfigId].scripts[scriptField].value && peerEditScripts[scriptField].enabled === network.peers[peerConfigId].scripts[scriptField].enabled"
                                       @click="peerEditScripts[scriptField].value = network.peers[peerConfigId].scripts[scriptField].value; peerEditScripts[scriptField].enabled = network.peers[peerConfigId].scripts[scriptField].enabled;">
@@ -1272,24 +1267,33 @@
                         </div>
                       </div>
 
-                      <div class="m-2 p-1 shadow-md border rounded bg-green-50 overflow-x-auto">
-                        <div v-for="peerConfigKey in ['publicKey', 'privateKey', 'createdAt', 'updatedAt']"
-                             class="relative">
-                          <div class="flex grid grid-cols-10 text-sm refresh-key">
-                            <div class="col-span-2">
+                      <div class="m-2 p-1 shadow-md border rounded relative" :class="[peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'bg-green-100' : 'bg-green-50', peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'highlight-undo-box' : '']">
+                        <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                                  title="Undo Changes"
+                                  :disabled="peerEditPublicKey === network.peers[peerConfigId].publicKey || peerEditPrivateKey === network.peers[peerConfigId].privateKey"
+                                  @click="peerEditPublicKey = network.peers[peerConfigId].publicKey; peerEditPrivateKey = network.peers[peerConfigId].privateKey">
+                            <img class="w-4" :src="returnIconSrc"/>
+                          </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                          <div v-for="peerConfigKey in ['publicKey', 'privateKey', 'createdAt', 'updatedAt']">
+                            <div class="flex grid grid-cols-10 text-sm refresh-key">
+                              <div class="col-span-2">
                               <span class="text-gray-800">
                                   <strong>{{ peerConfigKey }}</strong>
                               </span>
-                            </div>
-                            <div class="col-span-8 text-sm whitespace-nowrap">
-                              <span class="text-gray-800 text-xs">:</span>
-                              <div v-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs pr-4 inline-block">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</div>
-                              <div v-else class="pr-4 inline-block">
-                                <button class="align-middle rounded bg-gray-100 hover:bg-gray-600 hover:text-white transition-all" @click="refreshPeerEditKeys()">
-                                  <img :src="refreshIconSrc">
-                                </button>
-                                <span v-if="peerConfigKey === 'publicKey'" class="text-gray-800 text-xs">{{ peerEditPublicKey }}</span>
-                                <span v-else class="text-gray-800 text-xs">{{ peerEditPrivateKey }}</span>
+                              </div>
+                              <div class="col-span-8 text-sm whitespace-nowrap">
+                                <span class="text-gray-800 text-xs">:</span>
+                                <div v-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs pr-4 inline-block">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</div>
+                                <div v-else class="pr-4 inline-block">
+                                  <button class="align-middle rounded bg-gray-100 hover:bg-gray-600 hover:text-white transition-all" @click="refreshPeerEditKeys()">
+                                    <img :src="refreshIconSrc">
+                                  </button>
+                                  <span v-if="peerConfigKey === 'publicKey'" class="text-gray-800 text-xs">{{ peerEditPublicKey }}</span>
+                                  <span v-else class="text-gray-800 text-xs">{{ peerEditPrivateKey }}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1348,7 +1352,7 @@
                           </div>
                         </div>
                         <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                   title="Undo Changes"
                                   :disabled="Object.keys(this.peerEditChangedFieldsCompute[1]).length + Object.keys(this.peerEditChangedFieldsCompute[2]).length === 0"
                                   @click="peerEditStaticConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId)); peerEditRoamingConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId));">
@@ -1371,7 +1375,7 @@
                           </button>
                         </div>
                         <div class="inline-block float-right absolute z-20 right-[2.75rem] top-[0.25rem]">
-                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-600 hover:text-white opacity-0 transition undo-button-itself"
+                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                   title="Undo Changes"
                                   @click="peerEditResetConnectionFields(connectionId)"
                                   :disabled="Object.keys(peerEditResetConnectionFieldsDisabled).includes(connectionId) ? peerEditResetConnectionFieldsDisabled[connectionId] : true">
