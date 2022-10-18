@@ -22,6 +22,7 @@ const {
   WG_PRE_DOWN,
   WG_POST_DOWN,
   WG_NETWORK_DEFAULTS,
+  WG_PREAMBLE_EXPIRATON,
 } = require('../config');
 
 module.exports = class WireGuard {
@@ -215,26 +216,57 @@ module.exports = class WireGuard {
     return connection;
   }
 
-  async peerCreatePreamble() {
+  async peerCreatePreamble({ peerId, address }) {
     const config = await this.getConfig();
 
     const preamble = {
-      peerId: null,
-      address: null,
+      peerId,
+      address,
       expiration: null,
     };
 
+    console.log(peerId);
+    console.log(WireGuardHelper.checkField('peerId', peerId.toString()));
+    console.log(address);
+    console.log(WireGuardHelper.checkField('address', address.toString()));
+
+    const askingForExtension = WireGuardHelper.checkField('peerId', peerId.toString())
+        && WireGuardHelper.checkField('address', address.toString());
+
     this.preambles = this.preambles.filter(r => r.expiration > (new Date()).getTime());
     this.preambles = this.preambles.filter(r => Object.keys(config.peers).every(p => p !== r.peerId));
-    if (this.preambles.length >= 100) throw new Error('No address can be reserved.');
+    if (this.preambles.length >= 100 && !askingForExtension) throw new Error('No address can be reserved.');
 
-    // Calculate next IP
-    preamble.address = WireGuardHelper.getNextAvailableAddress(config);
-    if (!preamble.address) throw new Error('Maximum number of peers reached.');
+    if (!askingForExtension) {
+      const configCopy = JSON.parse(JSON.stringify(config));
+      this.preambles.forEach(p => {
+        configCopy.peers[p.peerId] = { address: p.address };
+      });
+      // Calculate next IP
+      preamble.address = WireGuardHelper.getNextAvailableAddress(configCopy);
+      if (!preamble.address) throw new Error('Maximum number of peers reached.');
 
-    preamble.peerId = uuid.v4();
-    preamble.expiration = (new Date()).getTime() + 5 * 60 * 1000;
-    this.preambles.push(preamble);
+      preamble.peerId = uuid.v4();
+      preamble.expiration = (new Date()).getTime() + WG_PREAMBLE_EXPIRATON;
+      this.preambles.push(preamble);
+    } else {
+      let extendedExpiration = false;
+      let isThereAClash = false;
+      for (let i = 0; i < this.preambles.length; i++) {
+        if (this.preambles[i].peerId === preamble.peerId && this.preambles[i].address === preamble.address) {
+          this.preambles[i].expiration = (new Date()).getTime() + WG_PREAMBLE_EXPIRATON;
+          preamble.expiration = this.preambles[i].expiration;
+          extendedExpiration = true;
+          break;
+        }
+        isThereAClash ||= this.preambles[i].peerId === preamble.peerId || this.preambles[i].address === preamble.address;
+      }
+      if (!isThereAClash && !extendedExpiration) {
+        preamble.expiration = (new Date()).getTime() + WG_PREAMBLE_EXPIRATON;
+        this.preambles.push(preamble);
+      }
+      if (isThereAClash && !extendedExpiration) throw new Error('This peerId/address pair can\'t be found.');
+    }
 
     return preamble;
   }

@@ -67,19 +67,20 @@ ${connectionDetails.persistentKeepalive.enabled ? `PersistentKeepalive = ${conne
   }
 
   static checkField(fieldName, fieldVariable) {
+    // check peerId
+    if (fieldName === 'peerId') {
+      return fieldVariable.match('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
+    }
+
     // check name
     if (fieldName === 'name') {
       return fieldVariable.length > 0;
     }
 
-    // TODO: change the hardcoded IP subnet
+    // TODO: check subnet
     // TODO: check to see if a duplicate exists
     if (fieldName === 'address') {
-      let addressCheck = true;
-      addressCheck &&= fieldVariable.startsWith('10.8.0.');
-      addressCheck &&= fieldVariable.replace('10.8.0.', '').match('^[0-9]*$');
-      addressCheck &&= parseInt(fieldVariable.replace('10.8.0.', ''), 10) >= 0 && parseInt(fieldVariable.replace('10.8.0.', ''), 10) <= 255;
-      return addressCheck;
+      return fieldVariable.match('^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$');
     }
 
     // check mobility

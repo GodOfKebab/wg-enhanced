@@ -95,8 +95,9 @@ module.exports = class Server {
         res.send(JSON.stringify({ status: await WireGuard.getServerStatus() }));
       }))
       .get('/api/wireguard/peer/preamble/:peerId/:address', Util.promisify(async (req, res) => {
+        const { peerId, address } = req.params;
         res.header('Content-Type', 'application/json');
-        res.send(JSON.stringify(await WireGuard.peerCreatePreamble()));
+        res.send(JSON.stringify(await WireGuard.peerCreatePreamble({ peerId, address })));
       }))
       .get('/api/wireguard/keypair', Util.promisify(async (req, res) => {
         res.header('Content-Type', 'application/json');

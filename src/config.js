@@ -22,6 +22,8 @@ iptables -A FORWARD -o ${module.exports.WG_INTERFACE} -j ACCEPT;
 module.exports.WG_PRE_DOWN = process.env.WG_PRE_DOWN || '';
 module.exports.WG_POST_DOWN = process.env.WG_POST_DOWN || '';
 
+module.exports.WG_PREAMBLE_EXPIRATON = process.env.WG_PREAMBLE_EXPIRATON || 5 * 60 * 1000; // default reservation is 5 minutes
+
 module.exports.WG_NETWORK_DEFAULTS = {
   peers: {
     dns: {

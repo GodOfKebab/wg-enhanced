@@ -399,6 +399,29 @@ new Vue({
           console.log(e);
         }
       }
+
+      // keep reserving the peer create address 10 seconds before it expires
+      if (this.peerCreatePeerId !== ''
+          && this.peerCreateAddress !== ''
+          && (new Date()).getTime() > (this.peerCreatePreambleExpiration - 10 * 1000)) {
+        console.log('reserving');
+        try {
+          const { peerId, address, expiration } = await this.api.preamblePeer({
+            peerId: this.peerCreatePeerId,
+            address: this.peerCreateAddress,
+          });
+          this.peerCreatePeerId = peerId;
+          this.peerCreateAddress = address;
+          this.peerCreatePreambleExpiration = expiration;
+        } catch (e) {
+          this.peerCreateMobility = '';
+          this.peerCreatePeerId = '';
+          this.peerCreateAddress = '';
+          this.peerCreateNoAddress = true;
+          return;
+        }
+        this.peerCreateNoAddress = false;
+      }
     },
 
     login(e) {
