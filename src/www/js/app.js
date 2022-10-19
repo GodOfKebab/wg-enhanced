@@ -30,6 +30,7 @@ new Vue({
     apexchart: VueApexCharts,
   },
   data: {
+    refreshInterval: 1000,
     authenticated: null,
     authenticating: false,
     password: null,
@@ -43,7 +44,6 @@ new Vue({
     peerAvatars: {},
     peerAvatarSources: {},
     peerAvatarCanvases: {},
-    peersPersist: {},
     peerDeleteId: null,
     peerConfigId: null,
     peerConfigWindow: 'edit',
@@ -168,6 +168,8 @@ new Vue({
     currentRelease: null,
     latestRelease: null,
 
+    networkSeriesRefresh: 0,
+    networkSeriesLength: 50,
     chartOptions: {
       chart: {
         background: 'transparent',
@@ -228,6 +230,7 @@ new Vue({
         },
       },
     },
+    peersPersist: {},
   },
   methods: {
     dateTime: value => {
@@ -260,40 +263,56 @@ new Vue({
       let detectedChange = false;
       // Get the network-wide config
       await this.api.getNetwork().then(network => {
+        let totalRootRx = 0;
+        let totalRootTx = 0;
         // start appending from network.connections
         for (const [connectionId, connectionDetails] of Object.entries(network.connections)) {
-          // only parse the connections including root
-          if (connectionId.includes('root') && connectionDetails.enabled) {
-            if (!this.peersPersist[connectionId]) {
-              this.peersPersist[connectionId] = {};
-              this.peersPersist[connectionId].transferRxHistory = Array(20).fill(0);
-              this.peersPersist[connectionId].transferRxPrevious = connectionDetails.transferRx;
-              this.peersPersist[connectionId].transferTxHistory = Array(20).fill(0);
-              this.peersPersist[connectionId].transferTxPrevious = connectionDetails.transferTx;
-
-              this.peersPersist[connectionId].chartOptions = {
-                ...this.chartOptions,
-                yaxis: {
-                  ...this.chartOptions.yaxis,
-                  max: () => this.peersPersist[connectionId].chartMax,
-                },
-              };
-            }
-
-            this.peersPersist[connectionId].transferRxCurrent = connectionDetails.transferRx - this.peersPersist[connectionId].transferRxPrevious;
+          if (!this.peersPersist[connectionId]) {
+            this.peersPersist[connectionId] = {};
+            this.peersPersist[connectionId].transferRxHistory = Array(this.networkSeriesLength).fill(0);
             this.peersPersist[connectionId].transferRxPrevious = connectionDetails.transferRx;
-            this.peersPersist[connectionId].transferTxCurrent = connectionDetails.transferTx - this.peersPersist[connectionId].transferTxPrevious;
+            this.peersPersist[connectionId].transferTxHistory = Array(this.networkSeriesLength).fill(0);
             this.peersPersist[connectionId].transferTxPrevious = connectionDetails.transferTx;
 
-            this.peersPersist[connectionId].transferRxHistory.push(this.peersPersist[connectionId].transferRxCurrent);
-            this.peersPersist[connectionId].transferRxHistory.shift();
-
-            this.peersPersist[connectionId].transferTxHistory.push(this.peersPersist[connectionId].transferTxCurrent);
-            this.peersPersist[connectionId].transferTxHistory.shift();
-
-            this.peersPersist[connectionId].chartMax = Math.max(...this.peersPersist[connectionId].transferTxHistory, ...this.peersPersist[connectionId].transferRxHistory);
+            this.peersPersist[connectionId].chartOptions = {
+              ...this.chartOptions,
+              yaxis: {
+                ...this.chartOptions.yaxis,
+                max: () => this.peersPersist[connectionId].chartMax,
+              },
+            };
           }
+
+          totalRootTx += connectionDetails.transferRx;
+          totalRootRx += connectionDetails.transferTx;
+
+          this.peersPersist[connectionId].transferRxCurrent = connectionDetails.transferRx - this.peersPersist[connectionId].transferRxPrevious;
+          this.peersPersist[connectionId].transferRxPrevious = connectionDetails.transferRx;
+          this.peersPersist[connectionId].transferTxCurrent = connectionDetails.transferTx - this.peersPersist[connectionId].transferTxPrevious;
+          this.peersPersist[connectionId].transferTxPrevious = connectionDetails.transferTx;
+
+          this.peersPersist[connectionId].transferRxHistory.push(this.peersPersist[connectionId].transferRxCurrent);
+          this.peersPersist[connectionId].transferRxHistory.shift();
+
+          this.peersPersist[connectionId].transferTxHistory.push(this.peersPersist[connectionId].transferTxCurrent);
+          this.peersPersist[connectionId].transferTxHistory.shift();
+
+          this.peersPersist[connectionId].chartMax = Math.max(...this.peersPersist[connectionId].transferTxHistory, ...this.peersPersist[connectionId].transferRxHistory);
         }
+        this.peersPersist['root*root'].transferRxCurrent = totalRootRx - this.peersPersist['root*root'].transferRxPrevious;
+        this.peersPersist['root*root'].transferRxPrevious = totalRootRx;
+        this.peersPersist['root*root'].transferTxCurrent = totalRootTx - this.peersPersist['root*root'].transferTxPrevious;
+        this.peersPersist['root*root'].transferTxPrevious = totalRootTx;
+
+        this.peersPersist['root*root'].transferRxHistory.push(this.peersPersist['root*root'].transferRxCurrent);
+        this.peersPersist['root*root'].transferRxHistory.shift();
+
+        this.peersPersist['root*root'].transferTxHistory.push(this.peersPersist['root*root'].transferTxCurrent);
+        this.peersPersist['root*root'].transferTxHistory.shift();
+
+        this.peersPersist['root*root'].chartMax = Math.max(...this.peersPersist['root*root'].transferTxHistory, ...this.peersPersist['root*root'].transferRxHistory);
+
+        this.networkSeriesRefresh += 1;
         // end append to network.connections
 
         const staticPeers = {};
@@ -403,8 +422,7 @@ new Vue({
       // keep reserving the peer create address 10 seconds before it expires
       if (this.peerCreatePeerId !== ''
           && this.peerCreateAddress !== ''
-          && (new Date()).getTime() > (this.peerCreatePreambleExpiration - 10 * 1000)) {
-        console.log('reserving');
+          && (new Date()).getTime() > (this.peerCreatePreambleExpiration - 10 * 1000 - this.refreshInterval)) {
         try {
           const { peerId, address, expiration } = await this.api.preamblePeer({
             peerId: this.peerCreatePeerId,
@@ -423,7 +441,6 @@ new Vue({
         this.peerCreateNoAddress = false;
       }
     },
-
     login(e) {
       e.preventDefault();
 
@@ -1591,6 +1608,30 @@ new Vue({
       }
       return forceG;
     },
+    networkSeriesCompute() {
+      this.networkSeriesRefresh &&= this.networkSeriesRefresh;
+      const series = {
+        rx: { 'root*root': { name: 'rx', data: this.peersPersist['root*root'].transferRxHistory } },
+        tx: { 'root*root': { name: 'tx', data: this.peersPersist['root*root'].transferTxHistory } },
+      };
+      for (const connectionId of [...Object.keys(this.network.connections), 'root*root']) {
+        // only parse the connections including root
+        series.rx[connectionId] = { name: 'rx', data: this.peersPersist[connectionId].transferRxHistory };
+        series.tx[connectionId] = { name: 'tx', data: this.peersPersist[connectionId].transferTxHistory };
+      }
+      return series;
+    },
+    networkAverageTrafficCompute() {
+      const avgTraffic = { rx: { 'root*root': 0 }, tx: { 'root*root': 0 } };
+      const lastFiveAverage = array => array.slice(-5).reduce((a, b) => a + b) / array.slice(-5).length;
+      for (const connectionId of Object.keys(this.network.connections)) {
+        avgTraffic.rx[connectionId] = Math.floor(lastFiveAverage(this.networkSeriesCompute.rx[connectionId].data));
+        avgTraffic.tx[connectionId] = Math.floor(lastFiveAverage(this.networkSeriesCompute.tx[connectionId].data));
+        avgTraffic.rx['root*root'] += avgTraffic.tx[connectionId];
+        avgTraffic.tx['root*root'] += avgTraffic.rx[connectionId];
+      }
+      return avgTraffic;
+    },
   },
   filters: {
     bytes,
@@ -1612,11 +1653,27 @@ new Vue({
         alert(err.message || err.toString());
       });
 
+    // eslint-disable-next-line no-unused-expressions
+    this.peersPersist['root*root'] = {
+      transferRxHistory: Array(this.networkSeriesLength).fill(2),
+      transferRxPrevious: 0,
+      transferTxHistory: Array(this.networkSeriesLength).fill(0),
+      transferTxPrevious: 0,
+
+      chartOptions: {
+        ...this.chartOptions,
+        yaxis: {
+          ...this.chartOptions.yaxis,
+          max: () => this.peersPersist['root*root'].chartMax,
+        },
+      },
+    };
+
     setInterval(() => {
       this.refresh().catch(error => {
         console.log(error);
       });
-    }, 1000);
+    }, this.refreshInterval);
 
     // Promise.resolve().then(async () => {
     //   const currentRelease = await this.api.getRelease();

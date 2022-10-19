@@ -225,11 +225,6 @@ module.exports = class WireGuard {
       expiration: null,
     };
 
-    console.log(peerId);
-    console.log(WireGuardHelper.checkField('peerId', peerId.toString()));
-    console.log(address);
-    console.log(WireGuardHelper.checkField('address', address.toString()));
-
     const askingForExtension = WireGuardHelper.checkField('peerId', peerId.toString())
         && WireGuardHelper.checkField('address', address.toString());
 

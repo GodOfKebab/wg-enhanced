@@ -166,17 +166,15 @@
               <div class="relative overflow-hidden border-b border-gray-100 border-solid">
 
                 <!-- Chart -->
-<!--                <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">-->
-<!--                  <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
-<!--                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="{ name: 'tx', data: peersPersist[getConnectionId('root', peerId)].transferTxHistory }">-->
-<!--                    </apexchart>-->
-<!--                  </div>-->
-<!--                  <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
-<!--                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="{ name: 'rx', data: peersPersist[getConnectionId('root', peerId)].transferRxHistory }"-->
-<!--                               style="transform: scaleY(-1);">-->
-<!--                    </apexchart>-->
-<!--                  </div>-->
-<!--                </div>-->
+                <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">
+                  <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="[networkSeriesCompute.tx[getConnectionId('root', peerId)]]">
+                  </apexchart>
+                </div>
+                <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">
+                  <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="[networkSeriesCompute.rx[getConnectionId('root', peerId)]]"
+                             style="transform: scaleY(-1);">
+                  </apexchart>
+                </div>
 
                 <div class="relative p-5 z-10 flex flex-row">
                   <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative" :id="`avatarDiv.${peerId}`">
@@ -247,8 +245,8 @@
                       </span>
 
                       <!-- Transfer TX -->
-                      <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled && peersPersist[getConnectionId('root', peerId)].transferTxCurrent" :title="'Total Download: ' + bytes(network.connections[getConnectionId('root', peerId)].transferTx)">
+<!--                      <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">-->
+                        <span v-if="networkAverageTrafficCompute.tx[getConnectionId('root', peerId)] > 0" :title="'Total Download: ' + bytes(networkAverageTrafficCompute.tx[getConnectionId('root', peerId)])">
                           ·
                           <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                fill="currentColor">
@@ -256,13 +254,13 @@
                                   d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z"
                                   clip-rule="evenodd" />
                           </svg>
-                          {{peersPersist[getConnectionId('root', peerId)].transferTxCurrent | bytes}}/s
+                          {{networkAverageTrafficCompute.tx[getConnectionId('root', peerId)] | bytes}}/s
                         </span>
-                      </span>
+<!--                      </span>-->
 
                       <!-- Transfer RX -->
-                      <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled && peersPersist[getConnectionId('root', peerId)].transferRxCurrent > 0" :title="'Total Upload: ' + bytes(network.connections[getConnectionId('root', peerId)].transferRx)">
+<!--                      <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">-->
+                        <span v-if="networkAverageTrafficCompute.rx[getConnectionId('root', peerId)] > 0" :title="'Total Upload: ' + bytes(networkAverageTrafficCompute.rx[getConnectionId('root', peerId)])">
                           ·
                           <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                fill="currentColor">
@@ -270,9 +268,9 @@
                                   d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
                                   clip-rule="evenodd" />
                           </svg>
-                          {{peersPersist[getConnectionId('root', peerId)].transferRxCurrent | bytes}}/s
+                          {{networkAverageTrafficCompute.rx[getConnectionId('root', peerId)] | bytes}}/s
                         </span>
-                      </span>
+<!--                      </span>-->
 
                       <!-- Last seen -->
                       <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
@@ -387,17 +385,17 @@
               <div class="relative overflow-hidden border-b border-gray-100 border-solid">
 
                 <!-- Chart -->
-<!--                <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">-->
-<!--                  <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
-<!--                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="{ name: 'tx', data: peersPersist[getConnectionId('root', peerId)].transferTxHistory }">-->
-<!--                    </apexchart>-->
-<!--                  </div>-->
-<!--                  <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
-<!--                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="{ name: 'rx', data: peersPersist[getConnectionId('root', peerId)].transferRxHistory }"-->
-<!--                               style="transform: scaleY(-1);">-->
-<!--                    </apexchart>-->
-<!--                  </div>-->
-<!--                </div>-->
+                <div v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
+                  <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">
+                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="[networkSeriesCompute.tx[getConnectionId('root', peerId)]]">
+                    </apexchart>
+                  </div>
+                  <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">
+                    <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="[networkSeriesCompute.rx[getConnectionId('root', peerId)]]"
+                               style="transform: scaleY(-1);">
+                    </apexchart>
+                  </div>
+                </div>
 
                 <div class="relative p-5 z-10 flex flex-row">
                   <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative" :id="`avatarDiv.${peerId}`">
@@ -470,7 +468,7 @@
 
                       <!-- Transfer TX -->
                       <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled && peersPersist[getConnectionId('root', peerId)].transferTxCurrent > 0" :title="'Total Download: ' + bytes(network.connections[getConnectionId('root', peerId)].transferTx)">
+                        <span v-if="networkAverageTrafficCompute.tx[getConnectionId('root', peerId)] > 0" :title="'Total Download: ' + bytes(network.connections[getConnectionId('root', peerId)].transferTx)">
                           ·
                           <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -478,13 +476,13 @@
                               d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z"
                               clip-rule="evenodd" />
                           </svg>
-                          {{peersPersist[getConnectionId('root', peerId)].transferTxCurrent | bytes}}/s
+                          {{networkAverageTrafficCompute.tx[getConnectionId('root', peerId)] | bytes}}/s
                         </span>
                       </span>
 
                       <!-- Transfer RX -->
                       <span v-if="Object.keys(network.connections).includes(getConnectionId('root', peerId))">
-                        <span v-if="network.connections[getConnectionId('root', peerId)].enabled && peersPersist[getConnectionId('root', peerId)].transferRxCurrent > 0" :title="'Total Upload: ' + bytes(network.connections[getConnectionId('root', peerId)].transferRx)">
+                        <span v-if="networkAverageTrafficCompute.rx[getConnectionId('root', peerId)] > 0" :title="'Total Upload: ' + bytes(network.connections[getConnectionId('root', peerId)].transferRx)">
                           ·
                           <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -492,7 +490,7 @@
                               d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z"
                               clip-rule="evenodd" />
                           </svg>
-                          {{peersPersist[getConnectionId('root', peerId)].transferRxCurrent | bytes}}/s
+                          {{networkAverageTrafficCompute.rx[getConnectionId('root', peerId)] | bytes}}/s
                         </span>
                       </span>
 
