@@ -193,6 +193,7 @@ module.exports = class WireGuard {
       });
 
     config.defaults = WG_NETWORK_DEFAULTS;
+    config.timestamp = (new Date()).getTime();
     return config;
   }
 

@@ -230,7 +230,7 @@ new Vue({
         },
       },
     },
-    peersPersist: {},
+    peersPersist: { prevTimeStamp: 0 },
   },
   methods: {
     dateTime: value => {
@@ -273,6 +273,8 @@ new Vue({
             this.peersPersist[connectionId].transferRxPrevious = connectionDetails.transferRx;
             this.peersPersist[connectionId].transferTxHistory = Array(this.networkSeriesLength).fill(0);
             this.peersPersist[connectionId].transferTxPrevious = connectionDetails.transferTx;
+            this.peersPersist[connectionId].transferRxCurrent = 0;
+            this.peersPersist[connectionId].transferTxCurrent = 0;
 
             this.peersPersist[connectionId].chartOptions = {
               ...this.chartOptions,
@@ -281,15 +283,15 @@ new Vue({
                 max: () => this.peersPersist[connectionId].chartMax,
               },
             };
+          } else {
+            totalRootTx += connectionDetails.transferRx;
+            totalRootRx += connectionDetails.transferTx;
+
+            this.peersPersist[connectionId].transferRxCurrent = (connectionDetails.transferRx - this.peersPersist[connectionId].transferRxPrevious) / ((network.timestamp - this.peersPersist.prevTimeStamp) / 1000);
+            this.peersPersist[connectionId].transferRxPrevious = connectionDetails.transferRx;
+            this.peersPersist[connectionId].transferTxCurrent = (connectionDetails.transferTx - this.peersPersist[connectionId].transferTxPrevious) / ((network.timestamp - this.peersPersist.prevTimeStamp) / 1000);
+            this.peersPersist[connectionId].transferTxPrevious = connectionDetails.transferTx;
           }
-
-          totalRootTx += connectionDetails.transferRx;
-          totalRootRx += connectionDetails.transferTx;
-
-          this.peersPersist[connectionId].transferRxCurrent = connectionDetails.transferRx - this.peersPersist[connectionId].transferRxPrevious;
-          this.peersPersist[connectionId].transferRxPrevious = connectionDetails.transferRx;
-          this.peersPersist[connectionId].transferTxCurrent = connectionDetails.transferTx - this.peersPersist[connectionId].transferTxPrevious;
-          this.peersPersist[connectionId].transferTxPrevious = connectionDetails.transferTx;
 
           this.peersPersist[connectionId].transferRxHistory.push(this.peersPersist[connectionId].transferRxCurrent);
           this.peersPersist[connectionId].transferRxHistory.shift();
@@ -299,11 +301,28 @@ new Vue({
 
           this.peersPersist[connectionId].chartMax = Math.max(...this.peersPersist[connectionId].transferTxHistory, ...this.peersPersist[connectionId].transferRxHistory);
         }
-        this.peersPersist['root*root'].transferRxCurrent = totalRootRx - this.peersPersist['root*root'].transferRxPrevious;
-        this.peersPersist['root*root'].transferRxPrevious = totalRootRx;
-        this.peersPersist['root*root'].transferTxCurrent = totalRootTx - this.peersPersist['root*root'].transferTxPrevious;
-        this.peersPersist['root*root'].transferTxPrevious = totalRootTx;
+        if (!this.peersPersist['root*root']) {
+          this.peersPersist['root*root'] = {};
+          this.peersPersist['root*root'].transferRxHistory = Array(this.networkSeriesLength).fill(0);
+          this.peersPersist['root*root'].transferRxPrevious = totalRootRx;
+          this.peersPersist['root*root'].transferTxHistory = Array(this.networkSeriesLength).fill(0);
+          this.peersPersist['root*root'].transferTxPrevious = totalRootTx;
+          this.peersPersist['root*root'].transferRxCurrent = 0;
+          this.peersPersist['root*root'].transferTxCurrent = 0;
 
+          this.peersPersist['root*root'].chartOptions = {
+            ...this.chartOptions,
+            yaxis: {
+              ...this.chartOptions.yaxis,
+              max: () => this.peersPersist['root*root'].chartMax,
+            },
+          };
+        } else {
+          this.peersPersist['root*root'].transferRxCurrent = totalRootRx - this.peersPersist['root*root'].transferRxPrevious;
+          this.peersPersist['root*root'].transferRxPrevious = totalRootRx;
+          this.peersPersist['root*root'].transferTxCurrent = totalRootTx - this.peersPersist['root*root'].transferTxPrevious;
+          this.peersPersist['root*root'].transferTxPrevious = totalRootTx;
+        }
         this.peersPersist['root*root'].transferRxHistory.push(this.peersPersist['root*root'].transferRxCurrent);
         this.peersPersist['root*root'].transferRxHistory.shift();
 
@@ -312,6 +331,7 @@ new Vue({
 
         this.peersPersist['root*root'].chartMax = Math.max(...this.peersPersist['root*root'].transferTxHistory, ...this.peersPersist['root*root'].transferRxHistory);
 
+        this.peersPersist.prevTimeStamp = network.timestamp;
         this.networkSeriesRefresh += 1;
         // end append to network.connections
 
@@ -345,6 +365,7 @@ new Vue({
           delete network.connections[connectionId].transferTx;
           delete network.connections[connectionId].transferRx;
         });
+        delete network.timestamp;
         if (JSON.stringify(this.network) !== JSON.stringify(network)) {
           this.network = network;
           this.staticPeers = staticPeers;
