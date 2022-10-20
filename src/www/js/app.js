@@ -300,6 +300,8 @@ new Vue({
           this.peersPersist[connectionId].transferTxHistory.shift();
 
           this.peersPersist[connectionId].chartMax = Math.max(...this.peersPersist[connectionId].transferTxHistory, ...this.peersPersist[connectionId].transferRxHistory);
+
+          this.graphDisplayTraffic(connectionId);
         }
         if (!this.peersPersist['root*root']) {
           this.peersPersist['root*root'] = {};
@@ -330,6 +332,9 @@ new Vue({
         this.peersPersist['root*root'].transferTxHistory.shift();
 
         this.peersPersist['root*root'].chartMax = Math.max(...this.peersPersist['root*root'].transferTxHistory, ...this.peersPersist['root*root'].transferRxHistory);
+        // const lastTenAverage = array => array.slice(-10).reduce((a, b) => a + b) / array.slice(-10).length;
+        // detectedChange ||= Math.floor(lastTenAverage(this.peersPersist['root*root'].transferRxHistory)) > 0
+        //     || Math.floor(lastTenAverage(this.peersPersist['root*root'].transferTxHistory)) > 0;
 
         this.peersPersist.prevTimeStamp = network.timestamp;
         this.networkSeriesRefresh += 1;
@@ -381,6 +386,14 @@ new Vue({
         }
       });
 
+      if (this.initializedGraph && detectedChange) {
+        try {
+          this.graph.graphData(this.forceGraphComputed);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
       if (!this.initializedGraph) {
         try {
           this.graph = ForceGraph()(document.getElementById('graph'))
@@ -425,17 +438,10 @@ new Vue({
             this.peerConfigId = node.id;
           });
 
+          this.graph.graphData(this.forceGraphComputed);
           this.initializedGraph = true;
         } catch (e) {
           console.log('my error: ');
-          console.log(e);
-        }
-      }
-
-      if (detectedChange) {
-        try {
-          this.graph.graphData(this.forceGraphComputed);
-        } catch (e) {
           console.log(e);
         }
       }
@@ -1012,6 +1018,26 @@ new Vue({
       const { preSharedKey } = await this.api.getNewPreSharedKey();
       this.peerEditConnectionPreSharedKeys[connectionId] = preSharedKey;
       this.peerEditConnectionColorRefresh += 1;
+    },
+    graphDisplayTraffic(connectionId) {
+      if (!this.graph) return;
+      this.graph.graphData().links.forEach(link => {
+        let trafficBytes = 0;
+        if (link.source.id === 'root' && link.target.id === connectionId.replaceAll('root*', '')) {
+          trafficBytes = this.networkAverageTrafficCompute.tx[connectionId];
+        }
+        if (link.target.id === 'root' && link.source.id === connectionId.replaceAll('root*', '')) {
+          trafficBytes = this.networkAverageTrafficCompute.rx[connectionId];
+        }
+        const particleCount = Math.max(Math.log10(Math.max(trafficBytes / 1000000, 1)), trafficBytes > 0);
+        this.graphEmitParticles(link, particleCount);
+      });
+    },
+    async graphEmitParticles(link, particleCount) {
+      for (let i = 0; i < particleCount; i++) {
+        this.graph.emitParticle(link);
+        await new Promise(r => setTimeout(r, 1000 / particleCount));
+      }
     },
   },
   computed: {
@@ -1644,10 +1670,10 @@ new Vue({
     },
     networkAverageTrafficCompute() {
       const avgTraffic = { rx: { 'root*root': 0 }, tx: { 'root*root': 0 } };
-      const lastFiveAverage = array => array.slice(-5).reduce((a, b) => a + b) / array.slice(-5).length;
+      const lastTenAverage = array => array.slice(-10).reduce((a, b) => a + b) / array.slice(-10).length;
       for (const connectionId of Object.keys(this.network.connections)) {
-        avgTraffic.rx[connectionId] = Math.floor(lastFiveAverage(this.networkSeriesCompute.rx[connectionId].data));
-        avgTraffic.tx[connectionId] = Math.floor(lastFiveAverage(this.networkSeriesCompute.tx[connectionId].data));
+        avgTraffic.rx[connectionId] = Math.floor(lastTenAverage(this.networkSeriesCompute.rx[connectionId].data));
+        avgTraffic.tx[connectionId] = Math.floor(lastTenAverage(this.networkSeriesCompute.tx[connectionId].data));
         avgTraffic.rx['root*root'] += avgTraffic.tx[connectionId];
         avgTraffic.tx['root*root'] += avgTraffic.rx[connectionId];
       }
