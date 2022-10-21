@@ -54,7 +54,6 @@ new Vue({
     peerCreateAddress: '',
     peerCreatePreambleExpiration: (new Date()).getTime(),
     peerCreateMobility: '',
-    peerCreateNoAddress: false,
     peerCreateEndpoint: '',
     peerCreateScripts: {
       PreUp: { enabled: false, value: '' },
@@ -157,6 +156,16 @@ new Vue({
       },
     },
     peerEditConnectionColorRefresh: 0,
+
+    dialogId: null,
+    dialogPeerId: null,
+    dialogTitle: null,
+    dialogBody: null,
+    dialogLeftButton: null,
+    dialogLeftButtonClick: null,
+    dialogRightButton: null,
+    dialogRightButtonClick: null,
+    dialogRightButtonClasses: null,
 
     staticPeers: {},
     roamingPeers: {},
@@ -462,10 +471,8 @@ new Vue({
           this.peerCreateMobility = '';
           this.peerCreatePeerId = '';
           this.peerCreateAddress = '';
-          this.peerCreateNoAddress = true;
-          return;
+          this.prepDialog('cant-create-peer');
         }
-        this.peerCreateNoAddress = false;
       }
     },
     login(e) {
@@ -587,18 +594,17 @@ new Vue({
       WireGuardHelper.downloadPeerConfig(this.network, peerId);
     },
     toggleWireGuardNetworking() {
-      if (this.wireguardStatus === 'up' && this.wireguardToggleTo === 'disable') {
+      if (this.wireguardStatus === 'up') {
         this.wireguardStatus = 'unknown';
         this.api.wireguardDisable()
           .catch(err => alert(err.message || err.toString()))
           .finally(() => this.refresh().catch(console.error));
-      } else if (this.wireguardStatus === 'down' && this.wireguardToggleTo === 'enable') {
+      } else if (this.wireguardStatus === 'down') {
         this.wireguardStatus = 'unknown';
         this.api.wireguardEnable()
           .catch(err => alert(err.message || err.toString()))
           .finally(() => this.refresh().catch(console.error));
       }
-      this.wireguardToggleTo = null;
     },
     getConnectionId(peer1, peer2) {
       return WireGuardHelper.getConnectionId(peer1, peer2);
@@ -613,10 +619,8 @@ new Vue({
             this.peerCreatePreambleExpiration = expiration;
           } catch (e) {
             this.peerCreateMobility = '';
-            this.peerCreateNoAddress = true;
-            return;
+            this.prepDialog('cant-create-peer');
           }
-          this.peerCreateNoAddress = false;
         }
 
         this.peerCreateName = '';
@@ -1038,6 +1042,66 @@ new Vue({
         this.graph.emitParticle(link);
         await new Promise(r => setTimeout(r, 1000 / particleCount));
       }
+    },
+    prepDialog(dialogId) {
+      switch (dialogId) {
+        case 'network-toggle':
+          // eslint-disable-next-line no-case-declarations
+          const toggle = this.wireguardStatus === 'up' ? 'Disable' : 'Enable';
+          this.dialogTitle = `${toggle} the WireGuard Network`;
+          this.dialogBody = `Are you sure you want to ${toggle.toLowerCase()} the WireGuard Network?`;
+          this.dialogLeftButton = 'Cancel';
+          this.dialogLeftButtonClick = () => {
+            this.dialogId = null;
+          };
+          this.dialogRightButton = toggle;
+          this.dialogRightButtonClick = () => {
+            this.toggleWireGuardNetworking();
+            this.dialogId = null;
+          };
+          this.dialogRightButtonClasses = this.wireguardStatus === 'up' ? ['text-white', 'bg-red-600', 'hover:bg-red-700'] : ['text-white', 'bg-green-600', 'hover:bg-green-700'];
+          break;
+        case 'delete-peer':
+          this.dialogTitle = 'Delete Peer';
+          this.dialogLeftButton = 'Cancel';
+          this.dialogLeftButtonClick = () => {
+            this.dialogId = null;
+          };
+          this.dialogRightButton = 'Delete';
+          this.dialogRightButtonClick = () => {
+            this.deletePeer(this.dialogPeerId);
+            this.dialogId = null;
+          };
+          this.dialogRightButtonClasses = ['text-white', 'bg-red-600', 'hover:bg-red-700'];
+          break;
+        case 'cant-create-peer':
+          this.dialogTitle = 'Error while preparing peer creation window';
+          this.dialogBody = 'There are no addresses left to be reserved. A new peer can\'t be created until the reserved addresses pool is reset, or you have reached the peer limit.';
+          this.dialogLeftButton = 'Cancel';
+          this.dialogLeftButtonClick = () => {
+            this.dialogId = null;
+          };
+          this.dialogRightButton = null;
+          break;
+        case 'confirm-changes':
+          this.dialogBody = 'Are you sure you want to make these changes?';
+          this.dialogLeftButton = 'Cancel';
+          this.dialogLeftButtonClick = () => {
+            this.dialogId = null;
+          };
+          this.dialogRightButton = 'Do it!';
+          this.dialogRightButtonClick = () => {
+            this.peerConfigEditApply().then();
+            this.peerConfigId = null;
+            this.peerConfigWindow = 'edit';
+            this.dialogId = null;
+          };
+          this.dialogRightButtonClasses = ['text-white', 'bg-green-600', 'hover:bg-green-700'];
+          break;
+        default:
+          break;
+      }
+      this.dialogId = dialogId;
     },
   },
   computed: {
