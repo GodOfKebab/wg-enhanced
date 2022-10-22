@@ -1063,6 +1063,7 @@ new Vue({
           break;
         case 'delete-peer':
           this.dialogTitle = 'Delete Peer';
+          this.dialogBody = `Are you sure you want to delete <strong>${this.network.peers[this.dialogPeerId].name}</strong>? This action cannot be undone.`;
           this.dialogLeftButton = 'Cancel';
           this.dialogLeftButtonClick = () => {
             this.dialogId = null;
@@ -1084,6 +1085,7 @@ new Vue({
           this.dialogRightButton = null;
           break;
         case 'confirm-changes':
+          this.dialogTitle = `Confirm changes for <strong>${this.network.peers[this.peerConfigId].name}</strong>`;
           this.dialogBody = 'Are you sure you want to make these changes?';
           this.dialogLeftButton = 'Cancel';
           this.dialogLeftButtonClick = () => {

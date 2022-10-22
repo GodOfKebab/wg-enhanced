@@ -1195,20 +1195,8 @@
                     </svg>
                   </div>
                   <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 v-if="dialogId === 'confirm-changes'" class="text-lg leading-6 font-medium text-gray-900">
-                      Confirm changes for <strong>{{network.peers[peerConfigId].name}}</strong>
-                    </h3>
-                    <h3 v-else class="text-lg leading-6 font-medium text-gray-900">
-                      {{ dialogTitle }}
-                    </h3>
-                    <div class="mt-2">
-                      <p v-if="dialogId === 'delete-peer'" class="text-sm text-gray-500">
-                        Are you sure you want to delete <strong>{{ this.network.peers[this.dialogPeerId].name }}</strong>? This action cannot be undone.
-                      </p>
-                      <p v-else class="text-sm text-gray-500">
-                        {{ dialogBody }}
-                      </p>
-                    </div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" v-html="dialogTitle"></h3>
+                    <div class="mt-2 text-sm text-gray-500" v-html="dialogBody"></div>
 
                     <div v-if="dialogId === 'confirm-changes'" class="mt-2">
                       <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
