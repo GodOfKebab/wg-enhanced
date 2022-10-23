@@ -24,6 +24,73 @@ function bytes(bytes, decimals, kib, maxunit) {
 }
 
 Vue.config.debug = true; Vue.config.devtools = true;
+Vue.component('dnsmtu-island', {
+  props: ['peerCreateDnsmtuColor', 'peerCreateDns', 'peerCreateMtu', 'network'],
+  template: `<div class="my-2 p-1 shadow-md border rounded" :class="[peerCreateDnsmtuColor.div]">
+               <div class="text-gray-800 mb-0.5">
+                 Configure DNS and MTU:
+               </div>
+               <div class="flex grid grid-cols-2 gap-2 mb-0.5">
+                 <div class="truncate">
+                   <div class="form-check truncate relative" :class="[peerCreateDns.enabled !== false || peerCreateDns.value !== '' ? 'highlight-undo-box' : '']">
+                     <label>
+                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerCreateDns.enabled">
+                       <span class="text-gray-800 cursor-pointer text-xs">
+                         <strong class="text-sm">DNS: </strong>
+                       </span>
+                     </label>
+                     <input list="inputDNSListCreate" style="width: 25vw;" type="text" placeholder="click to see recommendations"
+                            class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
+                            v-model="peerCreateDns.value"
+                            :class="[peerCreateDnsmtuColor.dnsInput]"
+                            :disabled="!peerCreateDns.enabled"/>
+                     <datalist id="inputDNSListCreate">
+                       <option :value="network.peers.root.address">
+                         Forward all DNS related traffic to {{network.peers.root.address}}
+                       </option>
+                     </datalist>
+                     <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                       <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                               title="Undo Changes"
+                               :disabled="peerCreateDns.enabled === false && peerCreateDns.value === ''"
+                               @click="peerCreateDns.enabled = false; peerCreateDns.value = '';">
+                         <img class="w-4" :src="returnIconSrc"/>
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+                 <div class="truncate">
+                   <div class="form-check truncate relative" :class="[peerCreateMtu.enabled !== false || peerCreateMtu.value !== '' ? 'highlight-undo-box' : '']">
+                     <label>
+                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerCreateMtu.enabled">
+                       <span class="text-gray-800 cursor-pointer text-xs">
+                         <strong class="text-sm">MTU: </strong>
+                       </span>
+                     </label>
+                     <input list="inputMTUListCreate" style="width: 25vw;" type="text" placeholder="click to see recommendations"
+                            class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
+                            v-model="peerCreateMtu.value"
+                            :class="[peerCreateDnsmtuColor.mtuInput]"
+                            :disabled="!peerCreateMtu.enabled"/>
+                     <datalist id="inputMTUListCreate">
+                       <option :value="1420">
+                         TODO
+                       </option>
+                     </datalist>
+                     <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                       <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                               title="Undo Changes"
+                               :disabled="peerCreateMtu.enabled === false && peerCreateMtu.value === ''"
+                               @click="peerCreateMtu.enabled = false; peerCreateMtu.value = '';">
+                         <img class="w-4" :src="returnIconSrc"/>
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+`,
+});
 new Vue({
   el: '#app',
   components: {
