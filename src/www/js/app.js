@@ -25,53 +25,53 @@ function bytes(bytes, decimals, kib, maxunit) {
 
 Vue.config.debug = true; Vue.config.devtools = true;
 Vue.component('dnsmtu-island', {
-  props: ['peerCreateDnsmtuColor', 'peerCreateDns', 'peerCreateMtu', 'network'],
-  template: `<div class="my-2 p-1 shadow-md border rounded" :class="[peerCreateDnsmtuColor.div]">
+  props: ['dns', 'mtu', 'defaultDnsAddress', 'color'],
+  template: `<div class="my-2 p-1 shadow-md border rounded" :class="[color.div]">
                <div class="text-gray-800 mb-0.5">
                  Configure DNS and MTU:
                </div>
                <div class="flex grid grid-cols-2 gap-2 mb-0.5">
                  <div class="truncate">
-                   <div class="form-check truncate relative" :class="[peerCreateDns.enabled !== false || peerCreateDns.value !== '' ? 'highlight-undo-box' : '']">
+                   <div class="form-check truncate relative" :class="[dns.enabled !== false || dns.value !== '' ? 'highlight-undo-box' : '']">
                      <label>
-                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerCreateDns.enabled">
+                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="dns.enabled">
                        <span class="text-gray-800 cursor-pointer text-xs">
                          <strong class="text-sm">DNS: </strong>
                        </span>
                      </label>
                      <input list="inputDNSListCreate" style="width: 25vw;" type="text" placeholder="click to see recommendations"
                             class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
-                            v-model="peerCreateDns.value"
-                            :class="[peerCreateDnsmtuColor.dnsInput]"
-                            :disabled="!peerCreateDns.enabled"/>
+                            v-model="dns.value"
+                            :class="[color.dnsInput]"
+                            :disabled="!dns.enabled"/>
                      <datalist id="inputDNSListCreate">
-                       <option :value="network.peers.root.address">
-                         Forward all DNS related traffic to {{network.peers.root.address}}
+                       <option :value="defaultDnsAddress">
+                         Forward all DNS related traffic to {{defaultDnsAddress}}
                        </option>
                      </datalist>
                      <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                        <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                title="Undo Changes"
-                               :disabled="peerCreateDns.enabled === false && peerCreateDns.value === ''"
-                               @click="peerCreateDns.enabled = false; peerCreateDns.value = '';">
+                               :disabled="dns.enabled === false && dns.value === ''"
+                               @click="dns.enabled = false; dns.value = '';">
                          <img class="w-4" :src="returnIconSrc"/>
                        </button>
                      </div>
                    </div>
                  </div>
                  <div class="truncate">
-                   <div class="form-check truncate relative" :class="[peerCreateMtu.enabled !== false || peerCreateMtu.value !== '' ? 'highlight-undo-box' : '']">
+                   <div class="form-check truncate relative" :class="[mtu.enabled !== false || mtu.value !== '' ? 'highlight-undo-box' : '']">
                      <label>
-                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerCreateMtu.enabled">
+                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="mtu.enabled">
                        <span class="text-gray-800 cursor-pointer text-xs">
                          <strong class="text-sm">MTU: </strong>
                        </span>
                      </label>
                      <input list="inputMTUListCreate" style="width: 25vw;" type="text" placeholder="click to see recommendations"
                             class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
-                            v-model="peerCreateMtu.value"
-                            :class="[peerCreateDnsmtuColor.mtuInput]"
-                            :disabled="!peerCreateMtu.enabled"/>
+                            v-model="mtu.value"
+                            :class="[color.mtuInput]"
+                            :disabled="!mtu.enabled"/>
                      <datalist id="inputMTUListCreate">
                        <option :value="1420">
                          TODO
@@ -80,16 +80,166 @@ Vue.component('dnsmtu-island', {
                      <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                        <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                title="Undo Changes"
-                               :disabled="peerCreateMtu.enabled === false && peerCreateMtu.value === ''"
-                               @click="peerCreateMtu.enabled = false; peerCreateMtu.value = '';">
+                               :disabled="mtu.enabled === false && mtu.value === ''"
+                               @click="mtu.enabled = false; mtu.value = '';">
                          <img class="w-4" :src="returnIconSrc"/>
                        </button>
                      </div>
                    </div>
                  </div>
                </div>
-             </div>
-`,
+             </div>`,
+});
+Vue.component('scripts-island', {
+  props: ['scripts', 'color'],
+  template: `<div class="p-1 shadow-md border rounded" :class="[color.div]">
+               <div class="text-gray-800 mb-0.5">
+                 Configure Script Snippets:
+               </div>
+               <div v-for="scriptField in ['PreUp', 'PostUp', 'PreDown', 'PostDown']">
+                 <div class="form-check truncate flex items-center relative mb-0.5" :class="[scripts[scriptField].value !== '' || scripts[scriptField].enabled === true ? 'highlight-undo-box' : '']">
+                   <label class="flex-none">
+                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="scripts[scriptField].enabled = !scripts[scriptField].enabled;" :checked="scripts[scriptField].enabled">
+                     <span class="text-gray-800 cursor-pointer text-xs mr-1">
+                       <strong class="text-sm">{{ scriptField }}:</strong>
+                      </span>
+                   </label>
+                   <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
+                          type="text" :placeholder="\`\${scriptField} Script (e.g. echo 'Hey, this is \${scriptField} Script';)\`"
+                          v-model="scripts[scriptField].value"
+                          :class="[color[scriptField]]"
+                          :disabled="!scripts[scriptField].enabled"/>
+                   <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                     <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                             title="Undo Changes"
+                             :disabled="scripts[scriptField].value === '' && scripts[scriptField].enabled === false"
+                             @click="scripts[scriptField].value = ''; scripts[scriptField].enabled = false;">
+                       <img class="w-4" :src="returnIconSrc"/>
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             </div>`,
+});
+Vue.component('attached-peers-island', {
+  props: {
+    titles: Object,
+    staticPeers: Object,
+    roamingPeers: Object,
+    attachedStaticPeers: Array,
+    attachedRoamingPeers: Array,
+    isConnectionEnabledDict: Object,
+    color: String,
+  },
+  data() {
+    return {
+      attachedStaticPeersLocal: this.attachedStaticPeers,
+      attachedRoamingPeersLocal: this.attachedRoamingPeers,
+    };
+  },
+  created() {
+    this.attachedStaticPeersLocal = this.attachedStaticPeers;
+    this.attachedRoamingPeersLocal = this.attachedRoamingPeers;
+  },
+  template: `<div v-if="Object.keys(staticPeers).length + Object.keys(roamingPeers).length > 0"
+                class="my-2 p-1 shadow-md border rounded relative" :class="[color, JSON.stringify(attachedStaticPeersLocal) === JSON.stringify(['root']) && attachedRoamingPeersLocal.length === 0 ? '' : 'highlight-undo-box']">
+               <div v-if="Object.keys(staticPeers).length > 0">
+                 <div class="text-gray-800">
+                   {{ titles.static }}
+                 </div>
+                 <div class="form-check mt-1">
+                   <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
+                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="selectAllStaticPeers">
+                     <span>Select All</span>
+                   </label>
+                 </div>
+                 <div class="flex grid grid-cols-2">
+                   <div v-for="(peerDetails, peerId) in staticPeers"
+                        class="relative overflow-hidden">
+                     <div class="form-check truncate">
+                       <label>
+                         <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="attachedStaticPeersLocal" :value="peerId" @change="isConnectionEnabledDict[peerId] = true;">
+                         <span class="text-gray-800 cursor-pointer text-xs">
+                         <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
+                       </span>
+                       </label>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+               <div v-if="Object.keys(roamingPeers).length > 0">
+                 <div class="text-gray-800">
+                   {{ titles.roaming }}
+                 </div>
+                 <div class="form-check mt-1">
+                   <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
+                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer inline-block" type="checkbox" v-model="selectAllRoamingPeers">
+                     <span>Select All</span>
+                   </label>
+                 </div>
+                 <div class="flex grid grid-cols-2">
+                   <div v-for="(peerDetails, peerId) in roamingPeers"
+                        class="relative overflow-hidden">
+                     <div class="form-check truncate">
+                       <label>
+                         <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="attachedRoamingPeersLocal" :value="peerId" @change="isConnectionEnabledDict[peerId] = true;">
+                         <span class="text-gray-800 cursor-pointer text-xs">
+                         <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
+                       </span>
+                       </label>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+               <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                 <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                         title="Undo Changes"
+                         :disabled="JSON.stringify(attachedStaticPeersLocal) === JSON.stringify(['root']) && attachedRoamingPeersLocal.length === 0"
+                         @click="attachedStaticPeersLocal = ['root']; attachedRoamingPeersLocal = []">
+                   <img class="w-4" :src="returnIconSrc"/>
+                 </button>
+               </div>
+             </div>`,
+  computed: {
+    selectAllStaticPeers: {
+      get() {
+        return this.staticPeers ? Object.keys(this.staticPeers).length === this.attachedStaticPeersLocal.length : false;
+      },
+      set(value) {
+        const attached = [];
+
+        if (value) {
+          Object.keys(this.staticPeers).forEach(peerId => {
+            attached.push(peerId);
+            if (!(peerId in this.attachedStaticPeersLocal)) {
+              this.isConnectionEnabledDict[peerId] = true;
+            }
+          });
+        }
+
+        this.attachedStaticPeersLocal = attached;
+      },
+    },
+    selectAllRoamingPeers: {
+      get() {
+        return this.roamingPeers ? Object.keys(this.roamingPeers).length === this.attachedRoamingPeersLocal.length : false;
+      },
+      set(value) {
+        const attached = [];
+
+        if (value) {
+          Object.keys(this.roamingPeers).forEach(peerId => {
+            attached.push(peerId);
+            if (!(peerId in this.attachedRoamingPeersLocal)) {
+              this.isConnectionEnabledDict[peerId] = true;
+            }
+          });
+        }
+
+        this.attachedRoamingPeersLocal = attached;
+      },
+    },
+  },
 });
 new Vue({
   el: '#app',
@@ -1204,44 +1354,6 @@ new Vue({
               || (this.peerCreateScripts.PreDown.enabled && this.peerCreateAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
               || (this.peerCreateScripts.PostDown.enabled && this.peerCreateAssignedColor.scripts.PostDown === 'enabled:bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       return this.peerCreateAssignedColor.scripts;
-    },
-    peerCreateStaticSelectAll: {
-      get() {
-        return this.staticPeers ? Object.keys(this.staticPeers).length === this.peerCreateAttachedStaticPeerIds.length : false;
-      },
-      set(value) {
-        const attached = [];
-
-        if (value) {
-          Object.keys(this.staticPeers).forEach(peerId => {
-            attached.push(peerId);
-            if (!(peerId in this.peerCreateAttachedStaticPeerIds)) {
-              this.peerCreateIsConnectionEnabled[peerId] = true;
-            }
-          });
-        }
-
-        this.peerCreateAttachedStaticPeerIds = attached;
-      },
-    },
-    peerCreateRoamingSelectAll: {
-      get() {
-        return this.roamingPeers ? Object.keys(this.roamingPeers).length === this.peerCreateAttachedRoamingPeerIds.length : false;
-      },
-      set(value) {
-        const attached = [];
-
-        if (value) {
-          Object.keys(this.roamingPeers).forEach(peerId => {
-            attached.push(peerId);
-            if (!(peerId in this.peerCreateAttachedRoamingPeerIds)) {
-              this.peerCreateIsConnectionEnabled[peerId] = true;
-            }
-          });
-        }
-
-        this.peerCreateAttachedRoamingPeerIds = attached;
-      },
     },
     peerCreateAttachedPeersCountDivColor() {
       this.peerCreateAssignedColor.connections.attachedPeerCountDiv = WireGuardHelper.checkField('peerCount', this.peerCreateAttachedStaticPeerIds) || WireGuardHelper.checkField('peerCount', this.peerCreateAttachedRoamingPeerIds) ? 'bg-green-50' : 'bg-red-50';
