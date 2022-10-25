@@ -25,63 +25,68 @@ function bytes(bytes, decimals, kib, maxunit) {
 
 Vue.config.debug = true; Vue.config.devtools = true;
 Vue.component('dnsmtu-island', {
-  props: ['dns', 'mtu', 'defaultDnsAddress', 'color'],
-  template: `<div class="my-2 p-1 shadow-md border rounded" :class="[color.div]">
+  props: {
+    value: {
+      type: Object,
+    },
+  },
+  emits: ['update:value'],
+  template: `<div class="my-2 p-1 shadow-md border rounded" :class="[colors.div]">
                <div class="text-gray-800 mb-0.5">
                  Configure DNS and MTU:
                </div>
                <div class="flex grid grid-cols-2 gap-2 mb-0.5">
                  <div class="truncate">
-                   <div class="form-check truncate relative" :class="[dns.enabled !== false || dns.value !== '' ? 'highlight-undo-box' : '']">
+                   <div class="form-check truncate relative" :class="[value.dns.enabled !== value.defaults.dns.enabled || value.dns.value !== value.defaults.dns.value ? 'highlight-undo-box' : '']">
                      <label>
-                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="dns.enabled">
+                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="value.dns.enabled">
                        <span class="text-gray-800 cursor-pointer text-xs">
                          <strong class="text-sm">DNS: </strong>
                        </span>
                      </label>
                      <input list="inputDNSListCreate" style="width: 25vw;" type="text" placeholder="click to see recommendations"
                             class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
-                            v-model="dns.value"
-                            :class="[color.dnsInput]"
-                            :disabled="!dns.enabled"/>
+                            v-model="value.dns.value"
+                            :class="[\`enabled:\${colors.dnsInput}\`]"
+                            :disabled="!value.dns.enabled"/>
                      <datalist id="inputDNSListCreate">
-                       <option :value="defaultDnsAddress">
-                         Forward all DNS related traffic to {{defaultDnsAddress}}
+                       <option :value="value.defaults.dns.value">
+                         Forward all DNS related traffic to {{ value.defaults.dns.value }}
                        </option>
                      </datalist>
                      <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                        <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                title="Undo Changes"
-                               :disabled="dns.enabled === false && dns.value === ''"
-                               @click="dns.enabled = false; dns.value = '';">
+                               :disabled="value.dns.enabled === value.defaults.dns.enabled && value.dns.value === value.defaults.dns.value"
+                               @click="value.dns.enabled = value.defaults.dns.enabled; value.dns.value = value.defaults.dns.value;">
                          <img class="w-4" :src="returnIconSrc"/>
                        </button>
                      </div>
                    </div>
                  </div>
                  <div class="truncate">
-                   <div class="form-check truncate relative" :class="[mtu.enabled !== false || mtu.value !== '' ? 'highlight-undo-box' : '']">
+                   <div class="form-check truncate relative" :class="[value.mtu.enabled !== value.defaults.mtu.enabled || value.mtu.value !== value.defaults.mtu.value ? 'highlight-undo-box' : '']">
                      <label>
-                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="mtu.enabled">
+                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="value.mtu.enabled">
                        <span class="text-gray-800 cursor-pointer text-xs">
                          <strong class="text-sm">MTU: </strong>
                        </span>
                      </label>
                      <input list="inputMTUListCreate" style="width: 25vw;" type="text" placeholder="click to see recommendations"
                             class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
-                            v-model="mtu.value"
-                            :class="[color.mtuInput]"
-                            :disabled="!mtu.enabled"/>
+                            v-model="value.mtu.value"
+                            :class="[\`enabled:\${colors.mtuInput}\`]"
+                            :disabled="!value.mtu.enabled"/>
                      <datalist id="inputMTUListCreate">
-                       <option :value="1420">
-                         TODO
+                       <option :value="value.defaults.mtu.value">
+                         Set MTU to {{ value.defaults.mtu.value }}
                        </option>
                      </datalist>
                      <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                        <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                title="Undo Changes"
-                               :disabled="mtu.enabled === false && mtu.value === ''"
-                               @click="mtu.enabled = false; mtu.value = '';">
+                               :disabled="value.mtu.enabled === value.defaults.mtu.enabled && value.mtu.value === value.defaults.mtu.value"
+                               @click="value.mtu.enabled = value.defaults.mtu.enabled; value.mtu.value = value.defaults.mtu.value;">
                          <img class="w-4" :src="returnIconSrc"/>
                        </button>
                      </div>
@@ -89,37 +94,74 @@ Vue.component('dnsmtu-island', {
                  </div>
                </div>
              </div>`,
+  computed: {
+    colors() {
+      const colors = {
+        dnsInput: WireGuardHelper.checkField('dns', { enabled: true, value: this.value.dns.value }) ? 'bg-green-200' : 'bg-red-200',
+        mtuInput: WireGuardHelper.checkField('mtu', { enabled: true, value: this.value.mtu.value }) ? 'bg-green-200' : 'bg-red-200',
+      };
+      // eslint-disable-next-line no-nested-ternary
+      colors.div = this.value.dns.enabled || this.value.mtu.enabled ? ((this.value.dns.enabled && colors.dnsInput === 'bg-red-200') || (this.value.mtu.enabled && colors.mtuInput === 'bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      this.value.hasError = colors.div === 'bg-red-50';
+      return colors;
+    },
+  },
 });
 Vue.component('scripts-island', {
-  props: ['scripts', 'color'],
-  template: `<div class="p-1 shadow-md border rounded" :class="[color.div]">
+  props: {
+    value: {
+      type: Object,
+    },
+  },
+  template: `<div class="p-1 shadow-md border rounded" :class="[colors.div]">
                <div class="text-gray-800 mb-0.5">
                  Configure Script Snippets:
                </div>
                <div v-for="scriptField in ['PreUp', 'PostUp', 'PreDown', 'PostDown']">
-                 <div class="form-check truncate flex items-center relative mb-0.5" :class="[scripts[scriptField].value !== '' || scripts[scriptField].enabled === true ? 'highlight-undo-box' : '']">
+                 <div class="form-check truncate flex items-center relative mb-0.5" :class="[value[scriptField].enabled !== value.defaults[scriptField].enabled || value[scriptField].value !== value.defaults[scriptField].value ? 'highlight-undo-box' : '']">
                    <label class="flex-none">
-                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="scripts[scriptField].enabled = !scripts[scriptField].enabled;" :checked="scripts[scriptField].enabled">
+                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="value[scriptField].enabled = !value[scriptField].enabled;" :checked="value[scriptField].enabled">
                      <span class="text-gray-800 cursor-pointer text-xs mr-1">
                        <strong class="text-sm">{{ scriptField }}:</strong>
                       </span>
                    </label>
                    <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
                           type="text" :placeholder="\`\${scriptField} Script (e.g. echo 'Hey, this is \${scriptField} Script';)\`"
-                          v-model="scripts[scriptField].value"
-                          :class="[color[scriptField]]"
-                          :disabled="!scripts[scriptField].enabled"/>
+                          v-model="value[scriptField].value"
+                          :class="[\`enabled:\${colors[scriptField]}\`]"
+                          :disabled="!value[scriptField].enabled"/>
                    <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
                      <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                              title="Undo Changes"
-                             :disabled="scripts[scriptField].value === '' && scripts[scriptField].enabled === false"
-                             @click="scripts[scriptField].value = ''; scripts[scriptField].enabled = false;">
+                             :disabled="value[scriptField].enabled === value.defaults[scriptField].enabled && value[scriptField].value === value.defaults[scriptField].value"
+                             @click="value[scriptField].enabled = value.defaults[scriptField].enabled; value[scriptField].value = value.defaults[scriptField].value;">
                        <img class="w-4" :src="returnIconSrc"/>
                      </button>
                    </div>
                  </div>
                </div>
              </div>`,
+  computed: {
+    colors() {
+      const colors = {
+        PreUp: WireGuardHelper.checkField('script', this.value.PreUp) ? 'bg-green-200' : 'bg-red-200',
+        PostUp: WireGuardHelper.checkField('script', this.value.PostUp) ? 'bg-green-200' : 'bg-red-200',
+        PreDown: WireGuardHelper.checkField('script', this.value.PreDown) ? 'bg-green-200' : 'bg-red-200',
+        PostDown: WireGuardHelper.checkField('script', this.value.PostDown) ? 'bg-green-200' : 'bg-red-200',
+      };
+      // eslint-disable-next-line no-nested-ternary
+      colors.div = (this.value.PreUp.enabled
+        || this.value.PostUp.enabled
+        || this.value.PreDown.enabled
+        || this.value.PostDown.enabled)
+        ? (((this.value.PreUp.enabled && colors.PreUp === 'bg-red-200')
+            || (this.value.PostUp.enabled && colors.PostUp === 'bg-red-200')
+            || (this.value.PreDown.enabled && colors.PreDown === 'bg-red-200')
+            || (this.value.PostDown.enabled && colors.PostDown === 'bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      this.value.hasError = colors.div === 'bg-red-50';
+      return colors;
+    },
+  },
 });
 Vue.component('peer-selection-islands', {
   props: {
@@ -261,6 +303,41 @@ new Vue({
     peerConfigId: null,
     peerConfigWindow: 'edit',
     peerQRId: null,
+
+    dnsmtuIslandData: {
+      dns: {
+        enabled: false,
+        value: '',
+      },
+      mtu: {
+        enabled: false,
+        value: '',
+      },
+      defaults: {
+        dns: {
+          enabled: true,
+          value: '1.1.1.1',
+        },
+        mtu: {
+          enabled: true,
+          value: '1420',
+        },
+      },
+      hasError: false,
+    },
+    scriptsIslandData: {
+      PreUp: { enabled: false, value: '' },
+      PostUp: { enabled: false, value: '' },
+      PreDown: { enabled: false, value: '' },
+      PostDown: { enabled: false, value: '' },
+      defaults: {
+        PreUp: { enabled: false, value: '' },
+        PostUp: { enabled: false, value: '' },
+        PreDown: { enabled: false, value: '' },
+        PostDown: { enabled: false, value: '' },
+      },
+      hasError: false,
+    },
 
     peerCreatePeerId: '',
     peerCreateName: '',

@@ -457,13 +457,17 @@
                           </div>
                         </div>
 
-                        <dnsmtu-island :dns="peerCreateDNS"
-                                       :mtu="peerCreateMTU"
-                                       :default-dns-address="network.peers.root.address"
-                                       :color="peerCreateDNSMTUColor"></dnsmtu-island>
+<!--                        <dnsmtu-island :dns="peerCreateDNS"-->
+<!--                                       :mtu="peerCreateMTU"-->
+<!--                                       :default-dns-address="network.peers.root.address"-->
+<!--                                       :color="peerCreateDNSMTUColor"></dnsmtu-island>-->
+                        <dnsmtu-island v-model="dnsmtuIslandData"></dnsmtu-island>
+<!--                        <span> {{ JSON.stringify(dnsmtuIslandData, false, 2) }} </span>-->
 
-                        <scripts-island :scripts="peerCreateScripts"
-                                        :color="peerCreateScriptsColor"></scripts-island>
+<!--                        <scripts-island :scripts="peerCreateScripts"-->
+<!--                                        :color="peerCreateScriptsColor"></scripts-island>-->
+                        <scripts-island v-model="scriptsIslandData"></scripts-island>
+<!--                        <span> {{ JSON.stringify(scriptsIslandData, false, 2) }} </span>-->
 
                         <peer-selection-islands :titles="{ static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' }"
                                                :static-peers="staticPeers"
