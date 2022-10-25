@@ -160,7 +160,7 @@
                 <p class="text-2xl font-medium">{{ mobility[0].toUpperCase() + mobility.slice(1) }} Peers</p>
               </div>
               <div class="flex-shrink-0">
-                <button @click="peerCreateWindowHandler('init').then(); peerCreateMobility = mobility;"
+                <button @click="peerCreateWindowHandler('init').then(() => peerCreateMobility = mobility);"
                         class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition"
                         :disabled="webServerStatus !== 'up'">
                   <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -355,7 +355,7 @@
               </div>
               <div v-else-if="Object.keys(mobility === 'static' ? staticPeers : roamingPeers).length === 0">
                 <p class="text-center m-10 text-gray-400 text-sm">There are no {{ mobility }} peers yet.<br /><br />
-                <button @click="peerCreateWindowHandler('init').then(); peerCreateMobility = mobility;"
+                <button @click="peerCreateWindowHandler('init').then(() => peerCreateMobility = mobility);"
                         class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition" :disabled="webServerStatus !== 'up'">
                   <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                        stroke="currentColor">
@@ -465,13 +465,13 @@
                         <scripts-island :scripts="peerCreateScripts"
                                         :color="peerCreateScriptsColor"></scripts-island>
 
-                        <attached-peers-island :titles="{ static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' }"
+                        <peer-selection-islands :titles="{ static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' }"
                                                :static-peers="staticPeers"
                                                :roaming-peers="roamingPeers"
                                                :attached-static-peers="peerCreateAttachedStaticPeerIds"
                                                :attached-roaming-peers="peerCreateAttachedRoamingPeerIds"
                                                :is-connection-enabled-dict="peerCreateIsConnectionEnabled"
-                                               :color="peerCreateAttachedPeersCountDivColor"></attached-peers-island>
+                                               :color="peerCreateAttachedPeersCountDivColor"></peer-selection-islands>
 
 <!--                  :select-all-static-peers="peerCreateStaticSelectAll"      <div v-if="Object.keys(network.peers).length > 0"-->
 <!--                             class="my-2 p-1 shadow-md border rounded relative" :class="[peerCreateAttachedPeersCountDivColor, JSON.stringify(peerCreateAttachedStaticPeerIds) === JSON.stringify(['root']) && peerCreateAttachedRoamingPeerIds.length === 0 ? '' : 'highlight-undo-box']">-->

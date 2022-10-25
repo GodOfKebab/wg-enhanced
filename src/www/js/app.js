@@ -121,7 +121,7 @@ Vue.component('scripts-island', {
                </div>
              </div>`,
 });
-Vue.component('attached-peers-island', {
+Vue.component('peer-selection-islands', {
   props: {
     titles: Object,
     staticPeers: Object,
@@ -136,10 +136,6 @@ Vue.component('attached-peers-island', {
       attachedStaticPeersLocal: this.attachedStaticPeers,
       attachedRoamingPeersLocal: this.attachedRoamingPeers,
     };
-  },
-  created() {
-    this.attachedStaticPeersLocal = this.attachedStaticPeers;
-    this.attachedRoamingPeersLocal = this.attachedRoamingPeers;
   },
   template: `<div v-if="Object.keys(staticPeers).length + Object.keys(roamingPeers).length > 0"
                 class="my-2 p-1 shadow-md border rounded relative" :class="[color, JSON.stringify(attachedStaticPeersLocal) === JSON.stringify(['root']) && attachedRoamingPeersLocal.length === 0 ? '' : 'highlight-undo-box']">
