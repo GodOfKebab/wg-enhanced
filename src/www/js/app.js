@@ -44,12 +44,12 @@ Vue.component('dnsmtu-island', {
                          <strong class="text-sm">DNS: </strong>
                        </span>
                      </label>
-                     <input list="inputDNSListCreate" style="width: 25vw;" type="text" placeholder="click to see recommendations"
+                     <input list="inputDNSList" style="width: 25vw;" type="text" placeholder="click to see recommendations"
                             class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
                             v-model="value.dns.value"
                             :class="[\`enabled:\${colors.dnsInput}\`]"
                             :disabled="!value.dns.enabled"/>
-                     <datalist id="inputDNSListCreate">
+                     <datalist id="inputDNSList">
                        <option :value="value.defaults.dns.value">
                          Forward all DNS related traffic to {{ value.defaults.dns.value }}
                        </option>
@@ -72,12 +72,12 @@ Vue.component('dnsmtu-island', {
                          <strong class="text-sm">MTU: </strong>
                        </span>
                      </label>
-                     <input list="inputMTUListCreate" style="width: 25vw;" type="text" placeholder="click to see recommendations"
+                     <input list="inputMTUList" style="width: 25vw;" type="text" placeholder="click to see recommendations"
                             class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
                             v-model="value.mtu.value"
                             :class="[\`enabled:\${colors.mtuInput}\`]"
                             :disabled="!value.mtu.enabled"/>
-                     <datalist id="inputMTUListCreate">
+                     <datalist id="inputMTUList">
                        <option :value="value.defaults.mtu.value">
                          Set MTU to {{ value.defaults.mtu.value }}
                        </option>
@@ -163,119 +163,176 @@ Vue.component('scripts-island', {
     },
   },
 });
-Vue.component('peer-selection-islands', {
+Vue.component('connection-islands', {
   props: {
-    titles: Object,
-    staticPeers: Object,
-    roamingPeers: Object,
-    attachedStaticPeers: Array,
-    attachedRoamingPeers: Array,
-    isConnectionEnabledDict: Object,
-    color: String,
+    value: Object,
+    focusPeerId: String,
+    focusPeerName: String,
   },
-  data() {
-    return {
-      attachedStaticPeersLocal: this.attachedStaticPeers,
-      attachedRoamingPeersLocal: this.attachedRoamingPeers,
-    };
-  },
-  template: `<div v-if="Object.keys(staticPeers).length + Object.keys(roamingPeers).length > 0"
-                class="my-2 p-1 shadow-md border rounded relative" :class="[color, JSON.stringify(attachedStaticPeersLocal) === JSON.stringify(['root']) && attachedRoamingPeersLocal.length === 0 ? '' : 'highlight-undo-box']">
-               <div v-if="Object.keys(staticPeers).length > 0">
-                 <div class="text-gray-800">
-                   {{ titles.static }}
-                 </div>
-                 <div class="form-check mt-1">
-                   <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="selectAllStaticPeers">
-                     <span>Select All</span>
-                   </label>
-                 </div>
-                 <div class="flex grid grid-cols-2">
-                   <div v-for="(peerDetails, peerId) in staticPeers"
-                        class="relative overflow-hidden">
-                     <div class="form-check truncate">
-                       <label>
-                         <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="attachedStaticPeersLocal" :value="peerId" @change="isConnectionEnabledDict[peerId] = true;">
-                         <span class="text-gray-800 cursor-pointer text-xs">
-                         <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
-                       </span>
-                       </label>
+  template: `<div v-if="Object.keys(value.staticPeers).length + Object.keys(value.roamingPeers).length > 0">
+               <div class="my-2 p-1 shadow-md border rounded relative" :class="[selectPeersDivColor, JSON.stringify(value.attachedStaticPeers) === JSON.stringify(['root']) && value.attachedRoamingPeers.length === 0 ? '' : 'highlight-undo-box']">
+                 <div v-if="Object.keys(value.staticPeers).length > 0">
+                   <div class="text-gray-800">
+                     {{ value.selectionBoxTitles.static }}
+                   </div>
+                   <div class="form-check mt-1">
+                     <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
+                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="selectAllStaticPeers">
+                       <span>Select All</span>
+                     </label>
+                   </div>
+                   <div class="flex grid grid-cols-2">
+                     <div v-for="(peerDetails, peerId) in value.staticPeers"
+                          class="relative overflow-hidden">
+                       <div class="form-check truncate">
+                         <label>
+                           <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="value.attachedStaticPeers" :value="peerId" @change="value.isConnectionEnabled[peerId] = true;">
+                           <span class="text-gray-800 cursor-pointer text-xs">
+                           <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
+                         </span>
+                         </label>
+                       </div>
                      </div>
                    </div>
                  </div>
-               </div>
-               <div v-if="Object.keys(roamingPeers).length > 0">
-                 <div class="text-gray-800">
-                   {{ titles.roaming }}
-                 </div>
-                 <div class="form-check mt-1">
-                   <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer inline-block" type="checkbox" v-model="selectAllRoamingPeers">
-                     <span>Select All</span>
-                   </label>
-                 </div>
-                 <div class="flex grid grid-cols-2">
-                   <div v-for="(peerDetails, peerId) in roamingPeers"
-                        class="relative overflow-hidden">
-                     <div class="form-check truncate">
-                       <label>
-                         <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="attachedRoamingPeersLocal" :value="peerId" @change="isConnectionEnabledDict[peerId] = true;">
-                         <span class="text-gray-800 cursor-pointer text-xs">
-                         <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
-                       </span>
-                       </label>
+                 <div v-if="Object.keys(value.roamingPeers).length > 0">
+                   <div class="text-gray-800">
+                     {{ value.selectionBoxTitles.roaming }}
+                   </div>
+                   <div class="form-check mt-1">
+                     <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
+                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer inline-block" type="checkbox" v-model="selectAllRoamingPeers">
+                       <span>Select All</span>
+                     </label>
+                   </div>
+                   <div class="flex grid grid-cols-2">
+                     <div v-for="(peerDetails, peerId) in value.roamingPeers"
+                          class="relative overflow-hidden">
+                       <div class="form-check truncate">
+                         <label>
+                           <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="value.attachedRoamingPeers" :value="peerId" @change="value.isConnectionEnabled[peerId] = true;">
+                           <span class="text-gray-800 cursor-pointer text-xs">
+                           <strong class="text-sm">{{ peerDetails.name }}</strong> {{ peerDetails.address }} ({{ peerId }})
+                         </span>
+                         </label>
+                       </div>
                      </div>
                    </div>
                  </div>
+                 <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                   <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                           title="Undo Changes"
+                           :disabled="JSON.stringify(value.attachedStaticPeers) === JSON.stringify(['root']) && value.attachedRoamingPeers.length === 0"
+                           @click="value.attachedStaticPeers = ['root']; value.attachedRoamingPeers = []">
+                     <img class="w-4" :src="returnIconSrc"/>
+                   </button>
+                 </div>
                </div>
-               <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                 <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                         title="Undo Changes"
-                         :disabled="JSON.stringify(attachedStaticPeersLocal) === JSON.stringify(['root']) && attachedRoamingPeersLocal.length === 0"
-                         @click="attachedStaticPeersLocal = ['root']; attachedRoamingPeersLocal = []">
-                   <img class="w-4" :src="returnIconSrc"/>
-                 </button>
+               
+               <div v-for="(peerDetails, peerId) in Object.assign({}, value.staticPeers, value.roamingPeers)" class="relative">
+                 <div v-if="value.attachedStaticPeers.includes(peerId) || value.attachedRoamingPeers.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap highlight-remove-box" :class="[false ? '' : 'highlight-undo-box']">
+                   <div class="inline-block float-right absolute z-20 right-[0.5rem] top-[0.25rem]">
+                     <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition remove-button-itself"
+                             title="Remove Connection" @click="value.attachedStaticPeers.includes(peerId) ? value.attachedStaticPeers.splice(value.attachedStaticPeers.indexOf(peerId), 1) : value.attachedRoamingPeers.splice(value.attachedRoamingPeers.indexOf(peerId), 1)">
+                       <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                         <path fill-rule="evenodd"
+                               d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                               clip-rule="evenodd" />
+                       </svg>
+                     </button>
+                   </div>
+                   <div class="inline-block float-right absolute z-20 right-[2.25rem] top-[0.25rem]">
+                     <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                             title="Undo Changes"
+                             @click=""
+                             :disabled="false">
+                       <img class="w-4" :src="returnIconSrc"/>
+                     </button>
+                   </div>
+                   <div class=" ml-1">
+                     <div class="form-check">
+                       <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
+                         <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox"  v-model="value.isConnectionEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)]">
+                         <span class="text-gray-800 text-xs">
+                           <strong class="text-sm">{{ peerDetails.name }}</strong>
+                           {{ peerDetails.address }}
+                           ({{ peerId }})
+                         </span>
+                       </label>
+                     </div>
+                   </div>
+                   <div v-show="value.isConnectionEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)]">
+                     <div class="relative text-gray-800 text-xs mx-6">
+                       <div class="text-xs flex items-center">
+                         <label class="flex items-center">
+                           <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer inline-block" type="checkbox" v-model="value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled">
+                           <span class="text-gray-800 cursor-pointer text-xs mr-1">
+                           <strong>Persistent Keepalive:</strong>
+                         </span>
+                         </label>
+                         <input class="text-gray-800 text-xs mr-1 mt-1 rounded-md pl-1 inline-block" v-model="value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].value" type="string" :disabled="!value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled" :class="[value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled ? 'bg-blue-50' : 'bg-gray-100']">
+                       </div>
+                       
+                       <div class="relative text-gray-800 text-xs mx-6">
+                         <div class="mt-1 flex items-center">
+                           <span class="flex-none"><strong>{{ focusPeerName }}</strong> will forward IP subnet(s)</span>
+                           <input v-if="WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="['bg-blue-50']">
+                           <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="['bg-blue-50']">
+                           <span class="flex-none pr-2"> to <strong>{{ peerDetails.name }}</strong></span>
+                         </div>
+                         <div class="mt-1 flex">
+                           <span class="flex-none"><strong>{{ peerDetails.name }}</strong> will forward IP subnet(s)</span>
+                           <input v-if="!WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="['bg-blue-50']">
+                           <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="['bg-blue-50']">
+                           <span class="flex-none pr-2"> to <strong>{{ focusPeerName }}</strong></span>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
                </div>
              </div>`,
   computed: {
     selectAllStaticPeers: {
       get() {
-        return this.staticPeers ? Object.keys(this.staticPeers).length === this.attachedStaticPeersLocal.length : false;
+        return this.value.staticPeers ? Object.keys(this.value.staticPeers).length === this.value.attachedStaticPeers.length : false;
       },
       set(value) {
         const attached = [];
 
         if (value) {
-          Object.keys(this.staticPeers).forEach(peerId => {
+          Object.keys(this.value.staticPeers).forEach(peerId => {
             attached.push(peerId);
-            if (!(peerId in this.attachedStaticPeersLocal)) {
-              this.isConnectionEnabledDict[peerId] = true;
+            if (!(peerId in this.value.attachedStaticPeers)) {
+              this.value.isConnectionEnabled[peerId] = true;
             }
           });
         }
 
-        this.attachedStaticPeersLocal = attached;
+        this.value.attachedStaticPeers = attached;
       },
     },
     selectAllRoamingPeers: {
       get() {
-        return this.roamingPeers ? Object.keys(this.roamingPeers).length === this.attachedRoamingPeersLocal.length : false;
+        return this.value.roamingPeers ? Object.keys(this.value.roamingPeers).length === this.value.attachedRoamingPeers.length : false;
       },
       set(value) {
         const attached = [];
 
         if (value) {
-          Object.keys(this.roamingPeers).forEach(peerId => {
+          Object.keys(this.value.roamingPeers).forEach(peerId => {
             attached.push(peerId);
-            if (!(peerId in this.attachedRoamingPeersLocal)) {
-              this.isConnectionEnabledDict[peerId] = true;
+            if (!(peerId in this.value.attachedRoamingPeers)) {
+              this.value.isConnectionEnabled[peerId] = true;
             }
           });
         }
 
-        this.attachedRoamingPeersLocal = attached;
+        this.value.attachedRoamingPeers = attached;
       },
+    },
+    selectPeersDivColor() {
+      return WireGuardHelper.checkField('peerCount', this.value.attachedStaticPeers.concat(this.value.attachedRoamingPeers)) ? 'bg-green-50' : 'bg-red-50';
     },
   },
 });
@@ -335,6 +392,26 @@ new Vue({
         PostUp: { enabled: false, value: '' },
         PreDown: { enabled: false, value: '' },
         PostDown: { enabled: false, value: '' },
+      },
+      hasError: false,
+    },
+    connectionIslandsData: {
+      selectionBoxTitles: { static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' },
+      staticPeers: {},
+      roamingPeers: {},
+      attachedStaticPeers: [],
+      attachedRoamingPeers: [],
+      isConnectionEnabled: {},
+      persistentKeepalive: {},
+      allowedIPsAtoB: {},
+      allowedIPsBtoA: {},
+      defaults: {
+        attachedStaticPeers: {},
+        attachedRoamingPeers: {},
+        isConnectionEnabled: {},
+        persistentKeepalive: {},
+        allowedIPsAtoB: {},
+        allowedIPsBtoA: {},
       },
       hasError: false,
     },
@@ -917,27 +994,46 @@ new Vue({
         this.peerCreateEndpoint = '';
         this.peerCreateShowAdvance = false;
 
-        for (const peerId of Object.keys(this.staticPeers)) {
-          this.peerCreateAllowedIPsNewToOld[peerId] = this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0';
-          this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
-          this.peerCreatePersistentKeepaliveEnabledData[peerId] = this.network.defaults.connections.persistentKeepalive.enabled;
-          this.peerCreatePersistentKeepaliveValueData[peerId] = this.network.defaults.connections.persistentKeepalive.value;
-        }
-        for (const peerId of Object.keys(this.roamingPeers)) {
-          this.peerCreateAllowedIPsNewToOld[peerId] = `${this.network.peers[peerId].address}/32`;
-          this.peerCreateAllowedIPsOldToNew[peerId] = `${this.peerCreateAddress}/32`;
-          this.peerCreatePersistentKeepaliveEnabledData[peerId] = this.network.defaults.connections.persistentKeepalive.enabled;
-          this.peerCreatePersistentKeepaliveValueData[peerId] = this.network.defaults.connections.persistentKeepalive.value;
-        }
+        this.dnsmtuIslandData.defaults.dns = this.network.defaults.peers.dns;
+        this.dnsmtuIslandData.defaults.mtu = this.network.defaults.peers.mtu;
+        this.dnsmtuIslandData.dns = this.dnsmtuIslandData.defaults.dns;
+        this.dnsmtuIslandData.mtu = this.dnsmtuIslandData.defaults.mtu;
+        this.dnsmtuIslandData.hasError = false;
 
-        this.peerCreateDNS = this.network.defaults.peers.dns;
-        this.peerCreateMTU = this.network.defaults.peers.mtu;
-        this.peerCreateScripts = this.network.defaults.peers.scripts;
+        this.scriptsIslandData.defaults = this.network.defaults.peers.scripts;
+        this.scriptsIslandData.PreUp = this.scriptsIslandData.defaults.PreUp;
+        this.scriptsIslandData.PostUp = this.scriptsIslandData.defaults.PostUp;
+        this.scriptsIslandData.PreDown = this.scriptsIslandData.defaults.PreDown;
+        this.scriptsIslandData.PostDown = this.scriptsIslandData.defaults.PostDown;
+        this.scriptsIslandData.hasError = false;
 
+        this.connectionIslandsData.selectionBoxTitles = { static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' };
+        this.connectionIslandsData.staticPeers = this.staticPeers;
+        this.connectionIslandsData.roamingPeers = this.roamingPeers;
         // enable the root server as default
-        this.peerCreateAttachedStaticPeerIds = ['root'];
-        this.peerCreateAttachedRoamingPeerIds = [];
-        this.peerCreateIsConnectionEnabled['root'] = true;
+        this.connectionIslandsData.attachedStaticPeers = ['root'];
+        this.connectionIslandsData.attachedRoamingPeers = [];
+        this.connectionIslandsData.hasError = false;
+
+        for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
+          const connectionId = WireGuardHelper.getConnectionId(this.peerCreatePeerId, peerId);
+          const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+
+          this.connectionIslandsData.defaults.isConnectionEnabled[connectionId] = true;
+          this.connectionIslandsData.defaults.persistentKeepalive[connectionId] = {
+            enabled: this.network.defaults.connections.persistentKeepalive.enabled,
+            value: this.network.defaults.connections.persistentKeepalive.value,
+          };
+          // eslint-disable-next-line no-nested-ternary
+          const allowedIPsNewToOld = peerDetails.mobility === 'static' ? (this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0') : `${this.network.peers[peerId].address}/32`;
+          const allowedIPsOldToNew = `${this.peerCreateAddress}/32`;
+          this.connectionIslandsData.defaults.allowedIPsAtoB[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsOldToNew : allowedIPsNewToOld;
+          this.connectionIslandsData.defaults.allowedIPsBtoA[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsNewToOld : allowedIPsOldToNew;
+        }
+        this.connectionIslandsData.isConnectionEnabled = this.connectionIslandsData.defaults.isConnectionEnabled;
+        this.connectionIslandsData.persistentKeepalive = this.connectionIslandsData.defaults.persistentKeepalive;
+        this.connectionIslandsData.allowedIPsAtoB = this.connectionIslandsData.defaults.allowedIPsAtoB;
+        this.connectionIslandsData.allowedIPsBtoA = this.connectionIslandsData.defaults.allowedIPsBtoA;
       } else if (mode === 'delete-preamble') {
         await this.api.deletePreamble({ peerId: this.peerCreatePeerId, address: this.peerCreateAddress });
 
