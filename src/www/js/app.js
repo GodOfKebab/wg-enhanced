@@ -169,8 +169,13 @@ Vue.component('connection-islands', {
     focusPeerId: String,
     focusPeerName: String,
   },
+  data() {
+    return {
+      colorRefresh: 0,
+    };
+  },
   template: `<div v-if="Object.keys(value.staticPeers).length + Object.keys(value.roamingPeers).length > 0">
-               <div class="my-2 p-1 shadow-md border rounded relative" :class="[selectPeersDivColor, JSON.stringify(value.attachedStaticPeers) === JSON.stringify(['root']) && value.attachedRoamingPeers.length === 0 ? '' : 'highlight-undo-box']">
+               <div class="my-2 p-1 shadow-md border rounded relative" :class="[color.selectionDiv, JSON.stringify(value.attachedStaticPeers) === JSON.stringify(['root']) && value.attachedRoamingPeers.length === 0 ? '' : 'highlight-undo-box']">
                  <div v-if="Object.keys(value.staticPeers).length > 0">
                    <div class="text-gray-800">
                      {{ value.selectionBoxTitles.static }}
@@ -230,7 +235,7 @@ Vue.component('connection-islands', {
                </div>
                
                <div v-for="(peerDetails, peerId) in Object.assign({}, value.staticPeers, value.roamingPeers)" class="relative">
-                 <div v-if="value.attachedStaticPeers.includes(peerId) || value.attachedRoamingPeers.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap highlight-remove-box" :class="[false ? '' : 'highlight-undo-box']">
+                 <div v-if="value.attachedStaticPeers.includes(peerId) || value.attachedRoamingPeers.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap highlight-remove-box" :class="[color.attachedPeerDiv[WireGuardHelper.getConnectionId(focusPeerId, peerId)], false ? '' : 'highlight-undo-box']">
                    <div class="inline-block float-right absolute z-20 right-[0.5rem] top-[0.25rem]">
                      <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition remove-button-itself"
                              title="Remove Connection" @click="value.attachedStaticPeers.includes(peerId) ? value.attachedStaticPeers.splice(value.attachedStaticPeers.indexOf(peerId), 1) : value.attachedRoamingPeers.splice(value.attachedRoamingPeers.indexOf(peerId), 1)">
@@ -252,7 +257,7 @@ Vue.component('connection-islands', {
                    <div class=" ml-1">
                      <div class="form-check">
                        <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                         <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox"  v-model="value.isConnectionEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)]">
+                         <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox"  v-model="value.isConnectionEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" @change="colorRefresh += 1">
                          <span class="text-gray-800 text-xs">
                            <strong class="text-sm">{{ peerDetails.name }}</strong>
                            {{ peerDetails.address }}
@@ -265,25 +270,25 @@ Vue.component('connection-islands', {
                      <div class="relative text-gray-800 text-xs mx-6">
                        <div class="text-xs flex items-center">
                          <label class="flex items-center">
-                           <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer inline-block" type="checkbox" v-model="value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled">
+                           <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer inline-block" type="checkbox" v-model="value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled" @change="colorRefresh += 1">
                            <span class="text-gray-800 cursor-pointer text-xs mr-1">
                            <strong>Persistent Keepalive:</strong>
                          </span>
                          </label>
-                         <input class="text-gray-800 text-xs mr-1 mt-1 rounded-md pl-1 inline-block" v-model="value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].value" type="string" :disabled="!value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled" :class="[value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled ? 'bg-blue-50' : 'bg-gray-100']">
+                         <input class="text-gray-800 text-xs mr-1 mt-1 rounded-md pl-1 inline-block" v-model="value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].value" type="string" :disabled="!value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled" :class="[value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled ? color.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)] : 'bg-gray-100']" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
                        </div>
                        
                        <div class="relative text-gray-800 text-xs mx-6">
                          <div class="mt-1 flex items-center">
                            <span class="flex-none"><strong>{{ focusPeerName }}</strong> will forward IP subnet(s)</span>
-                           <input v-if="WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="['bg-blue-50']">
-                           <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="['bg-blue-50']">
+                           <input v-if="WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
+                           <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
                            <span class="flex-none pr-2"> to <strong>{{ peerDetails.name }}</strong></span>
                          </div>
                          <div class="mt-1 flex">
                            <span class="flex-none"><strong>{{ peerDetails.name }}</strong> will forward IP subnet(s)</span>
-                           <input v-if="!WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="['bg-blue-50']">
-                           <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="['bg-blue-50']">
+                           <input v-if="!WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
+                           <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
                            <span class="flex-none pr-2"> to <strong>{{ focusPeerName }}</strong></span>
                          </div>
                        </div>
@@ -331,8 +336,32 @@ Vue.component('connection-islands', {
         this.value.attachedRoamingPeers = attached;
       },
     },
-    selectPeersDivColor() {
-      return WireGuardHelper.checkField('peerCount', this.value.attachedStaticPeers.concat(this.value.attachedRoamingPeers)) ? 'bg-green-50' : 'bg-red-50';
+    color() {
+      this.colorRefresh &&= this.colorRefresh;
+      const color = {
+        allowedIPsAtoB: {},
+        allowedIPsBtoA: {},
+        persistentKeepalive: {},
+        attachedPeerDiv: {},
+        selectionDiv: WireGuardHelper.checkField('peerCount', [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) ? 'bg-green-50' : 'bg-red-50',
+      };
+      for (const peerId of [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) {
+        const connectionId = WireGuardHelper.getConnectionId(this.focusPeerId, peerId);
+        try {
+          color.allowedIPsAtoB[connectionId] = WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200';
+          color.allowedIPsBtoA[connectionId] = WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200';
+          color.persistentKeepalive[connectionId] = this.value.persistentKeepalive[connectionId].enabled && WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepalive[connectionId].value) ? 'bg-green-200' : 'bg-red-200';
+          color.attachedPeerDiv[connectionId] = this.value.isConnectionEnabled[connectionId] && [color.allowedIPsAtoB[connectionId], color.allowedIPsBtoA[connectionId], color.persistentKeepalive[connectionId]].includes('bg-red-200') ? 'bg-red-50' : 'bg-green-50';
+        } catch (e) {
+          color.allowedIPsAtoB[connectionId] = 'bg-red-50';
+          color.allowedIPsBtoA[connectionId] = 'bg-red-50';
+          color.persistentKeepalive[connectionId] = 'bg-red-50';
+          color.attachedPeerDiv[connectionId] = 'bg-red-50';
+          console.log(e);
+        }
+        color.selectionDiv = [color.selectionDiv, color.attachedPeerDiv[connectionId]].includes('bg-red-50') ? 'bg-red-50' : 'bg-green-50';
+      }
+      return color;
     },
   },
 });
