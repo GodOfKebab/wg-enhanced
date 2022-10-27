@@ -297,10 +297,10 @@ module.exports = class WireGuard {
     if (!attachedPeers) throw new Error('Missing: attachedPeers : array ([peerId: str, allowedIPs: str (in the format x.x.x.x/32)])');
     if (!attachedPeers.length) throw new Error('Couldn\'t parse: attachedPeers : array ([peerId: str, allowedIPs: str (in the format x.x.x.x/32)])');
     for (const attachedPeer of attachedPeers) {
-      if (!attachedPeer.peer || !attachedPeer.allowedIPsNewToOld || !attachedPeer.allowedIPsOldToNew) throw new Error('Couldn\'t parse: attachedPeers : array ([{peerId: str, allowedIPs: str (in the format x.x.x.x/32)}, ...])');
+      if (!attachedPeer.peer || !attachedPeer.allowedIPsAtoB || !attachedPeer.allowedIPsBtoA) throw new Error('Couldn\'t parse: attachedPeers : array ([{peerId: str, allowedIPs: str (in the format x.x.x.x/32)}, ...])');
       if (!await this.getPeer({ peerId: attachedPeer.peer })) throw new Error(`attachedPeer doesn't exist: ${attachedPeer.peer}`);
-      if (!WireGuardHelper.checkField('allowedIPs', attachedPeer.allowedIPsNewToOld)) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPsNewToOld}`);
-      if (!WireGuardHelper.checkField('allowedIPs', attachedPeer.allowedIPsOldToNew)) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPsOldToNew}`);
+      if (!WireGuardHelper.checkField('allowedIPs', attachedPeer.allowedIPsAtoB)) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPsAtoB}`);
+      if (!WireGuardHelper.checkField('allowedIPs', attachedPeer.allowedIPsBtoA)) throw new Error(`allowedIPs couldn't be parsed: ${attachedPeer.allowedIPsBtoA}`);
     }
 
     const config = await this.getConfig();
@@ -353,8 +353,8 @@ module.exports = class WireGuard {
       config.connections[connectionId] = {
         preSharedKey,
         enabled: attachedPeer.enabled,
-        allowedIPsAtoB: connectionId.startsWith(peerId) ? attachedPeer.allowedIPsNewToOld : attachedPeer.allowedIPsOldToNew,
-        allowedIPsBtoA: !connectionId.startsWith(peerId) ? attachedPeer.allowedIPsNewToOld : attachedPeer.allowedIPsOldToNew,
+        allowedIPsAtoB: attachedPeer.allowedIPsAtoB,
+        allowedIPsBtoA: attachedPeer.allowedIPsBtoA,
         persistentKeepalive: attachedPeer.persistentKeepalive,
       };
     }

@@ -270,12 +270,12 @@ Vue.component('connection-islands', {
                      <div class="relative text-gray-800 text-xs mx-6">
                        <div class="text-xs flex items-center">
                          <label class="flex items-center">
-                           <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer inline-block" type="checkbox" v-model="value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled" @change="colorRefresh += 1">
+                           <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer inline-block" type="checkbox" v-model="value.persistentKeepaliveEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" @change="colorRefresh += 1">
                            <span class="text-gray-800 cursor-pointer text-xs mr-1">
                            <strong>Persistent Keepalive:</strong>
                          </span>
                          </label>
-                         <input class="text-gray-800 text-xs mr-1 mt-1 rounded-md pl-1 inline-block" v-model="value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].value" type="string" :disabled="!value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled" :class="[value.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)].enabled ? color.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)] : 'bg-gray-100']" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
+                         <input class="text-gray-800 text-xs mr-1 mt-1 rounded-md pl-1 inline-block" v-model="value.persistentKeepaliveValue[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" type="string" :disabled="!value.persistentKeepaliveEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[value.persistentKeepaliveEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)] ? color.persistentKeepalive[WireGuardHelper.getConnectionId(focusPeerId, peerId)] : 'bg-gray-100']" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
                        </div>
                        
                        <div class="relative text-gray-800 text-xs mx-6">
@@ -345,12 +345,13 @@ Vue.component('connection-islands', {
         attachedPeerDiv: {},
         selectionDiv: WireGuardHelper.checkField('peerCount', [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) ? 'bg-green-50' : 'bg-red-50',
       };
+      this.value.hasError = color.selectionDiv === 'bg-red-50';
       for (const peerId of [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) {
         const connectionId = WireGuardHelper.getConnectionId(this.focusPeerId, peerId);
         try {
           color.allowedIPsAtoB[connectionId] = WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200';
           color.allowedIPsBtoA[connectionId] = WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200';
-          color.persistentKeepalive[connectionId] = this.value.persistentKeepalive[connectionId].enabled && WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepalive[connectionId].value) ? 'bg-green-200' : 'bg-red-200';
+          color.persistentKeepalive[connectionId] = this.value.persistentKeepaliveEnabled[connectionId] && WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200';
           color.attachedPeerDiv[connectionId] = this.value.isConnectionEnabled[connectionId] && [color.allowedIPsAtoB[connectionId], color.allowedIPsBtoA[connectionId], color.persistentKeepalive[connectionId]].includes('bg-red-200') ? 'bg-red-50' : 'bg-green-50';
         } catch (e) {
           color.allowedIPsAtoB[connectionId] = 'bg-red-50';
@@ -359,7 +360,7 @@ Vue.component('connection-islands', {
           color.attachedPeerDiv[connectionId] = 'bg-red-50';
           console.log(e);
         }
-        color.selectionDiv = [color.selectionDiv, color.attachedPeerDiv[connectionId]].includes('bg-red-50') ? 'bg-red-50' : 'bg-green-50';
+        this.value.hasError ||= color.attachedPeerDiv[connectionId] === 'bg-red-50';
       }
       return color;
     },
@@ -431,14 +432,16 @@ new Vue({
       attachedStaticPeers: [],
       attachedRoamingPeers: [],
       isConnectionEnabled: {},
-      persistentKeepalive: {},
+      persistentKeepaliveEnabled: {},
+      persistentKeepaliveValue: {},
       allowedIPsAtoB: {},
       allowedIPsBtoA: {},
       defaults: {
         attachedStaticPeers: {},
         attachedRoamingPeers: {},
         isConnectionEnabled: {},
-        persistentKeepalive: {},
+        persistentKeepaliveEnabled: {},
+        persistentKeepaliveValue: {},
         allowedIPsAtoB: {},
         allowedIPsBtoA: {},
       },
@@ -467,30 +470,6 @@ new Vue({
     peerCreatePersistentKeepaliveValueData: {},
     peerCreateAllowedIPsNewToOld: {},
     peerCreateAllowedIPsOldToNew: {},
-    peerCreateAssignedColor: {
-      name: 'bg-white',
-      address: 'bg-white',
-      endpoint: 'bg-white',
-      dnsmtu: {
-        div: 'bg-white',
-        dnsInput: 'bg-white',
-        mtuInput: 'bg-white',
-      },
-      scripts: {
-        div: 'bg-white',
-        PreUp: 'bg-white',
-        PostUp: 'bg-white',
-        PreDown: 'bg-white',
-        PostDown: 'bg-white',
-      },
-      connections: {
-        attachedPeerCountDiv: 'bg-white',
-        attachedPeerDiv: {},
-        allowedIPsOldToNew: {},
-        allowedIPsNewToOld: {},
-        persistentKeepalive: {},
-      },
-    },
     peerCreateConnectionColorRefresh: 0,
 
     peerQuickEditName: null,
@@ -1049,10 +1028,8 @@ new Vue({
           const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
 
           this.connectionIslandsData.defaults.isConnectionEnabled[connectionId] = true;
-          this.connectionIslandsData.defaults.persistentKeepalive[connectionId] = {
-            enabled: this.network.defaults.connections.persistentKeepalive.enabled,
-            value: this.network.defaults.connections.persistentKeepalive.value,
-          };
+          this.connectionIslandsData.defaults.persistentKeepaliveEnabled[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
+          this.connectionIslandsData.defaults.persistentKeepaliveValue[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
           // eslint-disable-next-line no-nested-ternary
           const allowedIPsNewToOld = peerDetails.mobility === 'static' ? (this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0') : `${this.network.peers[peerId].address}/32`;
           const allowedIPsOldToNew = `${this.peerCreateAddress}/32`;
@@ -1060,7 +1037,8 @@ new Vue({
           this.connectionIslandsData.defaults.allowedIPsBtoA[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsNewToOld : allowedIPsOldToNew;
         }
         this.connectionIslandsData.isConnectionEnabled = this.connectionIslandsData.defaults.isConnectionEnabled;
-        this.connectionIslandsData.persistentKeepalive = this.connectionIslandsData.defaults.persistentKeepalive;
+        this.connectionIslandsData.persistentKeepaliveEnabled = this.connectionIslandsData.defaults.persistentKeepaliveEnabled;
+        this.connectionIslandsData.persistentKeepaliveValue = this.connectionIslandsData.defaults.persistentKeepaliveValue;
         this.connectionIslandsData.allowedIPsAtoB = this.connectionIslandsData.defaults.allowedIPsAtoB;
         this.connectionIslandsData.allowedIPsBtoA = this.connectionIslandsData.defaults.allowedIPsBtoA;
       } else if (mode === 'delete-preamble') {
@@ -1074,36 +1052,36 @@ new Vue({
     },
     createPeer() {
       const attachedPeersCompact = [];
-
-      for (const peerId of [...this.peerCreateAttachedStaticPeerIds, ...this.peerCreateAttachedRoamingPeerIds]) {
+      for (const peerId of [...this.connectionIslandsData.attachedStaticPeers, ...this.connectionIslandsData.attachedRoamingPeers]) {
+        const connectionId = WireGuardHelper.getConnectionId(this.peerCreatePeerId, peerId);
         attachedPeersCompact.push({
           peer: peerId,
-          enabled: this.peerCreateIsConnectionEnabled[peerId],
-          allowedIPsNewToOld: this.peerCreateAllowedIPsNewToOld[peerId],
-          allowedIPsOldToNew: this.peerCreateAllowedIPsOldToNew[peerId],
+          enabled: this.connectionIslandsData.isConnectionEnabled[connectionId],
+          allowedIPsAtoB: this.connectionIslandsData.allowedIPsAtoB[connectionId],
+          allowedIPsBtoA: this.connectionIslandsData.allowedIPsBtoA[connectionId],
           persistentKeepalive: {
-            enabled: this.peerCreatePersistentKeepaliveEnabledData[peerId],
-            value: this.peerCreatePersistentKeepaliveValueData[peerId],
+            enabled: this.connectionIslandsData.persistentKeepaliveEnabled[connectionId],
+            value: this.connectionIslandsData.persistentKeepaliveValue[connectionId],
           },
         });
       }
-      const dns = {
-        enabled: this.peerCreateDNS.enabled,
-        value: this.peerCreateDNS.value,
-      };
-      const mtu = {
-        enabled: this.peerCreateMTU.enabled,
-        value: this.peerCreateMTU.value,
-      };
-      const peerId = this.peerCreatePeerId;
-      const address = this.peerCreateAddress;
-      const name = this.peerCreateName;
-      const mobility = this.peerCreateMobility;
-      const endpoint = this.peerCreateEndpoint;
-      const scripts = this.peerCreateScripts;
 
       this.api.createPeer({
-        peerId, address, name, mobility, dns, mtu, endpoint, scripts, attachedPeers: attachedPeersCompact,
+        peerId: this.peerCreatePeerId,
+        address: this.peerCreateAddress,
+        name: this.peerCreateName,
+        mobility: this.peerCreateMobility,
+        endpoint: this.peerCreateEndpoint,
+        dns: {
+          enabled: this.dnsmtuIslandData.dns.enabled,
+          value: this.dnsmtuIslandData.dns.value,
+        },
+        mtu: {
+          enabled: this.dnsmtuIslandData.mtu.enabled,
+          value: this.dnsmtuIslandData.mtu.value,
+        },
+        scripts: this.peerCreateScripts,
+        attachedPeers: attachedPeersCompact,
       }).catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
 
@@ -1523,66 +1501,17 @@ new Vue({
   },
   computed: {
     peerCreateNameColor() {
-      this.peerCreateAssignedColor.name = WireGuardHelper.checkField('name', this.peerCreateName) ? 'bg-green-50' : 'bg-red-50';
-      return this.peerCreateAssignedColor.name;
+      return WireGuardHelper.checkField('name', this.peerCreateName) ? 'bg-green-50' : 'bg-red-50';
     },
     peerCreateEndpointColor() {
-      this.peerCreateAssignedColor.endpoint = WireGuardHelper.checkField('endpoint', this.peerCreateEndpoint) ? 'bg-green-50' : 'bg-red-50';
-      return this.peerCreateAssignedColor.endpoint;
-    },
-    peerCreateDNSMTUColor() {
-      this.peerCreateAssignedColor.dnsmtu.dnsInput = WireGuardHelper.checkField('dns', { enabled: true, value: this.peerCreateDNS.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerCreateAssignedColor.dnsmtu.mtuInput = WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerCreateMTU.value }) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      // eslint-disable-next-line no-nested-ternary
-      this.peerCreateAssignedColor.dnsmtu.div = this.peerCreateDNS.enabled || this.peerCreateMTU.enabled ? ((this.peerCreateDNS.enabled && this.peerCreateAssignedColor.dnsmtu.dnsInput === 'enabled:bg-red-200') || (this.peerCreateMTU.enabled && this.peerCreateAssignedColor.dnsmtu.mtuInput === 'enabled:bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
-      return this.peerCreateAssignedColor.dnsmtu;
-    },
-    peerCreateScriptsColor() {
-      this.peerCreateAssignedColor.scripts.PreUp = WireGuardHelper.checkField('script', this.peerCreateScripts.PreUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerCreateAssignedColor.scripts.PostUp = WireGuardHelper.checkField('script', this.peerCreateScripts.PostUp) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerCreateAssignedColor.scripts.PreDown = WireGuardHelper.checkField('script', this.peerCreateScripts.PreDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      this.peerCreateAssignedColor.scripts.PostDown = WireGuardHelper.checkField('script', this.peerCreateScripts.PostDown) ? 'enabled:bg-green-200' : 'enabled:bg-red-200';
-      // eslint-disable-next-line no-nested-ternary
-      this.peerCreateAssignedColor.scripts.div = (this.peerCreateScripts.PreUp.enabled
-      || this.peerCreateScripts.PostUp.enabled
-      || this.peerCreateScripts.PreDown.enabled
-      || this.peerCreateScripts.PostDown.enabled)
-        ? (((this.peerCreateScripts.PreUp.enabled && this.peerCreateAssignedColor.scripts.PreUp === 'enabled:bg-red-200')
-              || (this.peerCreateScripts.PostUp.enabled && this.peerCreateAssignedColor.scripts.PostUp === 'enabled:bg-red-200')
-              || (this.peerCreateScripts.PreDown.enabled && this.peerCreateAssignedColor.scripts.PreDown === 'enabled:bg-red-200')
-              || (this.peerCreateScripts.PostDown.enabled && this.peerCreateAssignedColor.scripts.PostDown === 'enabled:bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
-      return this.peerCreateAssignedColor.scripts;
-    },
-    peerCreateAttachedPeersCountDivColor() {
-      this.peerCreateAssignedColor.connections.attachedPeerCountDiv = WireGuardHelper.checkField('peerCount', this.peerCreateAttachedStaticPeerIds) || WireGuardHelper.checkField('peerCount', this.peerCreateAttachedRoamingPeerIds) ? 'bg-green-50' : 'bg-red-50';
-      return this.peerCreateAssignedColor.connections.attachedPeerCountDiv;
-    },
-    peerCreateConnectionColor() {
-      this.peerCreateConnectionColorRefresh &&= this.peerCreateConnectionColorRefresh;
-      for (const peerId of [...this.peerCreateAttachedStaticPeerIds, ...this.peerCreateAttachedRoamingPeerIds]) {
-        try {
-          this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] = WireGuardHelper.checkField('allowedIPs', this.peerCreateAllowedIPsOldToNew[peerId]) ? 'bg-green-200' : 'bg-red-200';
-          this.peerCreateAssignedColor.connections.allowedIPsNewToOld[peerId] = WireGuardHelper.checkField('allowedIPs', this.peerCreateAllowedIPsNewToOld[peerId]) ? 'bg-green-200' : 'bg-red-200';
-          // eslint-disable-next-line no-nested-ternary
-          this.peerCreateAssignedColor.connections.attachedPeerDiv[peerId] = this.peerCreateIsConnectionEnabled[peerId] && this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] !== 'bg-red-200' && this.peerCreateAssignedColor.connections.allowedIPsNewToOld[peerId] !== 'bg-red-200' ? 'bg-green-50' : 'bg-red-50';
-          // eslint-disable-next-line no-nested-ternary
-          this.peerCreateAssignedColor.connections.persistentKeepalive[peerId] = this.peerCreatePersistentKeepaliveEnabledData[peerId] && WireGuardHelper.checkField('persistentKeepalive', this.peerCreatePersistentKeepaliveValueData[peerId]) ? 'bg-green-200' : 'bg-red-200';
-        } catch (e) {
-          this.peerCreateAssignedColor.connections.attachedPeerDiv[peerId] = 'bg-red-50';
-          this.peerCreateAssignedColor.connections.allowedIPsOldToNew[peerId] = 'bg-red-50';
-          this.peerCreateAssignedColor.connections.allowedIPsNewToOld[peerId] = 'bg-red-50';
-        }
-      }
-      return this.peerCreateAssignedColor.connections;
+      return WireGuardHelper.checkField('endpoint', this.peerCreateEndpoint) ? 'bg-green-50' : 'bg-red-50';
     },
     peerCreateEligibilityOverall() {
       return this.peerCreateNameColor !== 'bg-red-50'
           && !(this.peerCreateMobility === 'static' && this.peerCreateEndpointColor === 'bg-red-50')
-          && this.peerCreateDNSMTUColor.div !== 'bg-red-50'
-          && this.peerCreateScriptsColor.div !== 'bg-red-50'
-          && this.peerCreateAttachedPeersCountDivColor !== 'bg-red-50'
-          && Object.values(this.peerCreateConnectionColor.allowedIPsOldToNew).every(color => color === 'bg-green-200')
-          && Object.values(this.peerCreateConnectionColor.allowedIPsNewToOld).every(color => color === 'bg-green-200');
+          && !this.dnsmtuIslandData.hasError
+          && !this.scriptsIslandData.hasError
+          && !this.connectionIslandsData.hasError;
     },
     peerEditNameColor() {
       // eslint-disable-next-line no-nested-ternary
