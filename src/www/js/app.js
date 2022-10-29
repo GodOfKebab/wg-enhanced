@@ -36,59 +36,36 @@ Vue.component('dnsmtu-island', {
                  Configure DNS and MTU:
                </div>
                <div class="flex grid grid-cols-2 gap-2 mb-0.5">
-                 <div class="truncate">
-                   <div class="form-check truncate relative" :class="[value.dns.enabled !== value.defaults.dns.enabled || value.dns.value !== value.defaults.dns.value ? 'highlight-undo-box' : '']">
-                     <label>
-                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="value.dns.enabled">
-                       <span class="text-gray-800 cursor-pointer text-xs">
-                         <strong class="text-sm">DNS: </strong>
-                       </span>
-                     </label>
-                     <input list="inputDNSList" style="width: 25vw;" type="text" placeholder="click to see recommendations"
-                            class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
-                            v-model="value.dns.value"
-                            :class="[\`enabled:\${colors.dnsInput}\`]"
-                            :disabled="!value.dns.enabled"/>
-                     <datalist id="inputDNSList">
-                       <option :value="value.defaults.dns.value">
-                         Forward all DNS related traffic to {{ value.defaults.dns.value }}
-                       </option>
-                     </datalist>
-                     <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                       <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                               title="Undo Changes"
-                               :disabled="value.dns.enabled === value.defaults.dns.enabled && value.dns.value === value.defaults.dns.value"
-                               @click="value.dns.enabled = value.defaults.dns.enabled; value.dns.value = value.defaults.dns.value;">
-                         <img class="w-4" :src="returnIconSrc"/>
-                       </button>
-                     </div>
-                   </div>
-                 </div>
-                 <div class="truncate">
-                   <div class="form-check truncate relative" :class="[value.mtu.enabled !== value.defaults.mtu.enabled || value.mtu.value !== value.defaults.mtu.value ? 'highlight-undo-box' : '']">
-                     <label>
-                       <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="value.mtu.enabled">
-                       <span class="text-gray-800 cursor-pointer text-xs">
-                         <strong class="text-sm">MTU: </strong>
-                       </span>
-                     </label>
-                     <input list="inputMTUList" style="width: 25vw;" type="text" placeholder="click to see recommendations"
-                            class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
-                            v-model="value.mtu.value"
-                            :class="[\`enabled:\${colors.mtuInput}\`]"
-                            :disabled="!value.mtu.enabled"/>
-                     <datalist id="inputMTUList">
-                       <option :value="value.defaults.mtu.value">
-                         Set MTU to {{ value.defaults.mtu.value }}
-                       </option>
-                     </datalist>
-                     <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                       <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                               title="Undo Changes"
-                               :disabled="value.mtu.enabled === value.defaults.mtu.enabled && value.mtu.value === value.defaults.mtu.value"
-                               @click="value.mtu.enabled = value.defaults.mtu.enabled; value.mtu.value = value.defaults.mtu.value;">
-                         <img class="w-4" :src="returnIconSrc"/>
-                       </button>
+                 <div v-for="field in ['dns', 'mtu']">
+                   <div class="truncate">
+                     <div class="form-check truncate relative" :class="[value[field].enabled !== value.defaults[field].enabled || value[field].value !== value.defaults[field].value ? 'highlight-undo-box' : '']">
+                       <label>
+                         <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="value[field].enabled">
+                         <span class="text-gray-800 cursor-pointer text-xs">
+                           <strong class="text-sm">{{ field.toUpperCase() }}: </strong>
+                         </span>
+                       </label>
+                       <input :list="field + 'Recommendations'" style="width: 25vw;" type="text" :placeholder="value.defaults[field].value ? 'Click to see recommendations' : 'No recommendations'"
+                              class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
+                              v-model="value[field].value"
+                              :class="[\`enabled:\${field === 'dns' ? colors.dnsInput : colors.mtuInput}\`]"
+                              :disabled="!value[field].enabled"/>
+                       <datalist :id="field + 'Recommendations'">
+                         <option v-if="field === 'dns'" :value="value.defaults[field].value">
+                           Forward all {{ field.toUpperCase() }} related traffic to {{ value.defaults[field].value }}
+                         </option>
+                         <option v-if="field === 'mtu'" :value="value.defaults[field].value">
+                           Set MTU to {{ value.defaults[field].value }}
+                         </option>
+                       </datalist>
+                       <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                         <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                                 title="Undo Changes"
+                                 :disabled="value[field].enabled === value.defaults[field].enabled && value[field].value === value.defaults[field].value"
+                                 @click="value[field].enabled = value.defaults[field].enabled; value[field].value = value.defaults[field].value;">
+                           <img class="w-4" :src="returnIconSrc"/>
+                         </button>
+                       </div>
                      </div>
                    </div>
                  </div>
@@ -392,23 +369,11 @@ new Vue({
     peerQRId: null,
 
     dnsmtuIslandData: {
-      dns: {
-        enabled: false,
-        value: '',
-      },
-      mtu: {
-        enabled: false,
-        value: '',
-      },
+      dns: { enabled: false, value: '' },
+      mtu: { enabled: false, value: '' },
       defaults: {
-        dns: {
-          enabled: true,
-          value: '1.1.1.1',
-        },
-        mtu: {
-          enabled: true,
-          value: '1420',
-        },
+        dns: { enabled: false, value: '' },
+        mtu: { enabled: false, value: '' },
       },
       hasError: false,
     },
@@ -1002,10 +967,14 @@ new Vue({
         this.peerCreateEndpoint = '';
         this.peerCreateShowAdvance = false;
 
-        this.dnsmtuIslandData.defaults.dns = this.network.defaults.peers.dns;
-        this.dnsmtuIslandData.defaults.mtu = this.network.defaults.peers.mtu;
-        this.dnsmtuIslandData.dns = this.dnsmtuIslandData.defaults.dns;
-        this.dnsmtuIslandData.mtu = this.dnsmtuIslandData.defaults.mtu;
+        this.dnsmtuIslandData.defaults.dns.enabled = this.network.defaults.peers.dns.enabled;
+        this.dnsmtuIslandData.defaults.dns.value = this.network.defaults.peers.dns.value;
+        this.dnsmtuIslandData.defaults.mtu.enabled = this.network.defaults.peers.mtu.enabled;
+        this.dnsmtuIslandData.defaults.mtu.value = this.network.defaults.peers.mtu.value;
+        this.dnsmtuIslandData.dns.enabled = this.dnsmtuIslandData.defaults.dns.enabled;
+        this.dnsmtuIslandData.dns.value = this.dnsmtuIslandData.defaults.dns.value;
+        this.dnsmtuIslandData.mtu.enabled = this.dnsmtuIslandData.defaults.mtu.enabled;
+        this.dnsmtuIslandData.mtu.value = this.dnsmtuIslandData.defaults.mtu.value;
         this.dnsmtuIslandData.hasError = false;
 
         this.scriptsIslandData.defaults = this.network.defaults.peers.scripts;
