@@ -456,8 +456,10 @@
                             Reserved address: <strong>{{ peerCreateAddress }}</strong>
                           </div>
                         </div>
-                        <dnsmtu-island v-model="dnsmtuIslandData"></dnsmtu-island>
-                        <scripts-island v-model="scriptsIslandData"></scripts-island>
+                        <dnsmtu-island v-model="dnsmtuIslandData"
+                                       :defaults="network.defaults.peers" ></dnsmtu-island>
+                        <scripts-island v-model="scriptsIslandData"
+                                        :defaults="network.defaults.peers"></scripts-island>
                         <connection-islands v-model="connectionIslandsData"
                                             :focus-peer-id="peerCreatePeerId"
                                             :focus-peer-name="peerCreateName"></connection-islands>

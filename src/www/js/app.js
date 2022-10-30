@@ -29,6 +29,17 @@ Vue.component('dnsmtu-island', {
     value: {
       type: Object,
     },
+    defaults: {
+      type: Object,
+    },
+  },
+  data() {
+    return {
+      rollbackData: {},
+    };
+  },
+  created() {
+    this.rollbackData = JSON.parse(JSON.stringify(this.value));
   },
   emits: ['update:value'],
   template: `<div class="my-2 p-1 shadow-md border rounded" :class="[colors.div]">
@@ -38,31 +49,31 @@ Vue.component('dnsmtu-island', {
                <div class="flex grid grid-cols-2 gap-2 mb-0.5">
                  <div v-for="field in ['dns', 'mtu']">
                    <div class="truncate">
-                     <div class="form-check truncate relative" :class="[value[field].enabled !== value.defaults[field].enabled || value[field].value !== value.defaults[field].value ? 'highlight-undo-box' : '']">
+                     <div class="form-check truncate relative" :class="[value[field].enabled !== rollbackData[field].enabled || value[field].value !== rollbackData[field].value ? 'highlight-undo-box' : '']">
                        <label>
                          <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="value[field].enabled">
                          <span class="text-gray-800 cursor-pointer text-xs">
                            <strong class="text-sm">{{ field.toUpperCase() }}: </strong>
                          </span>
                        </label>
-                       <input :list="field + 'Recommendations'" style="width: 25vw;" type="text" :placeholder="value.defaults[field].value ? 'Click to see recommendations' : 'No recommendations'"
+                       <input :list="field + 'Recommendations'" style="width: 25vw;" type="text" :placeholder="defaults[field].value ? 'Click to see recommendations' : 'No recommendations'"
                               class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
                               v-model="value[field].value"
                               :class="[\`enabled:\${field === 'dns' ? colors.dnsInput : colors.mtuInput}\`]"
                               :disabled="!value[field].enabled"/>
                        <datalist :id="field + 'Recommendations'">
-                         <option v-if="field === 'dns'" :value="value.defaults[field].value">
-                           Forward all {{ field.toUpperCase() }} related traffic to {{ value.defaults[field].value }}
+                         <option v-if="field === 'dns'" :value="defaults[field].value">
+                           Forward all {{ field.toUpperCase() }} related traffic to {{ defaults[field].value }}
                          </option>
-                         <option v-if="field === 'mtu'" :value="value.defaults[field].value">
-                           Set MTU to {{ value.defaults[field].value }}
+                         <option v-if="field === 'mtu'" :value="defaults[field].value">
+                           Set MTU to {{ defaults[field].value }}
                          </option>
                        </datalist>
                        <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                  title="Undo Changes"
-                                 :disabled="value[field].enabled === value.defaults[field].enabled && value[field].value === value.defaults[field].value"
-                                 @click="value[field].enabled = value.defaults[field].enabled; value[field].value = value.defaults[field].value;">
+                                 :disabled="value[field].enabled === rollbackData[field].enabled && value[field].value === rollbackData[field].value"
+                                 @click="value[field].enabled = rollbackData[field].enabled; value[field].value = rollbackData[field].value;">
                            <img class="w-4" :src="returnIconSrc"/>
                          </button>
                        </div>
@@ -89,29 +100,41 @@ Vue.component('scripts-island', {
     value: {
       type: Object,
     },
+    // TODO: add recommendations based on the defaults
+    defaults: {
+      type: Object,
+    },
+  },
+  data() {
+    return {
+      rollbackData: {},
+    };
+  },
+  created() {
+    this.rollbackData = JSON.parse(JSON.stringify(this.value));
   },
   template: `<div class="p-1 shadow-md border rounded" :class="[colors.div]">
                <div class="text-gray-800 mb-0.5">
                  Configure Script Snippets:
                </div>
                <div v-for="scriptField in ['PreUp', 'PostUp', 'PreDown', 'PostDown']">
-                 <div class="form-check truncate flex items-center relative mb-0.5" :class="[value[scriptField].enabled !== value.defaults[scriptField].enabled || value[scriptField].value !== value.defaults[scriptField].value ? 'highlight-undo-box' : '']">
+                 <div class="form-check truncate flex items-center relative mb-0.5" :class="[value.scripts[scriptField].enabled !== rollbackData.scripts[scriptField].enabled || value.scripts[scriptField].value !== rollbackData.scripts[scriptField].value ? 'highlight-undo-box' : '']">
                    <label class="flex-none">
-                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="value[scriptField].enabled = !value[scriptField].enabled;" :checked="value[scriptField].enabled">
+                     <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="value.scripts[scriptField].enabled = !value.scripts[scriptField].enabled;" :checked="value.scripts[scriptField].enabled">
                      <span class="text-gray-800 cursor-pointer text-xs mr-1">
                        <strong class="text-sm">{{ scriptField }}:</strong>
                       </span>
                    </label>
                    <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
                           type="text" :placeholder="\`\${scriptField} Script (e.g. echo 'Hey, this is \${scriptField} Script';)\`"
-                          v-model="value[scriptField].value"
+                          v-model="value.scripts[scriptField].value"
                           :class="[\`enabled:\${colors[scriptField]}\`]"
-                          :disabled="!value[scriptField].enabled"/>
+                          :disabled="!value.scripts[scriptField].enabled"/>
                    <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
                      <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                              title="Undo Changes"
-                             :disabled="value[scriptField].enabled === value.defaults[scriptField].enabled && value[scriptField].value === value.defaults[scriptField].value"
-                             @click="value[scriptField].enabled = value.defaults[scriptField].enabled; value[scriptField].value = value.defaults[scriptField].value;">
+                             :disabled="value.scripts[scriptField].enabled === rollbackData.scripts[scriptField].enabled && value.scripts[scriptField].value === rollbackData.scripts[scriptField].value"
+                             @click="value.scripts[scriptField].enabled = rollbackData.scripts[scriptField].enabled; value.scripts[scriptField].value = rollbackData.scripts[scriptField].value;">
                        <img class="w-4" :src="returnIconSrc"/>
                      </button>
                    </div>
@@ -121,20 +144,20 @@ Vue.component('scripts-island', {
   computed: {
     colors() {
       const colors = {
-        PreUp: WireGuardHelper.checkField('script', this.value.PreUp) ? 'bg-green-200' : 'bg-red-200',
-        PostUp: WireGuardHelper.checkField('script', this.value.PostUp) ? 'bg-green-200' : 'bg-red-200',
-        PreDown: WireGuardHelper.checkField('script', this.value.PreDown) ? 'bg-green-200' : 'bg-red-200',
-        PostDown: WireGuardHelper.checkField('script', this.value.PostDown) ? 'bg-green-200' : 'bg-red-200',
+        PreUp: WireGuardHelper.checkField('script', this.value.scripts.PreUp) ? 'bg-green-200' : 'bg-red-200',
+        PostUp: WireGuardHelper.checkField('script', this.value.scripts.PostUp) ? 'bg-green-200' : 'bg-red-200',
+        PreDown: WireGuardHelper.checkField('script', this.value.scripts.PreDown) ? 'bg-green-200' : 'bg-red-200',
+        PostDown: WireGuardHelper.checkField('script', this.value.scripts.PostDown) ? 'bg-green-200' : 'bg-red-200',
       };
       // eslint-disable-next-line no-nested-ternary
-      colors.div = (this.value.PreUp.enabled
-        || this.value.PostUp.enabled
-        || this.value.PreDown.enabled
-        || this.value.PostDown.enabled)
-        ? (((this.value.PreUp.enabled && colors.PreUp === 'bg-red-200')
-            || (this.value.PostUp.enabled && colors.PostUp === 'bg-red-200')
-            || (this.value.PreDown.enabled && colors.PreDown === 'bg-red-200')
-            || (this.value.PostDown.enabled && colors.PostDown === 'bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
+      colors.div = (this.value.scripts.PreUp.enabled
+        || this.value.scripts.PostUp.enabled
+        || this.value.scripts.PreDown.enabled
+        || this.value.scripts.PostDown.enabled)
+        ? (((this.value.scripts.PreUp.enabled && colors.PreUp === 'bg-red-200')
+            || (this.value.scripts.PostUp.enabled && colors.PostUp === 'bg-red-200')
+            || (this.value.scripts.PreDown.enabled && colors.PreDown === 'bg-red-200')
+            || (this.value.scripts.PostDown.enabled && colors.PostDown === 'bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
       this.value.hasError = colors.div === 'bg-red-50';
       return colors;
     },
@@ -148,11 +171,20 @@ Vue.component('connection-islands', {
   },
   data() {
     return {
+      rollbackData: {},
       colorRefresh: 0,
+      connectionChanged: {},
     };
   },
+  created() {
+    this.rollbackData = JSON.parse(JSON.stringify(this.value));
+    for (const peerId of [...Object.keys(this.value.staticPeers), ...Object.keys(this.value.roamingPeers)]) {
+      const connectionId = WireGuardHelper.getConnectionId(this.focusPeerId, peerId);
+      this.connectionChanged[connectionId] = false;
+    }
+  },
   template: `<div v-if="Object.keys(value.staticPeers).length + Object.keys(value.roamingPeers).length > 0">
-               <div class="my-2 p-1 shadow-md border rounded relative" :class="[color.selectionDiv, JSON.stringify(value.attachedStaticPeers) === JSON.stringify(['root']) && value.attachedRoamingPeers.length === 0 ? '' : 'highlight-undo-box']">
+               <div class="my-2 p-1 shadow-md border rounded relative" :class="[color.selectionDiv, JSON.stringify(value.attachedStaticPeers) === JSON.stringify(rollbackData.attachedStaticPeers) && JSON.stringify(value.attachedRoamingPeers) === JSON.stringify(rollbackData.attachedRoamingPeers) ? '' : 'highlight-undo-box']">
                  <div v-if="Object.keys(value.staticPeers).length > 0">
                    <div class="text-gray-800">
                      {{ value.selectionBoxTitles.static }}
@@ -204,15 +236,15 @@ Vue.component('connection-islands', {
                  <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                    <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                            title="Undo Changes"
-                           :disabled="JSON.stringify(value.attachedStaticPeers) === JSON.stringify(['root']) && value.attachedRoamingPeers.length === 0"
-                           @click="value.attachedStaticPeers = ['root']; value.attachedRoamingPeers = []">
+                           :disabled="JSON.stringify(value.attachedStaticPeers) === JSON.stringify(rollbackData.attachedStaticPeers) && JSON.stringify(value.attachedRoamingPeers) === JSON.stringify(rollbackData.attachedRoamingPeers)"
+                           @click="value.attachedStaticPeers = rollbackData.attachedStaticPeers; value.attachedRoamingPeers = rollbackData.attachedRoamingPeers">
                      <img class="w-4" :src="returnIconSrc"/>
                    </button>
                  </div>
                </div>
                
                <div v-for="(peerDetails, peerId) in Object.assign({}, value.staticPeers, value.roamingPeers)" class="relative">
-                 <div v-if="value.attachedStaticPeers.includes(peerId) || value.attachedRoamingPeers.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap highlight-remove-box" :class="[color.attachedPeerDiv[WireGuardHelper.getConnectionId(focusPeerId, peerId)], false ? '' : 'highlight-undo-box']">
+                 <div v-if="value.attachedStaticPeers.includes(peerId) || value.attachedRoamingPeers.includes(peerId)" class="my-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap highlight-remove-box" :class="[color.attachedPeerDiv[WireGuardHelper.getConnectionId(focusPeerId, peerId)], connectionChanged[WireGuardHelper.getConnectionId(focusPeerId, peerId)] ? 'highlight-undo-box' : '']">
                    <div class="inline-block float-right absolute z-20 right-[0.5rem] top-[0.25rem]">
                      <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition remove-button-itself"
                              title="Remove Connection" @click="value.attachedStaticPeers.includes(peerId) ? value.attachedStaticPeers.splice(value.attachedStaticPeers.indexOf(peerId), 1) : value.attachedRoamingPeers.splice(value.attachedRoamingPeers.indexOf(peerId), 1)">
@@ -226,8 +258,8 @@ Vue.component('connection-islands', {
                    <div class="inline-block float-right absolute z-20 right-[2.25rem] top-[0.25rem]">
                      <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                              title="Undo Changes"
-                             @click=""
-                             :disabled="false">
+                             @click="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)] = rollbackData.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]; value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)] = rollbackData.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]; value.persistentKeepaliveEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)] = rollbackData.persistentKeepaliveEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)]; value.persistentKeepaliveValue[WireGuardHelper.getConnectionId(focusPeerId, peerId)] = rollbackData.persistentKeepaliveValue[WireGuardHelper.getConnectionId(focusPeerId, peerId)]; colorRefresh += 1;"
+                             :disabled="!connectionChanged[WireGuardHelper.getConnectionId(focusPeerId, peerId)]">
                        <img class="w-4" :src="returnIconSrc"/>
                      </button>
                    </div>
@@ -322,23 +354,36 @@ Vue.component('connection-islands', {
         attachedPeerDiv: {},
         selectionDiv: WireGuardHelper.checkField('peerCount', [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) ? 'bg-green-50' : 'bg-red-50',
       };
-      this.value.hasError = color.selectionDiv === 'bg-red-50';
+      let hasError = color.selectionDiv === 'bg-red-50';
       for (const peerId of [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) {
         const connectionId = WireGuardHelper.getConnectionId(this.focusPeerId, peerId);
         try {
-          color.allowedIPsAtoB[connectionId] = WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200';
-          color.allowedIPsBtoA[connectionId] = WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200';
-          color.persistentKeepalive[connectionId] = this.value.persistentKeepaliveEnabled[connectionId] && WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200';
-          color.attachedPeerDiv[connectionId] = this.value.isConnectionEnabled[connectionId] && [color.allowedIPsAtoB[connectionId], color.allowedIPsBtoA[connectionId], color.persistentKeepalive[connectionId]].includes('bg-red-200') ? 'bg-red-50' : 'bg-green-50';
+          // eslint-disable-next-line no-nested-ternary
+          color.allowedIPsAtoB[connectionId] = this.value.context === 'create' || this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]
+            ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          // eslint-disable-next-line no-nested-ternary
+          color.allowedIPsBtoA[connectionId] = this.value.context === 'create' || this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]
+            ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          // eslint-disable-next-line no-nested-ternary
+          color.persistentKeepalive[connectionId] = this.value.context === 'create' || this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]
+            ? this.value.persistentKeepaliveEnabled[connectionId] && WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          color.attachedPeerDiv[connectionId] = this.value.isConnectionEnabled[connectionId] && [color.allowedIPsAtoB[connectionId], color.allowedIPsBtoA[connectionId], this.value.persistentKeepaliveEnabled[connectionId] ? color.persistentKeepalive[connectionId] : ''].includes('bg-red-200') ? 'bg-red-50' : 'bg-green-50';
+
+          this.connectionChanged[connectionId] = this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]
+              || this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]
+              || this.value.persistentKeepaliveEnabled[connectionId] !== this.rollbackData.persistentKeepaliveEnabled[connectionId]
+              || this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId];
         } catch (e) {
-          color.allowedIPsAtoB[connectionId] = 'bg-red-50';
-          color.allowedIPsBtoA[connectionId] = 'bg-red-50';
-          color.persistentKeepalive[connectionId] = 'bg-red-50';
-          color.attachedPeerDiv[connectionId] = 'bg-red-50';
+          this.connectionChanged[connectionId] = true;
+          for (const colorField of Object.keys(color)) {
+            if (colorField === 'selectionDiv') continue;
+            color[colorField][connectionId] = 'bg-red-50';
+          }
           console.log(e);
         }
-        this.value.hasError ||= color.attachedPeerDiv[connectionId] === 'bg-red-50';
+        hasError ||= color.attachedPeerDiv[connectionId] === 'bg-red-50';
       }
+      this.value.hasError = hasError;
       return color;
     },
   },
@@ -371,18 +416,10 @@ new Vue({
     dnsmtuIslandData: {
       dns: { enabled: false, value: '' },
       mtu: { enabled: false, value: '' },
-      defaults: {
-        dns: { enabled: false, value: '' },
-        mtu: { enabled: false, value: '' },
-      },
       hasError: false,
     },
     scriptsIslandData: {
-      PreUp: { enabled: false, value: '' },
-      PostUp: { enabled: false, value: '' },
-      PreDown: { enabled: false, value: '' },
-      PostDown: { enabled: false, value: '' },
-      defaults: {
+      scripts: {
         PreUp: { enabled: false, value: '' },
         PostUp: { enabled: false, value: '' },
         PreDown: { enabled: false, value: '' },
@@ -401,15 +438,7 @@ new Vue({
       persistentKeepaliveValue: {},
       allowedIPsAtoB: {},
       allowedIPsBtoA: {},
-      defaults: {
-        attachedStaticPeers: {},
-        attachedRoamingPeers: {},
-        isConnectionEnabled: {},
-        persistentKeepaliveEnabled: {},
-        persistentKeepaliveValue: {},
-        allowedIPsAtoB: {},
-        allowedIPsBtoA: {},
-      },
+      context: '',
       hasError: false,
     },
 
@@ -967,23 +996,14 @@ new Vue({
         this.peerCreateEndpoint = '';
         this.peerCreateShowAdvance = false;
 
-        this.dnsmtuIslandData.defaults.dns.enabled = this.network.defaults.peers.dns.enabled;
-        this.dnsmtuIslandData.defaults.dns.value = this.network.defaults.peers.dns.value;
-        this.dnsmtuIslandData.defaults.mtu.enabled = this.network.defaults.peers.mtu.enabled;
-        this.dnsmtuIslandData.defaults.mtu.value = this.network.defaults.peers.mtu.value;
-        this.dnsmtuIslandData.dns.enabled = this.dnsmtuIslandData.defaults.dns.enabled;
-        this.dnsmtuIslandData.dns.value = this.dnsmtuIslandData.defaults.dns.value;
-        this.dnsmtuIslandData.mtu.enabled = this.dnsmtuIslandData.defaults.mtu.enabled;
-        this.dnsmtuIslandData.mtu.value = this.dnsmtuIslandData.defaults.mtu.value;
+        this.dnsmtuIslandData.dns = JSON.parse(JSON.stringify(this.network.defaults.peers.dns));
+        this.dnsmtuIslandData.mtu = JSON.parse(JSON.stringify(this.network.defaults.peers.mtu));
         this.dnsmtuIslandData.hasError = false;
 
-        this.scriptsIslandData.defaults = this.network.defaults.peers.scripts;
-        this.scriptsIslandData.PreUp = this.scriptsIslandData.defaults.PreUp;
-        this.scriptsIslandData.PostUp = this.scriptsIslandData.defaults.PostUp;
-        this.scriptsIslandData.PreDown = this.scriptsIslandData.defaults.PreDown;
-        this.scriptsIslandData.PostDown = this.scriptsIslandData.defaults.PostDown;
+        this.scriptsIslandData.scripts = JSON.parse(JSON.stringify(this.network.defaults.peers.scripts));
         this.scriptsIslandData.hasError = false;
 
+        this.connectionIslandsData.context = 'create';
         this.connectionIslandsData.selectionBoxTitles = { static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' };
         this.connectionIslandsData.staticPeers = this.staticPeers;
         this.connectionIslandsData.roamingPeers = this.roamingPeers;
@@ -996,20 +1016,15 @@ new Vue({
           const connectionId = WireGuardHelper.getConnectionId(this.peerCreatePeerId, peerId);
           const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
 
-          this.connectionIslandsData.defaults.isConnectionEnabled[connectionId] = true;
-          this.connectionIslandsData.defaults.persistentKeepaliveEnabled[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
-          this.connectionIslandsData.defaults.persistentKeepaliveValue[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
+          this.connectionIslandsData.isConnectionEnabled[connectionId] = true;
+          this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
+          this.connectionIslandsData.persistentKeepaliveValue[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
           // eslint-disable-next-line no-nested-ternary
           const allowedIPsNewToOld = peerDetails.mobility === 'static' ? (this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0') : `${this.network.peers[peerId].address}/32`;
           const allowedIPsOldToNew = `${this.peerCreateAddress}/32`;
-          this.connectionIslandsData.defaults.allowedIPsAtoB[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsOldToNew : allowedIPsNewToOld;
-          this.connectionIslandsData.defaults.allowedIPsBtoA[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsNewToOld : allowedIPsOldToNew;
+          this.connectionIslandsData.allowedIPsAtoB[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsOldToNew : allowedIPsNewToOld;
+          this.connectionIslandsData.allowedIPsBtoA[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsNewToOld : allowedIPsOldToNew;
         }
-        this.connectionIslandsData.isConnectionEnabled = this.connectionIslandsData.defaults.isConnectionEnabled;
-        this.connectionIslandsData.persistentKeepaliveEnabled = this.connectionIslandsData.defaults.persistentKeepaliveEnabled;
-        this.connectionIslandsData.persistentKeepaliveValue = this.connectionIslandsData.defaults.persistentKeepaliveValue;
-        this.connectionIslandsData.allowedIPsAtoB = this.connectionIslandsData.defaults.allowedIPsAtoB;
-        this.connectionIslandsData.allowedIPsBtoA = this.connectionIslandsData.defaults.allowedIPsBtoA;
       } else if (mode === 'delete-preamble') {
         await this.api.deletePreamble({ peerId: this.peerCreatePeerId, address: this.peerCreateAddress });
 
@@ -1049,7 +1064,7 @@ new Vue({
           enabled: this.dnsmtuIslandData.mtu.enabled,
           value: this.dnsmtuIslandData.mtu.value,
         },
-        scripts: this.peerCreateScripts,
+        scripts: this.scriptsIslandData.scripts,
         attachedPeers: attachedPeersCompact,
       }).catch(err => alert(err.message || err.toString()))
         .finally(() => this.refresh().catch(console.error));
