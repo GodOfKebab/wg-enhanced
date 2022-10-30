@@ -599,98 +599,105 @@
                         </div>
                       </div>
 
-                      <div class="m-2 p-1 shadow-md border rounded" :class="[peerEditDNSMTUColor.div]">
-                        <div class="text-gray-800 mb-0.5">
-                          Configure DNS and MTU:
-                        </div>
-                        <div class="flex grid grid-cols-2 gap-2 mb-0.5">
-                          <div class="truncate">
-                            <div class="form-check truncate relative" :class="[peerEditDNS.enabled !== network.peers[peerConfigId].dns.enabled || peerEditDNS.value !== network.peers[peerConfigId].dns.value ? 'highlight-undo-box' : '']">
-                              <label>
-                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerEditDNS.enabled">
-                                <span class="text-gray-800 cursor-pointer text-xs">
-                                    <strong class="text-sm">DNS: </strong>
-                                  </span>
-                              </label>
-                              <input list="inputDNSListEdit" style="width: 25vw;" type="text" placeholder="click to see recommendations"
-                                     class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
-                                     v-model="peerEditDNS.value"
-                                     :class="[peerEditDNSMTUColor.dnsInput]"
-                                     :disabled="!peerEditDNS.enabled"/>
-                              <datalist id="inputDNSListEdit">
-                                <option :value="network.peers.root.address">
-                                  Forward all DNS related traffic to {{network.peers.root.address}}
-                                </option>
-                              </datalist>
-                              <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                                        title="Undo Changes"
-                                        :disabled="peerEditDNS.enabled === network.peers[peerConfigId].dns.enabled && peerEditDNS.value === network.peers[peerConfigId].dns.value"
-                                        @click="peerEditDNS.enabled = network.peers[peerConfigId].dns.enabled; peerEditDNS.value = network.peers[peerConfigId].dns.value;">
-                                  <img class="w-4" :src="returnIconSrc"/>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="truncate">
-                            <div class="form-check truncate relative" :class="[peerEditMTU.enabled !== network.peers[peerConfigId].mtu.enabled || peerEditMTU.value !== network.peers[peerConfigId].mtu.value ? 'highlight-undo-box' : '']">
-                              <label>
-                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerEditMTU.enabled">
-                                <span class="text-gray-800 cursor-pointer text-xs">
-                                    <strong class="text-sm">MTU: </strong>
-                                  </span>
-                              </label>
-                              <input list="inputMTUListEdit" style="width: 25vw;" type="text" placeholder="click to see recommendations"
-                                     class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
-                                     v-model="peerEditMTU.value"
-                                     :class="[peerEditDNSMTUColor.mtuInput]"
-                                     :disabled="!peerEditMTU.enabled"/>
-                              <datalist id="inputMTUListEdit">
-                                <option :value="1420">
-                                  TODO
-                                </option>
-                              </datalist>
-                              <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                                        title="Undo Changes"
-                                        :disabled="peerEditMTU.enabled === network.peers[peerConfigId].mtu.enabled && peerEditMTU.value === network.peers[peerConfigId].mtu.value"
-                                        @click="peerEditMTU.enabled = network.peers[peerConfigId].mtu.enabled; peerEditMTU.value = network.peers[peerConfigId].mtu.value;">
-                                  <img class="w-4" :src="returnIconSrc"/>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
 
-                      <div class=" m-2 p-1 shadow-md border rounded" :class="[peerEditScriptsColor.div]">
-                        <div class="text-gray-800 mb-0.5">
-                          Configure Script Snippets:
-                        </div>
-                        <div v-for="scriptField in ['PreUp', 'PostUp', 'PreDown', 'PostDown']">
-                          <div class="form-check truncate flex items-center relative mb-0.5" :class="[peerEditScripts[scriptField].value !== network.peers[peerConfigId].scripts[scriptField].value || peerEditScripts[scriptField].enabled !== network.peers[peerConfigId].scripts[scriptField].enabled ? 'highlight-undo-box' : '']">
-                            <label class="flex-none">
-                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="peerEditScripts[scriptField].enabled = !peerEditScripts[scriptField].enabled;" :checked="peerEditScripts[scriptField].enabled">
-                              <span class="text-gray-800 cursor-pointer text-xs mr-1">
-                                  <strong class="text-sm">{{ scriptField }}:</strong>
-                                 </span>
-                            </label>
-                            <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
-                                   type="text" :placeholder="`${scriptField} Script (e.g. echo 'Hey, this is ${scriptField} Script';)`"
-                                   v-model="peerEditScripts[scriptField].value"
-                                   :class="[peerEditScriptsColor[scriptField]]"
-                                   :disabled="!peerEditScripts[scriptField].enabled"/>
-                            <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                                      title="Undo Changes"
-                                      :disabled="peerEditScripts[scriptField].value === network.peers[peerConfigId].scripts[scriptField].value && peerEditScripts[scriptField].enabled === network.peers[peerConfigId].scripts[scriptField].enabled"
-                                      @click="peerEditScripts[scriptField].value = network.peers[peerConfigId].scripts[scriptField].value; peerEditScripts[scriptField].enabled = network.peers[peerConfigId].scripts[scriptField].enabled;">
-                                <img class="w-4" :src="returnIconSrc"/>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <dnsmtu-island v-model="dnsmtuIslandData"
+                                     :defaults="network.defaults.peers" ></dnsmtu-island>
+                      <scripts-island v-model="scriptsIslandData"
+                                      :defaults="network.defaults.peers"></scripts-island>
+
+
+<!--                      <div class="m-2 p-1 shadow-md border rounded" :class="[peerEditDNSMTUColor.div]">-->
+<!--                        <div class="text-gray-800 mb-0.5">-->
+<!--                          Configure DNS and MTU:-->
+<!--                        </div>-->
+<!--                        <div class="flex grid grid-cols-2 gap-2 mb-0.5">-->
+<!--                          <div class="truncate">-->
+<!--                            <div class="form-check truncate relative" :class="[peerEditDNS.enabled !== network.peers[peerConfigId].dns.enabled || peerEditDNS.value !== network.peers[peerConfigId].dns.value ? 'highlight-undo-box' : '']">-->
+<!--                              <label>-->
+<!--                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerEditDNS.enabled">-->
+<!--                                <span class="text-gray-800 cursor-pointer text-xs">-->
+<!--                                    <strong class="text-sm">DNS: </strong>-->
+<!--                                  </span>-->
+<!--                              </label>-->
+<!--                              <input list="inputDNSListEdit" style="width: 25vw;" type="text" placeholder="click to see recommendations"-->
+<!--                                     class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"-->
+<!--                                     v-model="peerEditDNS.value"-->
+<!--                                     :class="[peerEditDNSMTUColor.dnsInput]"-->
+<!--                                     :disabled="!peerEditDNS.enabled"/>-->
+<!--                              <datalist id="inputDNSListEdit">-->
+<!--                                <option :value="network.peers.root.address">-->
+<!--                                  Forward all DNS related traffic to {{network.peers.root.address}}-->
+<!--                                </option>-->
+<!--                              </datalist>-->
+<!--                              <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">-->
+<!--                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"-->
+<!--                                        title="Undo Changes"-->
+<!--                                        :disabled="peerEditDNS.enabled === network.peers[peerConfigId].dns.enabled && peerEditDNS.value === network.peers[peerConfigId].dns.value"-->
+<!--                                        @click="peerEditDNS.enabled = network.peers[peerConfigId].dns.enabled; peerEditDNS.value = network.peers[peerConfigId].dns.value;">-->
+<!--                                  <img class="w-4" :src="returnIconSrc"/>-->
+<!--                                </button>-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                          <div class="truncate">-->
+<!--                            <div class="form-check truncate relative" :class="[peerEditMTU.enabled !== network.peers[peerConfigId].mtu.enabled || peerEditMTU.value !== network.peers[peerConfigId].mtu.value ? 'highlight-undo-box' : '']">-->
+<!--                              <label>-->
+<!--                                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="peerEditMTU.enabled">-->
+<!--                                <span class="text-gray-800 cursor-pointer text-xs">-->
+<!--                                    <strong class="text-sm">MTU: </strong>-->
+<!--                                  </span>-->
+<!--                              </label>-->
+<!--                              <input list="inputMTUListEdit" style="width: 25vw;" type="text" placeholder="click to see recommendations"-->
+<!--                                     class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"-->
+<!--                                     v-model="peerEditMTU.value"-->
+<!--                                     :class="[peerEditDNSMTUColor.mtuInput]"-->
+<!--                                     :disabled="!peerEditMTU.enabled"/>-->
+<!--                              <datalist id="inputMTUListEdit">-->
+<!--                                <option :value="1420">-->
+<!--                                  TODO-->
+<!--                                </option>-->
+<!--                              </datalist>-->
+<!--                              <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">-->
+<!--                                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"-->
+<!--                                        title="Undo Changes"-->
+<!--                                        :disabled="peerEditMTU.enabled === network.peers[peerConfigId].mtu.enabled && peerEditMTU.value === network.peers[peerConfigId].mtu.value"-->
+<!--                                        @click="peerEditMTU.enabled = network.peers[peerConfigId].mtu.enabled; peerEditMTU.value = network.peers[peerConfigId].mtu.value;">-->
+<!--                                  <img class="w-4" :src="returnIconSrc"/>-->
+<!--                                </button>-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                        </div>-->
+<!--                      </div>-->
+
+<!--                      <div class=" m-2 p-1 shadow-md border rounded" :class="[peerEditScriptsColor.div]">-->
+<!--                        <div class="text-gray-800 mb-0.5">-->
+<!--                          Configure Script Snippets:-->
+<!--                        </div>-->
+<!--                        <div v-for="scriptField in ['PreUp', 'PostUp', 'PreDown', 'PostDown']">-->
+<!--                          <div class="form-check truncate flex items-center relative mb-0.5" :class="[peerEditScripts[scriptField].value !== network.peers[peerConfigId].scripts[scriptField].value || peerEditScripts[scriptField].enabled !== network.peers[peerConfigId].scripts[scriptField].enabled ? 'highlight-undo-box' : '']">-->
+<!--                            <label class="flex-none">-->
+<!--                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="peerEditScripts[scriptField].enabled = !peerEditScripts[scriptField].enabled;" :checked="peerEditScripts[scriptField].enabled">-->
+<!--                              <span class="text-gray-800 cursor-pointer text-xs mr-1">-->
+<!--                                  <strong class="text-sm">{{ scriptField }}:</strong>-->
+<!--                                 </span>-->
+<!--                            </label>-->
+<!--                            <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"-->
+<!--                                   type="text" :placeholder="`${scriptField} Script (e.g. echo 'Hey, this is ${scriptField} Script';)`"-->
+<!--                                   v-model="peerEditScripts[scriptField].value"-->
+<!--                                   :class="[peerEditScriptsColor[scriptField]]"-->
+<!--                                   :disabled="!peerEditScripts[scriptField].enabled"/>-->
+<!--                            <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">-->
+<!--                              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"-->
+<!--                                      title="Undo Changes"-->
+<!--                                      :disabled="peerEditScripts[scriptField].value === network.peers[peerConfigId].scripts[scriptField].value && peerEditScripts[scriptField].enabled === network.peers[peerConfigId].scripts[scriptField].enabled"-->
+<!--                                      @click="peerEditScripts[scriptField].value = network.peers[peerConfigId].scripts[scriptField].value; peerEditScripts[scriptField].enabled = network.peers[peerConfigId].scripts[scriptField].enabled;">-->
+<!--                                <img class="w-4" :src="returnIconSrc"/>-->
+<!--                              </button>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                        </div>-->
+<!--                      </div>-->
 
                       <div class="m-2 p-1 shadow-md border rounded relative" :class="[peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'bg-green-100' : 'bg-green-50', peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'highlight-undo-box' : '']">
                         <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
@@ -725,152 +732,158 @@
                         </div>
                       </div>
 
+                      <connection-islands v-model="connectionIslandsData"
+                                          :focus-peer-id="peerConfigId"
+                                          :focus-peer-name="peerEditName"
+                                          :get-new-pre-shared-key="async () => { return await (new API()).getNewPreSharedKey() }"></connection-islands>
+
+
                       <!-- Peer's connections edit -->
-                      <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0 || peerEditAttachablePeerIds.roamingPeers.length > 0" class="m-2 p-1 shadow-md border rounded relative" :class="[peerEditAttachedPeersCountDivColor, Object.keys(this.peerEditChangedFieldsCompute[1]).length + Object.keys(this.peerEditChangedFieldsCompute[2]).length === 0 ? '' : 'highlight-undo-box']">
-                        <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0">
-                          <div class="text-gray-800">
-                            Attached static peers:
-                          </div>
-                          <div class="form-check">
-                            <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticSelectAll" @change="peerEditWindowHandler('init-connections')">
-                              <span>Select All</span>
-                            </label>
-                          </div>
-                          <div class="flex grid grid-cols-2">
-                            <div v-for="peerId in peerEditAttachablePeerIds.staticPeers"
-                                 class="relative overflow-hidden">
-                              <div class="form-check truncate">
-                                <label>
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerEditWindowHandler('init-connection', {peerId: peerId})">
-                                  <span class="text-gray-800 cursor-pointer text-xs">
-                                    <strong class="text-sm">{{ network.peers[peerId].name }}</strong> {{ network.peers[peerId].address }} ({{ peerId }})
-                                  </span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+<!--                      <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0 || peerEditAttachablePeerIds.roamingPeers.length > 0" class="m-2 p-1 shadow-md border rounded relative" :class="[peerEditAttachedPeersCountDivColor, Object.keys(this.peerEditChangedFieldsCompute[1]).length + Object.keys(this.peerEditChangedFieldsCompute[2]).length === 0 ? '' : 'highlight-undo-box']">-->
+<!--                        <div v-if="peerEditAttachablePeerIds.staticPeers.length > 0">-->
+<!--                          <div class="text-gray-800">-->
+<!--                            Attached static peers:-->
+<!--                          </div>-->
+<!--                          <div class="form-check">-->
+<!--                            <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">-->
+<!--                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticSelectAll" @change="peerEditWindowHandler('init-connections')">-->
+<!--                              <span>Select All</span>-->
+<!--                            </label>-->
+<!--                          </div>-->
+<!--                          <div class="flex grid grid-cols-2">-->
+<!--                            <div v-for="peerId in peerEditAttachablePeerIds.staticPeers"-->
+<!--                                 class="relative overflow-hidden">-->
+<!--                              <div class="form-check truncate">-->
+<!--                                <label>-->
+<!--                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditStaticConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerEditWindowHandler('init-connection', {peerId: peerId})">-->
+<!--                                  <span class="text-gray-800 cursor-pointer text-xs">-->
+<!--                                    <strong class="text-sm">{{ network.peers[peerId].name }}</strong> {{ network.peers[peerId].address }} ({{ peerId }})-->
+<!--                                  </span>-->
+<!--                                </label>-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                        </div>-->
 
-                        <div v-if="peerEditAttachablePeerIds.roamingPeers.length > 0">
-                          <div class="text-gray-800">
-                            Attached roaming peers:
-                          </div>
-                          <div class="form-check">
-                            <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingSelectAll" @change="peerEditWindowHandler('init-connections')">
-                              <span>Select All</span>
-                            </label>
-                          </div>
-                          <div class="flex grid grid-cols-2">
-                            <div v-for="peerId in peerEditAttachablePeerIds.roamingPeers"
-                                 class="relative overflow-hidden">
-                              <div class="form-check truncate">
-                                <label>
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerEditWindowHandler('init-connection', {peerId: peerId})">
-                                  <span class="text-gray-800 cursor-pointer text-xs">
-                                    <strong class="text-sm">{{ network.peers[peerId].name }}</strong> {{ network.peers[peerId].address }} ({{ peerId }})
-                                  </span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                                  title="Undo Changes"
-                                  :disabled="Object.keys(this.peerEditChangedFieldsCompute[1]).length + Object.keys(this.peerEditChangedFieldsCompute[2]).length === 0"
-                                  @click="peerEditStaticConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId)); peerEditRoamingConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId));">
-                            <img class="w-4" :src="returnIconSrc"/>
-                          </button>
-                        </div>
-                      </div>
+<!--                        <div v-if="peerEditAttachablePeerIds.roamingPeers.length > 0">-->
+<!--                          <div class="text-gray-800">-->
+<!--                            Attached roaming peers:-->
+<!--                          </div>-->
+<!--                          <div class="form-check">-->
+<!--                            <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">-->
+<!--                              <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingSelectAll" @change="peerEditWindowHandler('init-connections')">-->
+<!--                              <span>Select All</span>-->
+<!--                            </label>-->
+<!--                          </div>-->
+<!--                          <div class="flex grid grid-cols-2">-->
+<!--                            <div v-for="peerId in peerEditAttachablePeerIds.roamingPeers"-->
+<!--                                 class="relative overflow-hidden">-->
+<!--                              <div class="form-check truncate">-->
+<!--                                <label>-->
+<!--                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model="peerEditRoamingConnectionIds" :value="WireGuardHelper.getConnectionId(peerConfigId, peerId)" @change="peerEditWindowHandler('init-connection', {peerId: peerId})">-->
+<!--                                  <span class="text-gray-800 cursor-pointer text-xs">-->
+<!--                                    <strong class="text-sm">{{ network.peers[peerId].name }}</strong> {{ network.peers[peerId].address }} ({{ peerId }})-->
+<!--                                  </span>-->
+<!--                                </label>-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                        </div>-->
+<!--                        <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">-->
+<!--                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"-->
+<!--                                  title="Undo Changes"-->
+<!--                                  :disabled="Object.keys(this.peerEditChangedFieldsCompute[1]).length + Object.keys(this.peerEditChangedFieldsCompute[2]).length === 0"-->
+<!--                                  @click="peerEditStaticConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId)); peerEditRoamingConnectionIds = Object.keys(network.connections).filter(connectionId => connectionId.includes(peerConfigId));">-->
+<!--                            <img class="w-4" :src="returnIconSrc"/>-->
+<!--                          </button>-->
+<!--                        </div>-->
+<!--                      </div>-->
 
-                      <!-- Peer's connections in boxes -->
-                      <div v-for="connectionId in peerEditConnectionIds" class="relative highlight-remove-box" :class="[!peerEditResetConnectionFieldsDisabled[connectionId] ? 'highlight-undo-box' : '']">
-                        <div class="inline-block float-right absolute z-20 right-[1rem] top-[0.25rem]">
-                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition remove-button-itself"
-                                  title="Remove Connection"
-                                  @click="peerEditStaticConnectionIds.includes(connectionId) ? peerEditStaticConnectionIds.splice(peerEditStaticConnectionIds.indexOf(connectionId), 1) : peerEditRoamingConnectionIds.splice(peerEditRoamingConnectionIds.indexOf(connectionId), 1)">
-                            <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                              <path fill-rule="evenodd"
-                                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                          </button>
-                        </div>
-                        <div class="inline-block float-right absolute z-20 right-[2.75rem] top-[0.25rem]">
-                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                                  title="Undo Changes"
-                                  @click="peerEditResetConnectionFields(connectionId)"
-                                  :disabled="Object.keys(peerEditResetConnectionFieldsDisabled).includes(connectionId) ? peerEditResetConnectionFieldsDisabled[connectionId] : true">
-                            <img class="w-4" :src="returnIconSrc"/>
-                          </button>
-                        </div>
-                        <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap relative" :class="[peerEditConnectionColor.div[connectionId]]">
-                          <div class=" ml-1">
-                            <div class="flex">
-                              <div class="form-check inline-block grow truncate">
-                                <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">
-                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model.lazy="peerEditIsConnectionEnabled[connectionId]" @change="peerEditConnectionColorRefresh += 1">
-                                  <span class="text-gray-800 text-xs">
-                                  <strong class="text-sm">{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong>
-                                  {{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].address }}
-                                  ({{ connectionId.replace(peerConfigId, "").replace("*", "") }})
-                                </span>
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                          <div v-show="peerEditIsConnectionEnabled[connectionId]">
-                            <div v-if="Object.keys(network.connections).includes(connectionId)" v-for="connectionKey in ['preSharedKey', 'latestHandshakeAt']" class="mb-0.5 refresh-key">
-                              <div v-if="network.connections[connectionId][connectionKey]" class="flex grid grid-cols-3 gap-1 text-xs mx-6">
-                                <div class="col-span-1 text-xs">
-                                  <span class="text-gray-800 align-middle">
-                                      <strong class="">{{ connectionKey }}</strong>:
-                                  </span>
-                                </div>
-                                <div v-if="connectionKey === 'preSharedKey'" class="col-span-2 text-xs">
-                                  <button class="align-middle rounded bg-gray-100 hover:bg-gray-600 hover:text-white transition-all" @click="refreshConnectionEditKeys(connectionId)">
-                                    <img :src="refreshIconSrc">
-                                  </button>
-                                  <span class="text-gray-800 text-xs pr-1 align-middle">
-                                    {{ peerEditConnectionPreSharedKeys[connectionId] }}
-                                  </span>
-                                </div>
-                                <div v-else class="col-span-2 text-xs">
-                                  <span class="text-gray-800 text-xs pr-1 align-middle">
-                                    {{ network.connections[connectionId][connectionKey] }}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="text-xs mx-6 flex items-center">
-                              <label class=" flex items-center">
-                                <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer inline-block" type="checkbox" v-model="peerEditPersistentKeepaliveEnabledData[connectionId]" @change="peerEditConnectionColorRefresh += 1">
-                                <span class="text-gray-800 cursor-pointer text-xs mr-1">
-                                  <strong>Persistent Keepalive:</strong>
-                                </span>
-                              </label>
-                              <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 inline-block" v-model="peerEditPersistentKeepaliveValueData[connectionId]" type="string" :disabled="!peerEditPersistentKeepaliveEnabledData[connectionId]" :class="[peerEditPersistentKeepaliveEnabledData[connectionId] ? peerEditConnectionColor.persistentKeepalive[connectionId] : 'bg-gray-100']" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
-                            </div>
-                            <div class="relative text-gray-800 text-xs mx-6">
-                              <div class="mt-1 flex items-center">
-                                <span class="flex-none"><strong>{{ network.peers[peerConfigId].name }}</strong> will forward IP subnet(s)</span>
-                                <input v-if="connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[connectionId]" :class="[peerEditConnectionColor.allowedIPsAtoB[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
-                                <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[connectionId]" :class="[peerEditConnectionColor.allowedIPsBtoA[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
-                                <span class="flex-none pr-2"> to <strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong></span>
-                              </div>
-                              <div class="mt-1 flex">
-                                <span class="flex-none"><strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong> will forward IP subnet(s)</span>
-                                <input v-if="!connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[connectionId]" :class="[peerEditConnectionColor.allowedIPsAtoB[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
-                                <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[connectionId]" :class="[peerEditConnectionColor.allowedIPsBtoA[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">
-                                <span class="flex-none pr-2"> to <strong>{{ network.peers[peerConfigId].name }}</strong></span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+<!--                      &lt;!&ndash; Peer's connections in boxes &ndash;&gt;-->
+<!--                      <div v-for="connectionId in peerEditConnectionIds" class="relative highlight-remove-box" :class="[!peerEditResetConnectionFieldsDisabled[connectionId] ? 'highlight-undo-box' : '']">-->
+<!--                        <div class="inline-block float-right absolute z-20 right-[1rem] top-[0.25rem]">-->
+<!--                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-red-600 hover:text-white opacity-0 transition remove-button-itself"-->
+<!--                                  title="Remove Connection"-->
+<!--                                  @click="peerEditStaticConnectionIds.includes(connectionId) ? peerEditStaticConnectionIds.splice(peerEditStaticConnectionIds.indexOf(connectionId), 1) : peerEditRoamingConnectionIds.splice(peerEditRoamingConnectionIds.indexOf(connectionId), 1)">-->
+<!--                            <svg class="w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">-->
+<!--                              <path fill-rule="evenodd"-->
+<!--                                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"-->
+<!--                                    clip-rule="evenodd" />-->
+<!--                            </svg>-->
+<!--                          </button>-->
+<!--                        </div>-->
+<!--                        <div class="inline-block float-right absolute z-20 right-[2.75rem] top-[0.25rem]">-->
+<!--                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"-->
+<!--                                  title="Undo Changes"-->
+<!--                                  @click="peerEditResetConnectionFields(connectionId)"-->
+<!--                                  :disabled="Object.keys(peerEditResetConnectionFieldsDisabled).includes(connectionId) ? peerEditResetConnectionFieldsDisabled[connectionId] : true">-->
+<!--                            <img class="w-4" :src="returnIconSrc"/>-->
+<!--                          </button>-->
+<!--                        </div>-->
+<!--                        <div class="m-2 p-1 shadow-md border rounded bg-blue-50 overflow-x-auto whitespace-nowrap relative" :class="[peerEditConnectionColor.div[connectionId]]">-->
+<!--                          <div class=" ml-1">-->
+<!--                            <div class="flex">-->
+<!--                              <div class="form-check inline-block grow truncate">-->
+<!--                                <label class="form-check-label inline-block text-gray-800 cursor-pointer text-sm">-->
+<!--                                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox" v-model.lazy="peerEditIsConnectionEnabled[connectionId]" @change="peerEditConnectionColorRefresh += 1">-->
+<!--                                  <span class="text-gray-800 text-xs">-->
+<!--                                  <strong class="text-sm">{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong>-->
+<!--                                  {{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].address }}-->
+<!--                                  ({{ connectionId.replace(peerConfigId, "").replace("*", "") }})-->
+<!--                                </span>-->
+<!--                                </label>-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                          <div v-show="peerEditIsConnectionEnabled[connectionId]">-->
+<!--                            <div v-if="Object.keys(network.connections).includes(connectionId)" v-for="connectionKey in ['preSharedKey', 'latestHandshakeAt']" class="mb-0.5 refresh-key">-->
+<!--                              <div v-if="network.connections[connectionId][connectionKey]" class="flex grid grid-cols-3 gap-1 text-xs mx-6">-->
+<!--                                <div class="col-span-1 text-xs">-->
+<!--                                  <span class="text-gray-800 align-middle">-->
+<!--                                      <strong class="">{{ connectionKey }}</strong>:-->
+<!--                                  </span>-->
+<!--                                </div>-->
+<!--                                <div v-if="connectionKey === 'preSharedKey'" class="col-span-2 text-xs">-->
+<!--                                  <button class="align-middle rounded bg-gray-100 hover:bg-gray-600 hover:text-white transition-all" @click="refreshConnectionEditKeys(connectionId)">-->
+<!--                                    <img :src="refreshIconSrc">-->
+<!--                                  </button>-->
+<!--                                  <span class="text-gray-800 text-xs pr-1 align-middle">-->
+<!--                                    {{ peerEditConnectionPreSharedKeys[connectionId] }}-->
+<!--                                  </span>-->
+<!--                                </div>-->
+<!--                                <div v-else class="col-span-2 text-xs">-->
+<!--                                  <span class="text-gray-800 text-xs pr-1 align-middle">-->
+<!--                                    {{ network.connections[connectionId][connectionKey] }}-->
+<!--                                  </span>-->
+<!--                                </div>-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                            <div class="text-xs mx-6 flex items-center">-->
+<!--                              <label class=" flex items-center">-->
+<!--                                <input class="form-check-input appearance-none h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer inline-block" type="checkbox" v-model="peerEditPersistentKeepaliveEnabledData[connectionId]" @change="peerEditConnectionColorRefresh += 1">-->
+<!--                                <span class="text-gray-800 cursor-pointer text-xs mr-1">-->
+<!--                                  <strong>Persistent Keepalive:</strong>-->
+<!--                                </span>-->
+<!--                              </label>-->
+<!--                              <input class="text-gray-800 text-xs mr-1 rounded-md pl-1 inline-block" v-model="peerEditPersistentKeepaliveValueData[connectionId]" type="string" :disabled="!peerEditPersistentKeepaliveEnabledData[connectionId]" :class="[peerEditPersistentKeepaliveEnabledData[connectionId] ? peerEditConnectionColor.persistentKeepalive[connectionId] : 'bg-gray-100']" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">-->
+<!--                            </div>-->
+<!--                            <div class="relative text-gray-800 text-xs mx-6">-->
+<!--                              <div class="mt-1 flex items-center">-->
+<!--                                <span class="flex-none"><strong>{{ network.peers[peerConfigId].name }}</strong> will forward IP subnet(s)</span>-->
+<!--                                <input v-if="connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[connectionId]" :class="[peerEditConnectionColor.allowedIPsAtoB[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">-->
+<!--                                <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[connectionId]" :class="[peerEditConnectionColor.allowedIPsBtoA[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">-->
+<!--                                <span class="flex-none pr-2"> to <strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong></span>-->
+<!--                              </div>-->
+<!--                              <div class="mt-1 flex">-->
+<!--                                <span class="flex-none"><strong>{{ network.peers[connectionId.replace(peerConfigId, "").replace("*", "")].name }}</strong> will forward IP subnet(s)</span>-->
+<!--                                <input v-if="!connectionId.startsWith(peerConfigId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsAtoB[connectionId]" :class="[peerEditConnectionColor.allowedIPsAtoB[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">-->
+<!--                                <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="peerEditAllowedIPsBtoA[connectionId]" :class="[peerEditConnectionColor.allowedIPsBtoA[connectionId]]" @change="peerEditConnectionColorRefresh += 1" @keyup="peerEditConnectionColorRefresh += 1">-->
+<!--                                <span class="flex-none pr-2"> to <strong>{{ network.peers[peerConfigId].name }}</strong></span>-->
+<!--                              </div>-->
+<!--                            </div>-->
+<!--                          </div>-->
+<!--                        </div>-->
+<!--                      </div>-->
                     </div>
 
                     <!-- show config -->
