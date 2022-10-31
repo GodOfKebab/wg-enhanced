@@ -40,6 +40,7 @@ Vue.component('dnsmtu-island', {
   },
   created() {
     this.rollbackData = JSON.parse(JSON.stringify(this.value));
+    this.value.changed = false;
   },
   emits: ['update:value'],
   template: `<div class="my-2 p-1 shadow-md border rounded" :class="[colors.div]">
@@ -84,16 +85,21 @@ Vue.component('dnsmtu-island', {
              </div>`,
   computed: {
     colors() {
+      let changed = false;
+      let error = null;
       const colors = {};
       for (const field of ['dns', 'mtu']) {
         // eslint-disable-next-line no-nested-ternary
         colors[field] = this.value.context === 'create' || this.value[field].enabled !== this.rollbackData[field].enabled || this.value[field].value !== this.rollbackData[field].value
           ? WireGuardHelper.checkField(field, this.value[field]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+        changed ||= colors[field] !== 'bg-white';
+        error = this.value[field].enabled && colors[field] === 'bg-red-200' ? field : error;
       }
       // eslint-disable-next-line no-nested-ternary
       colors.div = this.value.dns.enabled || this.value.mtu.enabled ? ((this.value.dns.enabled && colors.dns === 'bg-red-200') || (this.value.mtu.enabled && colors.mtu === 'bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
-      this.value.changed = JSON.stringify(this.value) !== JSON.stringify(this.rollbackData);
-      this.value.hasError = colors.div === 'bg-red-50';
+      this.value.changed = changed;
+      this.value.error = error;
+
       return colors;
     },
   },
@@ -115,6 +121,7 @@ Vue.component('scripts-island', {
   },
   created() {
     this.rollbackData = JSON.parse(JSON.stringify(this.value));
+    this.value.changed = false;
   },
   template: `<div class="p-1 shadow-md border rounded" :class="[colors.div]">
                <div class="text-gray-800 mb-0.5">
@@ -146,11 +153,15 @@ Vue.component('scripts-island', {
              </div>`,
   computed: {
     colors() {
+      let changed = false;
+      let error = null;
       const colors = {};
       for (const field of ['PreUp', 'PostUp', 'PreDown', 'PostDown']) {
         // eslint-disable-next-line no-nested-ternary
         colors[field] = this.value.context === 'create' || this.value.scripts[field].enabled !== this.rollbackData.scripts[field].enabled || this.value.scripts[field].value !== this.rollbackData.scripts[field].value
           ? WireGuardHelper.checkField('script', this.value.scripts[field]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+        changed ||= colors[field] !== 'bg-white';
+        error = this.value.scripts[field].enabled && colors[field] === 'bg-red-200' ? field : error;
       }
       // eslint-disable-next-line no-nested-ternary
       colors.div = (this.value.scripts.PreUp.enabled
@@ -161,8 +172,9 @@ Vue.component('scripts-island', {
             || (this.value.scripts.PostUp.enabled && colors.PostUp === 'bg-red-200')
             || (this.value.scripts.PreDown.enabled && colors.PreDown === 'bg-red-200')
             || (this.value.scripts.PostDown.enabled && colors.PostDown === 'bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
-      this.value.changed = JSON.stringify(this.value) !== JSON.stringify(this.rollbackData);
-      this.value.hasError = colors.div === 'bg-red-50';
+      this.value.changed = changed;
+      this.value.error = error;
+
       return colors;
     },
   },
@@ -183,6 +195,7 @@ Vue.component('connection-islands', {
   },
   created() {
     this.rollbackData = JSON.parse(JSON.stringify(this.value));
+    this.value.changed = false;
     for (const peerId of [...Object.keys(this.value.staticPeers), ...Object.keys(this.value.roamingPeers)]) {
       const connectionId = WireGuardHelper.getConnectionId(this.focusPeerId, peerId);
       this.connectionChanged[connectionId] = false;
@@ -388,19 +401,25 @@ Vue.component('connection-islands', {
         attachedPeerDiv: {},
         selectionDiv: WireGuardHelper.checkField('peerCount', [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) ? 'bg-green-50' : 'bg-red-50',
       };
-      let hasError = color.selectionDiv === 'bg-red-50';
+      let changed = JSON.stringify([...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) !== JSON.stringify([...this.rollbackData.attachedStaticPeers, ...this.rollbackData.attachedRoamingPeers]);
+      let error = null;
       for (const peerId of [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) {
         const connectionId = WireGuardHelper.getConnectionId(this.focusPeerId, peerId);
         try {
           // eslint-disable-next-line no-nested-ternary
           color.allowedIPsAtoB[connectionId] = this.value.context === 'create' || this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]
             ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          error = color.allowedIPsAtoB[connectionId] === 'bg-red-200' ? `${connectionId}'s 'allowedIPsAtoB' field` : error;
+
           // eslint-disable-next-line no-nested-ternary
           color.allowedIPsBtoA[connectionId] = this.value.context === 'create' || this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]
             ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          error = color.allowedIPsBtoA[connectionId] === 'bg-red-200' ? `${connectionId}'s 'allowedIPsBtoA' field` : error;
+
           // eslint-disable-next-line no-nested-ternary
           color.persistentKeepalive[connectionId] = this.value.context === 'create' || this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]
             ? this.value.persistentKeepaliveEnabled[connectionId] && WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          error = color.persistentKeepalive[connectionId] === 'bg-red-200' ? `${connectionId}'s 'persistentKeepalive' field` : error;
 
           this.connectionChanged[connectionId] = this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]
               || this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]
@@ -418,9 +437,11 @@ Vue.component('connection-islands', {
           }
           console.log(e);
         }
-        hasError ||= color.attachedPeerDiv[connectionId] === 'bg-red-50';
+        changed ||= this.connectionChanged[connectionId];
       }
-      this.value.hasError = hasError;
+      this.value.changed = changed;
+      this.value.error = error;
+
       return color;
     },
   },
@@ -454,8 +475,8 @@ new Vue({
       dns: { enabled: false, value: '' },
       mtu: { enabled: false, value: '' },
       context: '',
-      changed: true,
-      hasError: false,
+      changed: false,
+      error: null,
     },
     scriptsIslandData: {
       scripts: {
@@ -464,7 +485,8 @@ new Vue({
         PreDown: { enabled: false, value: '' },
         PostDown: { enabled: false, value: '' },
       },
-      hasError: false,
+      changed: false,
+      error: null,
     },
     connectionIslandsData: {
       selectionBoxTitles: { static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' },
@@ -480,7 +502,8 @@ new Vue({
       latestHandshakeAt: {},
       preSharedKey: {},
       context: '',
-      hasError: false,
+      changed: false,
+      error: null,
     },
 
     peerCreatePeerId: '',
@@ -1040,10 +1063,10 @@ new Vue({
         this.dnsmtuIslandData.context = 'create';
         this.dnsmtuIslandData.dns = JSON.parse(JSON.stringify(this.network.defaults.peers.dns));
         this.dnsmtuIslandData.mtu = JSON.parse(JSON.stringify(this.network.defaults.peers.mtu));
-        this.dnsmtuIslandData.hasError = false;
+        this.dnsmtuIslandData.error = null;
 
         this.scriptsIslandData.scripts = JSON.parse(JSON.stringify(this.network.defaults.peers.scripts));
-        this.scriptsIslandData.hasError = false;
+        this.scriptsIslandData.error = null;
 
         this.connectionIslandsData.context = 'create';
         this.connectionIslandsData.selectionBoxTitles = { static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' };
@@ -1052,7 +1075,7 @@ new Vue({
         // enable the root server as default
         this.connectionIslandsData.attachedStaticPeers = ['root'];
         this.connectionIslandsData.attachedRoamingPeers = [];
-        this.connectionIslandsData.hasError = false;
+        this.connectionIslandsData.error = null;
 
         for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
           const connectionId = WireGuardHelper.getConnectionId(this.peerCreatePeerId, peerId);
@@ -1133,10 +1156,10 @@ new Vue({
         this.dnsmtuIslandData.context = 'edit';
         this.dnsmtuIslandData.dns = JSON.parse(JSON.stringify(this.network.peers[peerId]['dns']));
         this.dnsmtuIslandData.mtu = JSON.parse(JSON.stringify(this.network.peers[peerId]['mtu']));
-        this.dnsmtuIslandData.hasError = false;
+        this.dnsmtuIslandData.error = null;
 
         this.scriptsIslandData.scripts = JSON.parse(JSON.stringify(this.network.peers[peerId]['scripts']));
-        this.scriptsIslandData.hasError = false;
+        this.scriptsIslandData.error = null;
 
         this.connectionIslandsData.context = 'edit';
         this.connectionIslandsData.selectionBoxTitles = { static: 'Attached static peers:', roaming: 'Attached roaming peers:' };
@@ -1164,7 +1187,7 @@ new Vue({
           const connectionId = WireGuardHelper.getConnectionId(roamingPeerId, peerId);
           if (Object.keys(this.network.connections).includes(connectionId)) this.connectionIslandsData.attachedRoamingPeers.push(roamingPeerId);
         }
-        this.connectionIslandsData.hasError = false;
+        this.connectionIslandsData.error = null;
 
         this.connectionIslandsData.isConnectionEnabled = {};
         this.connectionIslandsData.persistentKeepaliveEnabled = {};
@@ -1418,11 +1441,6 @@ new Vue({
       this.peerEditPublicKey = publicKey;
       this.peerEditPrivateKey = privateKey;
     },
-    // async refreshConnectionEditKeys(connectionId) {
-    //   const { preSharedKey } = await this.api.getNewPreSharedKey();
-    //   this.peerEditConnectionPreSharedKeys[connectionId] = preSharedKey;
-    //   this.peerEditConnectionColorRefresh += 1;
-    // },
     graphDisplayTraffic(connectionId) {
       if (!this.graph) return;
       this.graph.graphData().links.forEach(link => {
@@ -1516,9 +1534,9 @@ new Vue({
     peerCreateEligibilityOverall() {
       return this.peerCreateNameColor !== 'bg-red-50'
           && !(this.peerCreateMobility === 'static' && this.peerCreateEndpointColor === 'bg-red-50')
-          && !this.dnsmtuIslandData.hasError
-          && !this.scriptsIslandData.hasError
-          && !this.connectionIslandsData.hasError;
+          && !this.dnsmtuIslandData.error
+          && !this.scriptsIslandData.error
+          && !this.connectionIslandsData.error;
     },
     peerEditNameColor() {
       // eslint-disable-next-line no-nested-ternary
@@ -1537,39 +1555,6 @@ new Vue({
       this.peerEditAssignedColor.endpoint = this.peerEditMobility === 'static' ? this.peerEditEndpoint !== this.network.peers[this.peerConfigId].endpoint
         ? (WireGuardHelper.checkField('endpoint', this.peerEditEndpoint) ? 'bg-green-200' : 'bg-red-200') : 'bg-white' : 'bg-gray-100';
       return this.peerEditAssignedColor.endpoint;
-    },
-    peerEditDNSMTUColor() {
-      let error = false;
-      let changeDetected = false;
-      // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.dnsmtu.dnsInput = (this.network.peers[this.peerConfigId].dns.value === '' || this.peerEditDNS.value !== this.network.peers[this.peerConfigId].dns.value)
-        ? (WireGuardHelper.checkField('dns', { enabled: true, value: this.peerEditDNS.value }) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
-      // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.dnsmtu.mtuInput = (this.network.peers[this.peerConfigId].mtu.value === '' || this.peerEditMTU.value !== this.network.peers[this.peerConfigId].mtu.value)
-        ? (WireGuardHelper.checkField('mtu', { enabled: true, value: this.peerEditMTU.value }) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
-
-      error ||= this.peerEditDNS.enabled && this.peerEditAssignedColor.dnsmtu.dnsInput === 'bg-red-200';
-      changeDetected ||= this.peerEditAssignedColor.dnsmtu.dnsInput === 'bg-green-200';
-      error ||= this.peerEditMTU.enabled && this.peerEditAssignedColor.dnsmtu.mtuInput === 'bg-red-200';
-      changeDetected ||= this.peerEditAssignedColor.dnsmtu.mtuInput === 'bg-green-200';
-      // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.dnsmtu.div = this.peerEditDNS.enabled || this.peerEditMTU.enabled ? error ? 'bg-red-50' : changeDetected ? 'bg-green-100' : 'bg-green-50' : 'bg-gray-100';
-      return this.peerEditAssignedColor.dnsmtu;
-    },
-    peerEditScriptsColor() {
-      let anyEnabled = false;
-      let error = false;
-      let changeDetected = false;
-      for (const script of ['PreUp', 'PreDown', 'PostUp', 'PostDown']) {
-        // eslint-disable-next-line no-nested-ternary
-        this.peerEditAssignedColor.scripts[script] = (this.network.peers[this.peerConfigId].scripts[script].value === '' || this.peerEditScripts[script].value !== this.network.peers[this.peerConfigId].scripts[script].value) ? WireGuardHelper.checkField('script', this.peerEditScripts[script]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
-        error ||= this.peerEditScripts[script].enabled && this.peerEditAssignedColor.scripts[script] === 'bg-red-200';
-        changeDetected ||= this.peerEditAssignedColor.scripts[script] === 'bg-green-200';
-        anyEnabled ||= this.peerEditScripts[script].enabled;
-      }
-      // eslint-disable-next-line no-nested-ternary
-      this.peerEditAssignedColor.scripts.div = anyEnabled ? error ? 'bg-red-50' : changeDetected ? 'bg-green-100' : 'bg-green-50' : 'bg-gray-100';
-      return this.peerEditAssignedColor.scripts;
     },
     peerEditConfigColor() {
       let error = false;
@@ -1598,52 +1583,6 @@ new Vue({
       });
       return { staticPeers, roamingPeers };
     },
-    peerEditStaticSelectAll: {
-      get() {
-        return this.peerEditAttachablePeerIds.staticPeers.every(peerId => {
-          const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
-          return this.peerEditStaticConnectionIds.includes(connectionId);
-        });
-      },
-      set(value) {
-        const attached = [];
-
-        if (value) {
-          this.peerEditAttachablePeerIds.staticPeers.forEach(peerId => {
-            const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
-            attached.push(connectionId);
-            if (!(connectionId in this.peerEditStaticConnectionIds)) {
-              this.peerEditIsConnectionEnabled[connectionId] = true;
-            }
-          });
-        }
-
-        this.peerEditStaticConnectionIds = attached;
-      },
-    },
-    peerEditRoamingSelectAll: {
-      get() {
-        return this.peerEditAttachablePeerIds.roamingPeers.every(peerId => {
-          const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
-          return this.peerEditRoamingConnectionIds.includes(connectionId);
-        });
-      },
-      set(value) {
-        const attached = [];
-
-        if (value) {
-          this.peerEditAttachablePeerIds.roamingPeers.forEach(peerId => {
-            const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
-            attached.push(connectionId);
-            if (!(connectionId in this.peerEditRoamingConnectionIds)) {
-              this.peerEditIsConnectionEnabled[connectionId] = true;
-            }
-          });
-        }
-
-        this.peerEditRoamingConnectionIds = attached;
-      },
-    },
     peerEditConnectionIds() {
       const connectionIds = [];
       this.peerEditAttachablePeerIds.staticPeers.forEach(peerId => {
@@ -1657,61 +1596,8 @@ new Vue({
 
       return connectionIds;
     },
-    peerEditAttachedPeersCountDivColor() {
-      this.peerEditAssignedColor.connections.attachedPeerCountDiv = WireGuardHelper.checkField('peerCount', this.peerEditConnectionIds) ? 'bg-green-50' : 'bg-red-50';
-      return this.peerEditAssignedColor.connections.attachedPeerCountDiv;
-    },
-    peerEditConnectionColor() {
-      // this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;
-      for (const connectionId of this.peerEditConnectionIds) {
-        try {
-          let error = false;
-          let change = false;
-          if (Object.keys(this.network.connections).includes(connectionId)) {
-            // eslint-disable-next-line no-nested-ternary
-            this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB
-              ? (WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
-            error ||= this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] === 'bg-red-200';
-            change ||= this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] !== 'bg-white';
-            // eslint-disable-next-line no-nested-ternary
-            this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] = this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA
-              ? (WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
-            error ||= this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] === 'bg-red-200';
-            change ||= this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] !== 'bg-white';
-            // eslint-disable-next-line no-nested-ternary
-            this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] = this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value
-              ? (WireGuardHelper.checkField('persistentKeepalive', this.peerEditPersistentKeepaliveValueData[connectionId]) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
-            error ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] === 'bg-red-200';
-            change ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] !== 'bg-white';
-            change ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
-            change ||= this.peerEditConnectionPreSharedKeys[connectionId] !== this.network.connections[connectionId].preSharedKey;
-          } else {
-            this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200';
-            error ||= this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] === 'bg-red-200';
-            change ||= this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] !== 'bg-white';
-            this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] = WireGuardHelper.checkField('allowedIPs', this.peerEditAllowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200';
-            error ||= this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] === 'bg-red-200';
-            change ||= this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] !== 'bg-white';
-            this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] = WireGuardHelper.checkField('persistentKeepalive', this.peerEditPersistentKeepaliveValueData[connectionId]) ? 'bg-green-200' : 'bg-red-200';
-            error ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] === 'bg-red-200';
-            change ||= this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] !== 'bg-white';
-            change ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
-          }
-          // eslint-disable-next-line no-nested-ternary
-          this.peerEditAssignedColor.connections.div[connectionId] = !error ? this.peerEditIsConnectionEnabled[connectionId] ? change ? 'bg-green-100' : 'bg-green-50' : 'bg-red-50' : 'bg-red-100';
-        } catch (e) {
-          console.log(e);
-          this.peerEditAssignedColor.connections.div[connectionId] = 'bg-red-50';
-          this.peerEditAssignedColor.connections.allowedIPsAtoB[connectionId] = 'bg-red-50';
-          this.peerEditAssignedColor.connections.allowedIPsBtoA[connectionId] = 'bg-red-50';
-          this.peerEditAssignedColor.connections.persistentKeepalive[connectionId] = 'bg-red-50';
-        }
-      }
-      return this.peerEditAssignedColor.connections;
-    },
     peerEditChangedFieldsCompute() {
       // this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;
-      let errorNotFound = true;
       let changeDetectedPeer = false;
       const addDetectedPeer = false;
       const changedFields = { peers: {}, connections: {} };
@@ -1724,42 +1610,26 @@ new Vue({
         peerErrorField = this.peerEditNameColor === 'bg-red-200' ? 'name' : peerErrorField;
         peerErrorField = this.peerEditAddressColor === 'bg-red-200' ? 'address' : peerErrorField;
         peerErrorField = this.peerEditEndpointColor === 'bg-red-200' ? 'endpoint' : peerErrorField;
-        errorNotFound = false;
       }
       changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
-      if (this.peerEditDNSMTUColor.div === 'bg-red-50') {
-        peerErrorField = this.peerEditDNS.enabled && this.peerEditDNSMTUColor.dnsInput === 'bg-red-200' ? 'dns' : peerErrorField;
-        peerErrorField = this.peerEditMTU.enabled && this.peerEditDNSMTUColor.mtuInput === 'bg-red-200' ? 'mtu' : peerErrorField;
-        errorNotFound = false;
-      }
-      changeDetectedPeer ||= this.peerEditDNS.enabled !== this.network.peers[this.peerConfigId].dns.enabled;
-      changeDetectedPeer ||= this.peerEditMTU.enabled !== this.network.peers[this.peerConfigId].mtu.enabled;
-      if (this.peerEditScriptsColor.div === 'bg-red-50') {
-        for (const script of ['PreUp', 'PreDown', 'PostUp', 'PostDown']) {
-          peerErrorField = this.peerEditScripts[script].enabled && this.peerEditScriptsColor[script] === 'bg-red-200' ? script : peerErrorField;
-        }
-        errorNotFound = false;
-      }
-      for (const script of ['PreUp', 'PreDown', 'PostUp', 'PostDown']) {
-        changeDetectedPeer ||= this.peerEditScripts[script].enabled !== this.network.peers[this.peerConfigId]['scripts'][script].enabled;
-      }
+
+      peerErrorField = this.dnsmtuIslandData.error ? this.dnsmtuIslandData.error : peerErrorField;
+      changeDetectedPeer ||= this.dnsmtuIslandData.changed;
+
+      peerErrorField = this.scriptsIslandData.error ? this.scriptsIslandData.error : peerErrorField;
+      changeDetectedPeer ||= this.scriptsIslandData.changed;
+
       for (const peerEditFieldColor of [
         this.peerEditNameColor,
         this.peerEditAddressColor,
         this.peerEditEndpointColor,
-        this.peerEditDNSMTUColor.dnsInput,
-        this.peerEditDNSMTUColor.mtuInput,
-        this.peerEditScriptsColor.PreUp,
-        this.peerEditScriptsColor.PostUp,
-        this.peerEditScriptsColor.PreDown,
-        this.peerEditScriptsColor.PostDown,
       ]) {
         changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200';
       }
       changeDetectedPeer ||= this.network.peers[this.peerConfigId].publicKey !== this.peerEditPublicKey;
       changeDetectedPeer ||= this.network.peers[this.peerConfigId].privateKey !== this.peerEditPrivateKey;
 
-      if (!errorNotFound) {
+      if (peerErrorField) {
         return [
           { msg: `Error detected in the peer's '${peerErrorField}' field. Changes can't be considered until this is fixed.` },
           {},
@@ -1785,8 +1655,8 @@ new Vue({
         }
 
         for (const [peerConfigField, peerConfigValue] of Object.entries({
-          dns: this.peerEditDNS,
-          mtu: this.peerEditMTU,
+          dns: this.dnsmtuIslandData.dns,
+          mtu: this.dnsmtuIslandData.mtu,
         })) {
           const changedDNSMTUFields = {};
           for (const subField of ['enabled', 'value']) {
@@ -1801,10 +1671,10 @@ new Vue({
 
         const changedScriptFields = {};
         for (const [peerScriptField, peerConfigValue] of Object.entries({
-          PreUp: this.peerEditScripts.PreUp,
-          PostUp: this.peerEditScripts.PostUp,
-          PreDown: this.peerEditScripts.PreDown,
-          PostDown: this.peerEditScripts.PostDown,
+          PreUp: this.scriptsIslandData.scripts.PreUp,
+          PostUp: this.scriptsIslandData.scripts.PostUp,
+          PreDown: this.scriptsIslandData.scripts.PreDown,
+          PostDown: this.scriptsIslandData.scripts.PostDown,
         })) {
           const changedSubScriptFields = {};
           for (const subField of ['enabled', 'value']) {
@@ -1822,80 +1692,49 @@ new Vue({
         }
       }
 
-      const changeDetectedConnection = false;
-      const connectionIdError = '';
-      const connectionErrorField = '';
+      this.peerChangedConnections = this.connectionIslandsData.changed;
 
-      // check errors
-      // for (const connectionId of this.peerEditConnectionIds) {
-      //   if (Object.keys(this.network.connections).includes(connectionId)) {
-      //     for (const connectionField of ['allowedIPsAtoB', 'allowedIPsBtoA', 'persistentKeepalive']) {
-      //       if (this.peerEditConnectionColor[connectionField][connectionId] === 'bg-red-200') {
-      //         connectionIdError = connectionId;
-      //         connectionErrorField = connectionField;
-      //         errorNotFound = false;
-      //       }
-      //       if (connectionField === 'persistentKeepalive') {
-      //         changeDetectedConnection ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
-      //       }
-      //       changeDetectedConnection ||= this.peerEditConnectionColor[connectionField][connectionId] === 'bg-green-200';
-      //     }
-      //     changeDetectedConnection ||= this.peerEditConnectionColor.persistentKeepalive[connectionId] === 'bg-green-200';
-      //     changeDetectedConnection ||= this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled;
-      //     changeDetectedConnection ||= this.peerEditConnectionPreSharedKeys[connectionId] !== this.network.connections[connectionId].preSharedKey;
-      //   } else {
-      //     addDetectedPeer = true;
-      //     for (const connectionField of ['allowedIPsAtoB', 'allowedIPsBtoA', 'persistentKeepalive']) {
-      //       if (this.peerEditConnectionColor[connectionField][connectionId] === 'bg-red-200') {
-      //         connectionIdError = connectionId;
-      //         connectionErrorField = connectionField;
-      //         errorNotFound = false;
-      //       }
-      //     }
-      //   }
-      // }
-
-      if (!errorNotFound) {
+      if (this.connectionIslandsData.error) {
         return [
-          { msg: `Error detected in the connection '${connectionIdError}'s '${connectionErrorField}' field. Changes can't be considered until this is fixed.` },
+          { msg: `Error detected in the '${this.connectionIslandsData.error}' field. Changes can't be considered until this is fixed.` },
           {},
           {},
           false,
         ];
       }
 
-      this.peerChangedConnections = changeDetectedConnection;
-      if (changeDetectedConnection) {
+      if (this.connectionIslandsData.changed) {
         const changedConnections = {};
-        for (const connectionId of this.peerEditConnectionIds) {
+        for (const peerId of [...this.connectionIslandsData.attachedStaticPeers, ...this.connectionIslandsData.attachedRoamingPeers]) {
+          const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
           const changedSubFields = {};
           if (Object.keys(this.network.connections).includes(connectionId)) {
-            if (this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled) {
-              changedSubFields.enabled = this.peerEditIsConnectionEnabled[connectionId];
+            if (this.connectionIslandsData.isConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled) {
+              changedSubFields.enabled = this.connectionIslandsData.isConnectionEnabled[connectionId];
             }
 
-            if (this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB) {
-              changedSubFields.allowedIPsAtoB = this.peerEditAllowedIPsAtoB[connectionId];
+            if (this.connectionIslandsData.allowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB) {
+              changedSubFields.allowedIPsAtoB = this.connectionIslandsData.allowedIPsAtoB[connectionId];
             }
 
-            if (this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA) {
-              changedSubFields.allowedIPsBtoA = this.peerEditAllowedIPsBtoA[connectionId];
+            if (this.connectionIslandsData.allowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA) {
+              changedSubFields.allowedIPsBtoA = this.connectionIslandsData.allowedIPsBtoA[connectionId];
             }
 
-            if (this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled) {
-              changedSubFields.persistentKeepalive = { enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId] };
+            if (this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled) {
+              changedSubFields.persistentKeepalive = { enabled: this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] };
             }
 
-            if (this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value) {
+            if (this.connectionIslandsData.persistentKeepaliveValue[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value) {
               if ('persistentKeepalive' in changedSubFields) {
-                changedSubFields.persistentKeepalive.value = this.peerEditPersistentKeepaliveValueData[connectionId];
+                changedSubFields.persistentKeepalive.value = this.connectionIslandsData.persistentKeepaliveValue[connectionId];
               } else {
-                changedSubFields.persistentKeepalive = { value: this.peerEditPersistentKeepaliveValueData[connectionId] };
+                changedSubFields.persistentKeepalive = { value: this.connectionIslandsData.persistentKeepaliveValue[connectionId] };
               }
             }
 
-            if (this.peerEditConnectionPreSharedKeys[connectionId] !== this.network.connections[connectionId].preSharedKey) {
-              changedSubFields.preSharedKey = this.peerEditConnectionPreSharedKeys[connectionId];
+            if (this.connectionIslandsData.preSharedKey[connectionId] !== this.network.connections[connectionId].preSharedKey) {
+              changedSubFields.preSharedKey = this.connectionIslandsData.preSharedKey[connectionId];
             }
 
             if (Object.keys(changedSubFields).length > 0) {
@@ -1909,85 +1748,42 @@ new Vue({
         }
       }
 
-      this.peerAddedConnections = addDetectedPeer;
-      if (addDetectedPeer) {
-        for (const connectionId of this.peerEditConnectionIds) {
-          if (!Object.keys(this.network.connections).includes(connectionId)) {
-            addedFields.connections[connectionId] = {
-              enabled: this.peerEditIsConnectionEnabled[connectionId],
-              allowedIPsAtoB: this.peerEditAllowedIPsAtoB[connectionId],
-              allowedIPsBtoA: this.peerEditAllowedIPsBtoA[connectionId],
-              persistentKeepalive: {
-                enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId],
-                value: this.peerEditPersistentKeepaliveValueData[connectionId],
-              },
-            };
-          }
-        }
-      }
-
-      for (const connectionId of Object.keys(this.network.connections)) {
-        if (connectionId.includes(this.peerConfigId)
-            && !this.peerEditConnectionIds.includes(connectionId)) {
-          removedFields.connections[connectionId] = {
-            enabled: this.network.connections[connectionId].enabled,
-            allowedIPsAtoB: this.network.connections[connectionId].allowedIPsAtoB,
-            allowedIPsBtoA: this.network.connections[connectionId].allowedIPsBtoA,
-            persistentKeepalive: this.network.connections[connectionId].persistentKeepalive,
-          };
-        }
-      }
-      this.peerRemovedConnections = Object.keys(removedFields.connections).length > 0;
+      // this.peerAddedConnections = addDetectedPeer;
+      // if (addDetectedPeer) {
+      //   for (const connectionId of this.peerEditConnectionIds) {
+      //     if (!Object.keys(this.network.connections).includes(connectionId)) {
+      //       addedFields.connections[connectionId] = {
+      //         enabled: this.peerEditIsConnectionEnabled[connectionId],
+      //         allowedIPsAtoB: this.peerEditAllowedIPsAtoB[connectionId],
+      //         allowedIPsBtoA: this.peerEditAllowedIPsBtoA[connectionId],
+      //         persistentKeepalive: {
+      //           enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId],
+      //           value: this.peerEditPersistentKeepaliveValueData[connectionId],
+      //         },
+      //       };
+      //     }
+      //   }
+      // }
+      //
+      // for (const connectionId of Object.keys(this.network.connections)) {
+      //   if (connectionId.includes(this.peerConfigId)
+      //       && !this.peerEditConnectionIds.includes(connectionId)) {
+      //     removedFields.connections[connectionId] = {
+      //       enabled: this.network.connections[connectionId].enabled,
+      //       allowedIPsAtoB: this.network.connections[connectionId].allowedIPsAtoB,
+      //       allowedIPsBtoA: this.network.connections[connectionId].allowedIPsBtoA,
+      //       persistentKeepalive: this.network.connections[connectionId].persistentKeepalive,
+      //     };
+      //   }
+      // }
+      // this.peerRemovedConnections = Object.keys(removedFields.connections).length > 0;
 
       return [
-        changeDetectedPeer || changeDetectedConnection ? changedFields : {},
+        changeDetectedPeer || this.connectionIslandsData.changed ? changedFields : {},
         this.peerAddedConnections ? addedFields : {},
         this.peerRemovedConnections ? removedFields : {},
         true,
       ];
-    },
-    peerEditResetConnectionFieldsDisabled() {
-      this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;
-      const resetFields = {};
-      for (const connectionId of [...this.peerEditStaticConnectionIds, ...this.peerEditRoamingConnectionIds]) {
-        let changed = false;
-        if (Object.keys(this.network.connections).includes(connectionId)) {
-          changed ||= this.peerEditIsConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled;
-          changed ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled;
-          changed ||= this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value;
-          changed ||= this.peerEditAllowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB;
-          changed ||= this.peerEditAllowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA;
-          changed ||= this.peerEditConnectionPreSharedKeys[connectionId] !== this.network.connections[connectionId].preSharedKey;
-        } else {
-          changed ||= this.peerEditIsConnectionEnabled[connectionId] !== true;
-          changed ||= this.peerEditPersistentKeepaliveEnabledData[connectionId] !== this.network.defaults.connections.persistentKeepalive.enabled;
-          changed ||= this.peerEditPersistentKeepaliveValueData[connectionId] !== this.network.defaults.connections.persistentKeepalive.value;
-          const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
-          changed ||= this.peerEditAllowedIPsAtoB[connectionId] !== `${this.network.peers[b].address}/32`;
-          changed ||= this.peerEditAllowedIPsBtoA[connectionId] !== `${this.network.peers[a].address}/32`;
-        }
-        resetFields[connectionId] = !changed;
-      }
-      return resetFields;
-    },
-    peerCreateResetConnectionFieldsDisabled() {
-      this.peerCreateConnectionColorRefresh &&= this.peerCreateConnectionColorRefresh;
-      const resetFields = {};
-      for (const peerId of [...this.peerCreateAttachedStaticPeerIds, ...this.peerCreateAttachedRoamingPeerIds]) {
-        let changed = false;
-        changed ||= this.peerCreateIsConnectionEnabled[peerId] !== true;
-        changed ||= this.peerCreatePersistentKeepaliveEnabledData[peerId] !== this.network.defaults.connections.persistentKeepalive.enabled;
-        changed ||= this.peerCreatePersistentKeepaliveValueData[peerId] !== this.network.defaults.connections.persistentKeepalive.value;
-        if (this.peerCreateAttachedStaticPeerIds.includes(peerId)) {
-          changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== (this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0');
-          changed ||= this.peerCreateAllowedIPsOldToNew[peerId] !== `${this.peerCreateAddress}/32`;
-        } else {
-          changed ||= this.peerCreateAllowedIPsNewToOld[peerId] !== `${this.network.peers[peerId].address}/32`;
-          changed ||= this.peerCreateAllowedIPsOldToNew[peerId] !== `${this.peerCreateAddress}/32`;
-        }
-        resetFields[peerId] = !changed;
-      }
-      return resetFields;
     },
     forceGraphComputed() {
       const peerSize = {};
