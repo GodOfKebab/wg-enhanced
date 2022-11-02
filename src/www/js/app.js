@@ -428,7 +428,7 @@ Vue.component('connection-islands', {
               || this.value.preSharedKey[connectionId] !== this.rollbackData.preSharedKey[connectionId];
 
           // eslint-disable-next-line no-nested-ternary
-          color.attachedPeerDiv[connectionId] = ![color.allowedIPsAtoB[connectionId], color.allowedIPsBtoA[connectionId], this.value.persistentKeepaliveEnabled[connectionId] ? color.persistentKeepalive[connectionId] : ''].includes('bg-red-200') ? this.value.isConnectionEnabled[connectionId] ? this.connectionChanged[connectionId] ? 'bg-green-100' : 'bg-green-50' : 'bg-red-50' : 'bg-red-100';
+          color.attachedPeerDiv[connectionId] = ![color.allowedIPsAtoB[connectionId], color.allowedIPsBtoA[connectionId], this.value.persistentKeepaliveEnabled[connectionId] ? color.persistentKeepalive[connectionId] : ''].includes('bg-red-200') ? this.value.isConnectionEnabled[connectionId] ? this.connectionChanged[connectionId] || !(this.rollbackData.attachedStaticPeers.includes(peerId) || this.rollbackData.attachedRoamingPeers.includes(peerId)) ? 'bg-green-100' : 'bg-green-50' : 'bg-red-50' : 'bg-red-100';
         } catch (e) {
           this.connectionChanged[connectionId] = true;
           for (const colorField of Object.keys(color)) {
@@ -1205,6 +1205,25 @@ new Vue({
             this.connectionIslandsData.preSharedKey[connectionId] = this.network.connections[connectionId].preSharedKey;
           }
         }
+        for (const [otherPeerId, peerDetails] of Object.entries(this.network.peers)) {
+          if (otherPeerId === this.peerConfigId) continue;
+          const connectionId = WireGuardHelper.getConnectionId(peerId, otherPeerId);
+          const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+
+          if (Object.keys(this.connectionIslandsData.isConnectionEnabled).includes(connectionId)) continue;
+
+          this.connectionIslandsData.isConnectionEnabled[connectionId] = true;
+          this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
+          this.connectionIslandsData.persistentKeepaliveValue[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
+          // eslint-disable-next-line no-nested-ternary
+          const allowedIPsNewToOld = peerDetails.mobility === 'static' ? (this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0') : `${this.network.peers[otherPeerId].address}/32`;
+          const allowedIPsOldToNew = `${this.network.peers[peerId].address}/32`;
+          this.connectionIslandsData.allowedIPsAtoB[connectionId] = (a === otherPeerId && b === this.peerCreatePeerId) ? allowedIPsOldToNew : allowedIPsNewToOld;
+          this.connectionIslandsData.allowedIPsBtoA[connectionId] = (a === otherPeerId && b === this.peerCreatePeerId) ? allowedIPsNewToOld : allowedIPsOldToNew;
+
+          this.connectionIslandsData.latestHandshakeAt[connectionId] = null;
+          this.connectionIslandsData.preSharedKey[connectionId] = null;
+        }
       }
 
       if (mode === 'init-connection') {
@@ -1599,7 +1618,6 @@ new Vue({
     peerEditChangedFieldsCompute() {
       // this.peerEditConnectionColorRefresh &&= this.peerEditConnectionColorRefresh;
       let changeDetectedPeer = false;
-      const addDetectedPeer = false;
       const changedFields = { peers: {}, connections: {} };
       const addedFields = { connections: {} };
       const removedFields = { connections: {} };
@@ -1692,8 +1710,6 @@ new Vue({
         }
       }
 
-      this.peerChangedConnections = this.connectionIslandsData.changed;
-
       if (this.connectionIslandsData.error) {
         return [
           { msg: `Error detected in the '${this.connectionIslandsData.error}' field. Changes can't be considered until this is fixed.` },
@@ -1748,40 +1764,39 @@ new Vue({
         }
       }
 
-      // this.peerAddedConnections = addDetectedPeer;
-      // if (addDetectedPeer) {
-      //   for (const connectionId of this.peerEditConnectionIds) {
-      //     if (!Object.keys(this.network.connections).includes(connectionId)) {
-      //       addedFields.connections[connectionId] = {
-      //         enabled: this.peerEditIsConnectionEnabled[connectionId],
-      //         allowedIPsAtoB: this.peerEditAllowedIPsAtoB[connectionId],
-      //         allowedIPsBtoA: this.peerEditAllowedIPsBtoA[connectionId],
-      //         persistentKeepalive: {
-      //           enabled: this.peerEditPersistentKeepaliveEnabledData[connectionId],
-      //           value: this.peerEditPersistentKeepaliveValueData[connectionId],
-      //         },
-      //       };
-      //     }
-      //   }
-      // }
-      //
-      // for (const connectionId of Object.keys(this.network.connections)) {
-      //   if (connectionId.includes(this.peerConfigId)
-      //       && !this.peerEditConnectionIds.includes(connectionId)) {
-      //     removedFields.connections[connectionId] = {
-      //       enabled: this.network.connections[connectionId].enabled,
-      //       allowedIPsAtoB: this.network.connections[connectionId].allowedIPsAtoB,
-      //       allowedIPsBtoA: this.network.connections[connectionId].allowedIPsBtoA,
-      //       persistentKeepalive: this.network.connections[connectionId].persistentKeepalive,
-      //     };
-      //   }
-      // }
-      // this.peerRemovedConnections = Object.keys(removedFields.connections).length > 0;
+      const attachedPeerIds = [...this.connectionIslandsData.attachedStaticPeers, ...this.connectionIslandsData.attachedRoamingPeers];
+      for (const peerId of attachedPeerIds) {
+        const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
+        if (!Object.keys(this.network.connections).includes(connectionId)) {
+          addedFields.connections[connectionId] = {
+            enabled: this.connectionIslandsData.isConnectionEnabled[connectionId],
+            allowedIPsAtoB: this.connectionIslandsData.allowedIPsAtoB[connectionId],
+            allowedIPsBtoA: this.connectionIslandsData.allowedIPsBtoA[connectionId],
+            persistentKeepalive: {
+              enabled: this.connectionIslandsData.persistentKeepaliveEnabled[connectionId],
+              value: this.connectionIslandsData.persistentKeepaliveValue[connectionId],
+            },
+          };
+        }
+      }
+
+      for (const connectionId of Object.keys(this.network.connections)) {
+        const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+        if ((a === this.peerConfigId && !attachedPeerIds.includes(b))
+            || (b === this.peerConfigId && !attachedPeerIds.includes(a))) {
+          removedFields.connections[connectionId] = {
+            enabled: this.network.connections[connectionId].enabled,
+            allowedIPsAtoB: this.network.connections[connectionId].allowedIPsAtoB,
+            allowedIPsBtoA: this.network.connections[connectionId].allowedIPsBtoA,
+            persistentKeepalive: this.network.connections[connectionId].persistentKeepalive,
+          };
+        }
+      }
 
       return [
-        changeDetectedPeer || this.connectionIslandsData.changed ? changedFields : {},
-        this.peerAddedConnections ? addedFields : {},
-        this.peerRemovedConnections ? removedFields : {},
+        Object.keys(changedFields.peers).length + Object.keys(changedFields.connections).length > 0 ? changedFields : {},
+        Object.keys(addedFields.connections).length > 0 ? addedFields : {},
+        Object.keys(removedFields.connections).length > 0 ? removedFields : {},
         true,
       ];
     },
