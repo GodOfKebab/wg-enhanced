@@ -651,15 +651,11 @@ module.exports = class WireGuard {
   }
 
   async enableServer() {
-    await Util.exec(`wg-quick up ${WG_INTERFACE}`, {
-      log: false,
-    });
+    await Util.exec(`wg-quick up ${WG_INTERFACE}`);
   }
 
   async disableServer() {
-    await Util.exec(`wg-quick down ${WG_INTERFACE}`, {
-      log: false,
-    });
+    await Util.exec(`wg-quick down ${WG_INTERFACE}`);
   }
 
 };
