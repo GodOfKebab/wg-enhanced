@@ -211,7 +211,7 @@
 
                         <!-- Show -->
                         <input v-if="peerQuickEditNameId === peerId" v-model="peerQuickEditName"
-                               v-on:keyup.enter="updatePeerName(peerId, peerQuickEditName); peerQuickEditName = null; peerQuickEditNameId = null;"
+                               v-on:keyup.enter="api.updatePeerName(peerId, peerQuickEditName); peerQuickEditName = null; peerQuickEditNameId = null;"
                                v-on:focusout="peerQuickEditName = null; peerQuickEditNameId = null;"
                                :ref="`peer-${peerId}-name`"
                                class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
@@ -240,7 +240,7 @@
 
                           <!-- Show -->
                           <input v-show="peerQuickEditAddressId === peerId" v-model="peerQuickEditAddress"
-                                 v-on:keyup.enter="updatePeerAddress(peerId, peerQuickEditAddress); peerQuickEditAddress = null; peerQuickEditAddressId = null;"
+                                 v-on:keyup.enter="api.updatePeerAddress(peerId, peerQuickEditAddress); peerQuickEditAddress = null; peerQuickEditAddressId = null;"
                                  v-on:focusout="peerQuickEditAddress = null; peerQuickEditAddressId = null;"
                                  :ref="`peer-${peerId}-address`"
                                  class="rounded border-2 border-gray-100 focus:border-gray-200 outline-none w-20 text-black" />
@@ -640,7 +640,7 @@
                       <connection-islands v-model="connectionIslandsData"
                                           :focus-peer-id="peerConfigId"
                                           :focus-peer-name="peerEditName"
-                                          :get-new-pre-shared-key="async () => { return await (new API()).getNewPreSharedKey() }"></connection-islands>
+                                          :get-new-pre-shared-key="async () => { return await api.getNewPreSharedKey() }"></connection-islands>
                     </div>
 
                     <!-- show config -->
@@ -789,7 +789,7 @@
               </div>
               <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button v-if="dialogRightButton" type="button" @click="dialogRightButtonClick"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:ml-3 sm:w-auto sm:text-sm" :class="this.dialogRightButtonClasses">
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:ml-3 sm:w-auto sm:text-sm" :class="dialogRightButtonClasses">
                   {{ dialogRightButton }}
                 </button>
                 <button v-if="dialogLeftButton" type="button" @click="dialogLeftButtonClick"
@@ -800,6 +800,15 @@
             </div>
           </div>
         </div>
+
+<!--        <custom-dialog class="z-10"-->
+<!--                       :left-button-text="'Cancel'">-->
+<!--          <h3 class="text-lg leading-6 font-medium text-gray-900">hello title</h3>-->
+<!--          <div class="mt-2 text-sm text-gray-500">hello body</div>-->
+<!--          <div>-->
+<!--            Hi there-->
+<!--          </div>-->
+<!--        </custom-dialog>-->
 
       </div>
 
@@ -870,6 +879,7 @@
   <script src="./js/components/islands/dnsmtu.js"></script>
   <script src="./js/components/islands/scripts.js"></script>
   <script src="./js/components/islands/connections.js"></script>
+  <script src="./js/components/custom-dialog.js"></script>
   <script src="./js/api.js"></script>
   <script src="./js/app.js"></script>
 </body>

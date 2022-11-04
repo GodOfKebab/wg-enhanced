@@ -36,6 +36,8 @@ new Vue({
     password: null,
     requiresPassword: null,
 
+    api: null,
+
     initializedGraph: false,
     graph: null,
 
@@ -1309,5 +1311,6 @@ new Vue({
     'dnsmtu-island': dnsmtuIsland,
     'scripts-island': scriptsIsland,
     'connection-islands': connectionIslands,
+    'custom-dialog': customDialog,
   },
 });
