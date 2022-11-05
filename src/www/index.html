@@ -132,13 +132,13 @@
               </div>
               <div v-if="wireguardStatus === 'up'"
                    title="Disable WireGuard Networking"
-                   @click="prepDialog('network-toggle')"
+                   @click="dialogId = 'network-toggle'"
                    class="inline-block align-middle shadow-md rounded-full w-5 h-3 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">
                 <div class="shadow-md rounded-full w-1 h-1 m-1 ml-3 bg-white"></div>
               </div>
               <div v-if="wireguardStatus === 'down'"
                    title="Enable WireGuard Networking"
-                   @click="prepDialog('network-toggle')"
+                   @click="dialogId = 'network-toggle'"
                    class="inline-block align-middle shadow-md rounded-full w-5 h-3 mr-0.25 bg-red-500 cursor-pointer hover:bg-red-400 transition-all">
                 <div class="shadow-md rounded-full w-1 h-1 m-1 bg-white"></div>
               </div>
@@ -332,7 +332,7 @@
                         <!-- Delete -->
                         <button class="align-middle p-2 rounded"
                                 :class="{'bg-gray-100 hover:bg-red-600 hover:text-white transition': peerId !== 'root', 'bg-gray-50': peerId === 'root'}"
-                                :title="peerId !== 'root' ? 'Delete Peer' : 'You can\'t delete the root peer'" @click="dialogPeerId = peerId; prepDialog('delete-peer');" :disabled="peerId === 'root'">
+                                :title="peerId !== 'root' ? 'Delete Peer' : 'You can\'t delete the root peer'" @click="dialogPeerId = peerId; dialogId = 'delete-peer';" :disabled="peerId === 'root'">
                           <svg class="w-5" :class="{'fill-gray-300': peerId === 'root'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                   d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -692,7 +692,7 @@
                 </button>
                 <!-- Save Configuration -->
                 <button v-show="peerConfigWindow === 'edit' || peerConfigWindow === 'view-changes'" type="button"
-                        @click="peerConfigEditUpdateConfirmation().then(); prepDialog('confirm-changes');"
+                        @click="peerConfigEditUpdateConfirmation().then(); dialogId = 'confirm-changes';"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm disabled:bg-gray-200 transition"
                         :disabled="!(Object.keys(peerEditChangedFieldsCompute[0]).length + Object.keys(peerEditChangedFieldsCompute[1]).length + Object.keys(peerEditChangedFieldsCompute[2]).length > 0 && peerEditChangedFieldsCompute[3] && webServerStatus === 'up')">
                   Save Configuration
@@ -706,109 +706,92 @@
           </div>
         </div>
 
-        <!-- Dialogs: WireGuard Enable/Disable, Delete, CreateError -->
-        <div v-if="dialogId" class="fixed z-20 inset-0 overflow-y-auto">
-          <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <!--
-          Background overlay, show/hide based on modal state.
+        <!-- Dialog: WireGuard Enable/Disable -->
+        <custom-dialog v-if="dialogId === 'network-toggle'" class="z-10"
+                       :left-button-text="'Cancel'"
+                       :left-button-click="() => { dialogId = null }"
+                       :right-button-text="wireguardStatus === 'up' ? 'Disable' : 'Enable'"
+                       :right-button-classes="wireguardStatus === 'up' ? ['text-white', 'bg-red-600', 'hover:bg-red-700'] : ['text-white', 'bg-green-600', 'hover:bg-green-700']"
+                       :right-button-click="() => { toggleWireGuardNetworking(); dialogId = null; }">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            {{ wireguardStatus === 'up' ? 'Disable' : 'Enable' }} the WireGuard Network
+          </h3>
+          <div class="mt-2 text-sm text-gray-500">
+            Are you sure you want to {{ wireguardStatus === 'up' ? 'disable' : 'enable' }} the WireGuard network?
+          </div>
+        </custom-dialog>
 
-          Entering: "ease-out duration-300"
-          From: "opacity-0"
-          To: "opacity-100"
-          Leaving: "ease-in duration-200"
-          From: "opacity-100"
-          To: "opacity-0"
-          -->
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        <!-- Dialog: Delete -->
+        <custom-dialog v-if="dialogId === 'delete-peer'" class="z-10"
+                       :left-button-text="'Cancel'"
+                       :left-button-click="() => { dialogId = null }"
+                       :right-button-text="'Delete'"
+                       :right-button-classes="['text-white', 'bg-red-600', 'hover:bg-red-700']"
+                       :right-button-click="() => { api.deletePeer(dialogPeerId).then(); dialogId = null; }">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Delete Peer
+          </h3>
+          <div class="mt-2 text-sm text-gray-500">
+            Are you sure you want to delete <strong>{{ network.peers[dialogPeerId].name }}</strong>? This action cannot be undone.
+          </div>
+        </custom-dialog>
+
+        <!-- Dialog: CreateError -->
+        <custom-dialog v-if="dialogId === 'confirm-changes'" class="z-20"
+                       :left-button-text="'Cancel'"
+                       :left-button-click="() => { dialogId = null }"
+                       :right-button-text="'Do it!'"
+                       :right-button-classes="['text-white', 'bg-green-600', 'hover:bg-green-700']"
+                       :right-button-click="() => { peerConfigEditApply().then(); peerConfigId = null; peerConfigWindow = 'edit'; dialogId = null; }">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Confirm changes for <strong>{{ network.peers[peerConfigId].name }}</strong>
+          </h3>
+          <div class="mt-2 text-sm text-gray-500">
+            Are you sure you want to make these changes?
+          </div>
+
+          <div class="m-2 text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
+            <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
+              <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
+              <div v-if="Object.keys(peerEditChangedFieldsCompute[0]).length > 0 || !peerEditChangedFieldsCompute[3]">
+                <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+                <div v-else-if="Object.keys(peerEditChangedFieldsCompute[0].peers).length > 0 && Object.keys(peerEditChangedFieldsCompute[0].connections).length === 0" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
+                <div v-else-if="Object.keys(peerEditChangedFieldsCompute[0].peers).length === 0 && Object.keys(peerEditChangedFieldsCompute[0].connections).length > 0" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
+                <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+              </div>
             </div>
-
-            <!-- This element is to trick the browser into centering the modal contents. -->
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <!--
-          Modal panel, show/hide based on modal state.
-
-          Entering: "ease-out duration-300"
-          From: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-          To: "opacity-100 translate-y-0 sm:scale-100"
-          Leaving: "ease-in duration-200"
-          From: "opacity-100 translate-y-0 sm:scale-100"
-          To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-          -->
-            <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-                    role="dialog" aria-modal="true">
-              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start">
-                  <div
-                          class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <!-- Heroicon name: outline/exclamation -->
-                    <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                  </div>
-                  <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" v-html="dialogTitle"></h3>
-                    <div class="mt-2 text-sm text-gray-500" v-html="dialogBody"></div>
-
-                    <div v-if="dialogId === 'confirm-changes'" class="mt-2">
-                      <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
-                        <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                          <div v-if="Object.keys(peerEditChangedFieldsCompute[0]).length > 0 || !peerEditChangedFieldsCompute[3]">
-                            <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                            <div v-else-if="Object.keys(peerEditChangedFieldsCompute[0].peers).length > 0 && Object.keys(peerEditChangedFieldsCompute[0].connections).length === 0" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
-                            <div v-else-if="Object.keys(peerEditChangedFieldsCompute[0].peers).length === 0 && Object.keys(peerEditChangedFieldsCompute[0].connections).length > 0" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
-                            <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                          </div>
-                        </div>
-                        <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
-                          <div v-if="Object.keys(peerEditChangedFieldsCompute[1]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
-                        </div>
-                        <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
-                          <div v-if="Object.keys(peerEditChangedFieldsCompute[2]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
-                        </div>
-                        <div class="bg-red-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
-                          <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                          <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
-                        </div>
-                        <div class="bg-green-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
-                          <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                          <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button v-if="dialogRightButton" type="button" @click="dialogRightButtonClick"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:ml-3 sm:w-auto sm:text-sm" :class="dialogRightButtonClasses">
-                  {{ dialogRightButton }}
-                </button>
-                <button v-if="dialogLeftButton" type="button" @click="dialogLeftButtonClick"
-                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                  {{ dialogLeftButton }}
-                </button>
-              </div>
+            <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
+              <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
+              <div v-if="Object.keys(peerEditChangedFieldsCompute[1]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
+            </div>
+            <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
+              <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
+              <div v-if="Object.keys(peerEditChangedFieldsCompute[2]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
+            </div>
+            <div class="bg-red-100 rounded-md overflow-scroll">
+              <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
+              <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
+              <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
+            </div>
+            <div class="bg-green-100 rounded-md overflow-scroll">
+              <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
+              <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
+              <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
             </div>
           </div>
-        </div>
+        </custom-dialog>
 
-<!--        <custom-dialog class="z-10"-->
-<!--                       :left-button-text="'Cancel'">-->
-<!--          <h3 class="text-lg leading-6 font-medium text-gray-900">hello title</h3>-->
-<!--          <div class="mt-2 text-sm text-gray-500">hello body</div>-->
-<!--          <div>-->
-<!--            Hi there-->
-<!--          </div>-->
-<!--        </custom-dialog>-->
+        <!-- Dialog: Can't Create Peer -->
+        <custom-dialog v-if="dialogId === 'cant-create-peer'" class="z-10"
+                       :left-button-text="'Cancel'"
+                       :left-button-click="() => { dialogId = null }">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Error while preparing peer creation window
+          </h3>
+          <div class="mt-2 text-sm text-gray-500">
+            There are no addresses left to be reserved. A new peer can't be created until the reserved addresses pool is reset, or you have reached the peer limit.
+          </div>
+        </custom-dialog>
 
       </div>
 

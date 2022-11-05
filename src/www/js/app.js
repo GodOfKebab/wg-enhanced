@@ -425,7 +425,7 @@ new Vue({
           this.peerCreateMobility = '';
           this.peerCreatePeerId = '';
           this.peerCreateAddress = '';
-          this.prepDialog('cant-create-peer');
+          this.dialogId = 'cant-create-peer';
         }
       }
     },
@@ -483,7 +483,7 @@ new Vue({
           this.peerCreatePreambleExpiration = expiration;
         } catch (e) {
           this.peerCreateMobility = '';
-          this.prepDialog('cant-create-peer');
+          this.dialogId = 'cant-create-peer';
         }
       }
 
@@ -877,68 +877,6 @@ new Vue({
         this.graph.emitParticle(link);
         await new Promise(r => setTimeout(r, 1000 / particleCount));
       }
-    },
-    prepDialog(dialogId) {
-      switch (dialogId) {
-        case 'network-toggle':
-          // eslint-disable-next-line no-case-declarations
-          const toggle = this.wireguardStatus === 'up' ? 'Disable' : 'Enable';
-          this.dialogTitle = `${toggle} the WireGuard Network`;
-          this.dialogBody = `Are you sure you want to ${toggle.toLowerCase()} the WireGuard Network?`;
-          this.dialogLeftButton = 'Cancel';
-          this.dialogLeftButtonClick = () => {
-            this.dialogId = null;
-          };
-          this.dialogRightButton = toggle;
-          this.dialogRightButtonClick = () => {
-            this.toggleWireGuardNetworking();
-            this.dialogId = null;
-          };
-          this.dialogRightButtonClasses = this.wireguardStatus === 'up' ? ['text-white', 'bg-red-600', 'hover:bg-red-700'] : ['text-white', 'bg-green-600', 'hover:bg-green-700'];
-          break;
-        case 'delete-peer':
-          this.dialogTitle = 'Delete Peer';
-          this.dialogBody = `Are you sure you want to delete <strong>${this.network.peers[this.dialogPeerId].name}</strong>? This action cannot be undone.`;
-          this.dialogLeftButton = 'Cancel';
-          this.dialogLeftButtonClick = () => {
-            this.dialogId = null;
-          };
-          this.dialogRightButton = 'Delete';
-          this.dialogRightButtonClick = () => {
-            this.api.deletePeer(this.dialogPeerId).then();
-            this.dialogId = null;
-          };
-          this.dialogRightButtonClasses = ['text-white', 'bg-red-600', 'hover:bg-red-700'];
-          break;
-        case 'cant-create-peer':
-          this.dialogTitle = 'Error while preparing peer creation window';
-          this.dialogBody = 'There are no addresses left to be reserved. A new peer can\'t be created until the reserved addresses pool is reset, or you have reached the peer limit.';
-          this.dialogLeftButton = 'Cancel';
-          this.dialogLeftButtonClick = () => {
-            this.dialogId = null;
-          };
-          this.dialogRightButton = null;
-          break;
-        case 'confirm-changes':
-          this.dialogTitle = `Confirm changes for <strong>${this.network.peers[this.peerConfigId].name}</strong>`;
-          this.dialogBody = 'Are you sure you want to make these changes?';
-          this.dialogLeftButton = 'Cancel';
-          this.dialogLeftButtonClick = () => {
-            this.dialogId = null;
-          };
-          this.dialogRightButton = 'Do it!';
-          this.dialogRightButtonClick = () => {
-            this.peerConfigEditApply().then();
-            this.peerConfigId = null;
-            this.peerConfigWindow = 'edit';
-            this.dialogId = null;
-          };
-          this.dialogRightButtonClasses = ['text-white', 'bg-green-600', 'hover:bg-green-700'];
-          break;
-        default:
-          break;
-      }
-      this.dialogId = dialogId;
     },
   },
   computed: {
