@@ -22,7 +22,8 @@ const dnsmtuIsland = Vue.component('dnsmtu-island', {
   },
   created() {
     this.rollbackData = JSON.parse(JSON.stringify(this.value));
-    this.value.changed = false;
+    this.value.changedFields = {};
+    this.value.error = null;
   },
   emits: ['update:value'],
   template: `<div class="my-2 p-1 shadow-md border rounded" :class="[colors.div]">
@@ -67,19 +68,24 @@ const dnsmtuIsland = Vue.component('dnsmtu-island', {
              </div>`,
   computed: {
     colors() {
-      let changed = false;
+      const changedFields = { dns: {}, mtu: {} };
       let error = null;
       const colors = {};
       for (const field of ['dns', 'mtu']) {
         // eslint-disable-next-line no-nested-ternary
         colors[field] = this.value.context === 'create' || this.value[field].enabled !== this.rollbackData[field].enabled || this.value[field].value !== this.rollbackData[field].value
           ? WireGuardHelper.checkField(field, this.value[field]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
-        changed ||= colors[field] !== 'bg-white';
+
+        if (this.value[field].enabled !== this.rollbackData[field].enabled) changedFields[field].enabled = this.value[field].enabled;
+        if (this.value[field].value !== this.rollbackData[field].value) changedFields[field].value = this.value[field].value;
+        if (Object.keys(changedFields[field]).length === 0) delete changedFields[field];
+
         error = this.value[field].enabled && colors[field] === 'bg-red-200' ? field : error;
       }
+
       // eslint-disable-next-line no-nested-ternary
       colors.div = this.value.dns.enabled || this.value.mtu.enabled ? ((this.value.dns.enabled && colors.dns === 'bg-red-200') || (this.value.mtu.enabled && colors.mtu === 'bg-red-200') ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
-      this.value.changed = changed;
+      this.value.changedFields = changedFields;
       this.value.error = error;
 
       return colors;

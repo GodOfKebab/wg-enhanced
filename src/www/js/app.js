@@ -55,7 +55,7 @@ new Vue({
       dns: { enabled: false, value: '' },
       mtu: { enabled: false, value: '' },
       context: '',
-      changed: false,
+      changedFields: {},
       error: null,
     },
     scriptsIslandData: {
@@ -65,7 +65,7 @@ new Vue({
         PreDown: { enabled: false, value: '' },
         PostDown: { enabled: false, value: '' },
       },
-      changed: false,
+      changedFields: {},
       error: null,
     },
     connectionIslandsData: {
@@ -921,35 +921,20 @@ new Vue({
       return error ? 'bg-red-50' : changeDetected ? 'bg-green-100' : 'bg-green-50';
     },
     peerEditChangedFieldsCompute() {
-      let changeDetectedPeer = false;
       const changedFields = { peers: {}, connections: {} };
       const addedFields = { connections: {} };
       const removedFields = { connections: {} };
 
       let peerErrorField = '';
-      // check errors
+      // check for the errors in the peer's config
       if (this.peerEditConfigColor.div === 'bg-red-50') {
         peerErrorField = this.peerEditNameColor === 'bg-red-200' ? 'name' : peerErrorField;
         peerErrorField = this.peerEditAddressColor === 'bg-red-200' ? 'address' : peerErrorField;
         peerErrorField = this.peerEditEndpointColor === 'bg-red-200' ? 'endpoint' : peerErrorField;
       }
-      changeDetectedPeer ||= this.peerEditMobility !== this.network.peers[this.peerConfigId].mobility;
 
       peerErrorField = this.dnsmtuIslandData.error ? this.dnsmtuIslandData.error : peerErrorField;
-      changeDetectedPeer ||= this.dnsmtuIslandData.changed;
-
       peerErrorField = this.scriptsIslandData.error ? this.scriptsIslandData.error : peerErrorField;
-      changeDetectedPeer ||= this.scriptsIslandData.changed;
-
-      for (const peerEditFieldColor of [
-        this.peerEditNameColor,
-        this.peerEditAddressColor,
-        this.peerEditEndpointColor,
-      ]) {
-        changeDetectedPeer ||= peerEditFieldColor === 'bg-green-200';
-      }
-      changeDetectedPeer ||= this.network.peers[this.peerConfigId].publicKey !== this.peerEditPublicKey;
-      changeDetectedPeer ||= this.network.peers[this.peerConfigId].privateKey !== this.peerEditPrivateKey;
 
       if (peerErrorField) {
         return [
@@ -960,60 +945,31 @@ new Vue({
         ];
       }
 
-      this.peerChangedPeer = changeDetectedPeer;
-      if (changeDetectedPeer) {
-        changedFields.peers[this.peerConfigId] = {};
-        for (const [peerConfigField, peerConfigValue] of Object.entries({
-          name: this.peerEditName,
-          address: this.peerEditAddress,
-          mobility: this.peerEditMobility,
-          endpoint: this.peerEditEndpoint,
-          publicKey: this.peerEditPublicKey,
-          privateKey: this.peerEditPrivateKey,
-        })) {
-          if (peerConfigValue !== this.network.peers[this.peerConfigId][peerConfigField]) {
-            changedFields.peers[this.peerConfigId][peerConfigField] = peerConfigValue;
-          }
-        }
-
-        for (const [peerConfigField, peerConfigValue] of Object.entries({
-          dns: this.dnsmtuIslandData.dns,
-          mtu: this.dnsmtuIslandData.mtu,
-        })) {
-          const changedDNSMTUFields = {};
-          for (const subField of ['enabled', 'value']) {
-            if (peerConfigValue[subField] !== this.network.peers[this.peerConfigId][peerConfigField][subField]) {
-              changedDNSMTUFields[subField] = peerConfigValue[subField];
-            }
-          }
-          if (Object.keys(changedDNSMTUFields).length > 0) {
-            changedFields.peers[this.peerConfigId][peerConfigField] = changedDNSMTUFields;
-          }
-        }
-
-        const changedScriptFields = {};
-        for (const [peerScriptField, peerConfigValue] of Object.entries({
-          PreUp: this.scriptsIslandData.scripts.PreUp,
-          PostUp: this.scriptsIslandData.scripts.PostUp,
-          PreDown: this.scriptsIslandData.scripts.PreDown,
-          PostDown: this.scriptsIslandData.scripts.PostDown,
-        })) {
-          const changedSubScriptFields = {};
-          for (const subField of ['enabled', 'value']) {
-            if (peerConfigValue[subField] !== this.network.peers[this.peerConfigId]['scripts'][peerScriptField][subField]) {
-              changedSubScriptFields[subField] = peerConfigValue[subField];
-            }
-          }
-          if (Object.keys(changedSubScriptFields).includes('enabled')
-              || Object.keys(changedSubScriptFields).includes('value')) {
-            changedScriptFields[peerScriptField] = changedSubScriptFields;
-          }
-        }
-        if (Object.keys(changedScriptFields).length > 0) {
-          changedFields.peers[this.peerConfigId].scripts = changedScriptFields;
+      // check for the changes in the peer's config
+      changedFields.peers[this.peerConfigId] = {};
+      for (const [peerConfigField, peerConfigValue] of Object.entries({
+        name: this.peerEditName,
+        address: this.peerEditAddress,
+        mobility: this.peerEditMobility,
+        endpoint: this.peerEditEndpoint,
+        publicKey: this.peerEditPublicKey,
+        privateKey: this.peerEditPrivateKey,
+      })) {
+        if (peerConfigValue !== this.network.peers[this.peerConfigId][peerConfigField]) {
+          changedFields.peers[this.peerConfigId][peerConfigField] = peerConfigValue;
         }
       }
 
+      for (const [field, value] of Object.entries(this.dnsmtuIslandData.changedFields)) {
+        changedFields.peers[this.peerConfigId][field] = value;
+      }
+
+      if ('scripts' in this.scriptsIslandData.changedFields) {
+        changedFields.peers[this.peerConfigId]['scripts'] = this.scriptsIslandData.changedFields.scripts;
+      }
+      if (Object.keys(changedFields.peers[this.peerConfigId]).length === 0) delete changedFields.peers;
+
+      // check for the errors in the peer's connections
       if (this.connectionIslandsData.error) {
         return [
           { msg: `Error detected in the '${this.connectionIslandsData.error}' field. Changes can't be considered until this is fixed.` },

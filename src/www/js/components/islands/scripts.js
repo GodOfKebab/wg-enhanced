@@ -23,6 +23,7 @@ const scriptsIsland = Vue.component('scripts-island', {
   },
   created() {
     this.rollbackData = JSON.parse(JSON.stringify(this.value));
+    this.value.changedFields = {};
     this.value.changed = false;
   },
   template: `<div class="p-1 shadow-md border rounded" :class="[colors.div]">
@@ -55,16 +56,26 @@ const scriptsIsland = Vue.component('scripts-island', {
              </div>`,
   computed: {
     colors() {
-      let changed = false;
+      const changedFields = {
+        scripts: {
+          PreUp: {}, PostUp: {}, PreDown: {}, PostDown: {},
+        },
+      };
       let error = null;
       const colors = {};
       for (const field of ['PreUp', 'PostUp', 'PreDown', 'PostDown']) {
         // eslint-disable-next-line no-nested-ternary
         colors[field] = this.value.context === 'create' || this.value.scripts[field].enabled !== this.rollbackData.scripts[field].enabled || this.value.scripts[field].value !== this.rollbackData.scripts[field].value
           ? WireGuardHelper.checkField('script', this.value.scripts[field]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
-        changed ||= colors[field] !== 'bg-white';
+
+        if (this.value.scripts[field].enabled !== this.rollbackData.scripts[field].enabled) changedFields.scripts[field].enabled = this.value.scripts[field].enabled;
+        if (this.value.scripts[field].value !== this.rollbackData.scripts[field].value) changedFields.scripts[field].value = this.value.scripts[field].value;
+        if (Object.keys(changedFields.scripts[field]).length === 0) delete changedFields.scripts[field];
+
         error = this.value.scripts[field].enabled && colors[field] === 'bg-red-200' ? field : error;
       }
+      if (Object.keys(changedFields.scripts).length === 0) delete changedFields.scripts;
+
       // eslint-disable-next-line no-nested-ternary
       colors.div = (this.value.scripts.PreUp.enabled
                 || this.value.scripts.PostUp.enabled
@@ -74,7 +85,7 @@ const scriptsIsland = Vue.component('scripts-island', {
                     || (this.value.scripts.PostUp.enabled && colors.PostUp === 'bg-red-200')
                     || (this.value.scripts.PreDown.enabled && colors.PreDown === 'bg-red-200')
                     || (this.value.scripts.PostDown.enabled && colors.PostDown === 'bg-red-200')) ? 'bg-red-50' : 'bg-green-50') : 'bg-gray-100';
-      this.value.changed = changed;
+      this.value.changedFields = changedFields;
       this.value.error = error;
 
       return colors;
