@@ -86,143 +86,143 @@
 
 <body class="bg-gray-50">
 
-  <div id="app">
+<div id="app">
 
-    <div class="container mx-auto max-w-3xl">
+  <div class="container mx-auto max-w-3xl">
 
-      <div v-if="authenticated === true">
+    <div v-if="authenticated === true">
 
-        <!-- Header -->
-        <div class="mt-10 mb-2" style="display: flex; align-items: center;">
-          <div class="inline-block float-left ml-3" style="flex: 1; min-width: 0;">
-            <h1 class="text-4xl font-medium truncate">
-              <img src="./img/logo.png" width="32" class="inline align-middle" />
-              <span class="align-middle">WireGuard Management Console</span>
-            </h1>
-          </div>
-
-          <div class=" inline-block float-right p-3 whitespace-nowrap bg-gray-50 align-middle">
-            <div v-if="requiresPassword" class="relative mb-5 bg-blue-50">
-              <div class="text-sm text-gray-400 cursor-pointer hover:underline absolute top-0 right-0" @click="logout">
-                Logout
-                <svg class="h-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </div>
-            </div>
-            <div>
-              <div v-if="webServerStatus === 'unknown'"
-                   title="Management Web Server Status Unknown"
-                   class="inline-block shadow-md rounded-lg bg-yellow-500 hover:bg-yellow-400 p-1.5 mr-0.5"></div>
-              <div v-if="webServerStatus === 'down'"
-                   title="Management Web Server is Down/Not reachable"
-                   class="inline-block shadow-md rounded-lg bg-red-500 hover:bg-red-400 p-1.5 mr-0.5"></div>
-              <div v-if="webServerStatus === 'up'"
-                   title="Management Web Server is Up"
-                   class="inline-block shadow-md rounded-lg bg-green-500 hover:bg-green-400 p-1.5 mr-0.5"></div>
-              <span class="text-sm text-gray-500">Web Server Status</span>
-            </div>
-            <div>
-              <div v-if="wireguardStatus === 'unknown'"
-                   title="WireGuard Networking Status Unknown"
-                   class="inline-block align-middle shadow-md rounded-full w-5 h-3 bg-yellow-500 hover:bg-yellow-400 transition-all">
-                <div class="shadow-md rounded-full w-1 h-1 m-1 ml-2 bg-white"></div>
-              </div>
-              <div v-if="wireguardStatus === 'up'"
-                   title="Disable WireGuard Networking"
-                   @click="dialogId = 'network-toggle'"
-                   class="inline-block align-middle shadow-md rounded-full w-5 h-3 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">
-                <div class="shadow-md rounded-full w-1 h-1 m-1 ml-3 bg-white"></div>
-              </div>
-              <div v-if="wireguardStatus === 'down'"
-                   title="Enable WireGuard Networking"
-                   @click="dialogId = 'network-toggle'"
-                   class="inline-block align-middle shadow-md rounded-full w-5 h-3 mr-0.25 bg-red-500 cursor-pointer hover:bg-red-400 transition-all">
-                <div class="shadow-md rounded-full w-1 h-1 m-1 bg-white"></div>
-              </div>
-              <span class="text-sm text-gray-500">WireGuard Status</span>
-            </div>
-          </div>
+      <!-- Header -->
+      <div class="mt-10 mb-2" style="display: flex; align-items: center;">
+        <div class="inline-block float-left ml-3" style="flex: 1; min-width: 0;">
+          <h1 class="text-4xl font-medium truncate">
+            <img src="./img/logo.png" width="32" class="inline align-middle" />
+            <span class="align-middle">WireGuard Management Console</span>
+          </h1>
         </div>
 
-        <!-- Map -->
-        <div id="graph" class="shadow-md rounded-lg bg-white overflow-hidden mx-3 my-2 justify-center h-96"></div>
-
-        <!-- Peer Boxes -->
-        <div v-for="mobility in ['static', 'roaming']">
-          <div class="shadow-md rounded-lg bg-white overflow-hidden m-8">
-
-            <!--          "Peers" + "Add a Peer" line -->
-            <div class="flex flex-row flex-auto items-center p-3 px-5 border-b-2 border-gray-100">
-              <div class="flex-grow">
-                <p class="text-2xl font-medium">{{ mobility[0].toUpperCase() + mobility.slice(1) }} Peers</p>
-              </div>
-              <div class="flex-shrink-0">
-                <button @click="peerCreateWindowInitialize().then(() => peerCreateMobility = mobility);"
-                        class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition"
-                        :disabled="webServerStatus !== 'up'">
-                  <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  <span class="text-sm">Add a Peer</span>
-                </button>
-              </div>
+        <div class=" inline-block float-right p-3 whitespace-nowrap bg-gray-50 align-middle">
+          <div v-if="requiresPassword" class="relative mb-5 bg-blue-50">
+            <div class="text-sm text-gray-400 cursor-pointer hover:underline absolute top-0 right-0" @click="logout">
+              Logout
+              <svg class="h-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
             </div>
+          </div>
+          <div>
+            <div v-if="webServerStatus === 'unknown'"
+                 title="Management Web Server Status Unknown"
+                 class="inline-block shadow-md rounded-lg bg-yellow-500 hover:bg-yellow-400 p-1.5 mr-0.5"></div>
+            <div v-if="webServerStatus === 'down'"
+                 title="Management Web Server is Down/Not reachable"
+                 class="inline-block shadow-md rounded-lg bg-red-500 hover:bg-red-400 p-1.5 mr-0.5"></div>
+            <div v-if="webServerStatus === 'up'"
+                 title="Management Web Server is Up"
+                 class="inline-block shadow-md rounded-lg bg-green-500 hover:bg-green-400 p-1.5 mr-0.5"></div>
+            <span class="text-sm text-gray-500">Web Server Status</span>
+          </div>
+          <div>
+            <div v-if="wireguardStatus === 'unknown'"
+                 title="WireGuard Networking Status Unknown"
+                 class="inline-block align-middle shadow-md rounded-full w-5 h-3 bg-yellow-500 hover:bg-yellow-400 transition-all">
+              <div class="shadow-md rounded-full w-1 h-1 m-1 ml-2 bg-white"></div>
+            </div>
+            <div v-if="wireguardStatus === 'up'"
+                 title="Disable WireGuard Networking"
+                 @click="dialogId = 'network-toggle'"
+                 class="inline-block align-middle shadow-md rounded-full w-5 h-3 bg-green-500 cursor-pointer hover:bg-green-400 transition-all">
+              <div class="shadow-md rounded-full w-1 h-1 m-1 ml-3 bg-white"></div>
+            </div>
+            <div v-if="wireguardStatus === 'down'"
+                 title="Enable WireGuard Networking"
+                 @click="dialogId = 'network-toggle'"
+                 class="inline-block align-middle shadow-md rounded-full w-5 h-3 mr-0.25 bg-red-500 cursor-pointer hover:bg-red-400 transition-all">
+              <div class="shadow-md rounded-full w-1 h-1 m-1 bg-white"></div>
+            </div>
+            <span class="text-sm text-gray-500">WireGuard Status</span>
+          </div>
+        </div>
+      </div>
 
-            <div>
-              <!-- Peer -->
-              <div v-if="Object.keys(mobility === 'static' ? staticPeers : roamingPeers).length" v-for="(peerDetails, peerId) in (mobility === 'static' ? staticPeers : roamingPeers)">
-                <div class="relative overflow-hidden border-b border-gray-100 border-solid">
+      <!-- Map -->
+      <div id="graph" class="shadow-md rounded-lg bg-white overflow-hidden mx-3 my-2 justify-center h-96"></div>
 
-                  <!-- Chart -->
-  <!--                <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
-  <!--                  <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="[networkSeriesCompute.tx[getConnectionId('root', peerId)]]">-->
-  <!--                  </apexchart>-->
-  <!--                </div>-->
-  <!--                <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
-  <!--                  <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="[networkSeriesCompute.rx[getConnectionId('root', peerId)]]"-->
-  <!--                             style="transform: scaleY(-1);">-->
-  <!--                  </apexchart>-->
-  <!--                </div>-->
+      <!-- Peer Boxes -->
+      <div v-for="mobility in ['static', 'roaming']">
+        <div class="shadow-md rounded-lg bg-white overflow-hidden m-8">
 
-                  <div class="relative p-5 z-10 flex flex-row">
-                    <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
-                      <img v-if="peerAvatars[peerId].src !== staticPeerIconSrc && peerAvatars[peerId].src !== roamingPeerIconSrc"
-                           :src="peerAvatars[peerId].src"
-                           class="w-10 rounded-full absolute top-0 left-0" />
-                      <img v-else
-                           :src="mobility === 'static' ? staticPeerIconSrc : roamingPeerIconSrc"
-                           class="w-4 m-3 absolute top-0 left-0">
+          <!--          "Peers" + "Add a Peer" line -->
+          <div class="flex flex-row flex-auto items-center p-3 px-5 border-b-2 border-gray-100">
+            <div class="flex-grow">
+              <p class="text-2xl font-medium">{{ mobility[0].toUpperCase() + mobility.slice(1) }} Peers</p>
+            </div>
+            <div class="flex-shrink-0">
+              <button @click="peerCreateWindowInitialize().then(() => peerCreateMobility = mobility);"
+                      class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition"
+                      :disabled="webServerStatus !== 'up'">
+                <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span class="text-sm">Add a Peer</span>
+              </button>
+            </div>
+          </div>
 
-                      <div v-if="Object.keys(network.connections).includes(WireGuardHelper.getConnectionId('root', peerId))">
-                        <div v-if="network.connections[WireGuardHelper.getConnectionId('root', peerId)].latestHandshakeAt && ((new Date() - new Date(network.connections[WireGuardHelper.getConnectionId('root', peerId)].latestHandshakeAt) < 1000 * 60 * 10))">
-                          <div class="animate-ping w-4 h-4 p-1 bg-red-100 rounded-full absolute -bottom-1 -right-1"></div>
-                          <div class="w-2 h-2 bg-red-800 rounded-full absolute bottom-0 right-0"></div>
-                        </div>
+          <div>
+            <!-- Peer -->
+            <div v-if="Object.keys(mobility === 'static' ? staticPeers : roamingPeers).length" v-for="(peerDetails, peerId) in (mobility === 'static' ? staticPeers : roamingPeers)">
+              <div class="relative overflow-hidden border-b border-gray-100 border-solid">
+
+                <!-- Chart -->
+                <!--                <div class="absolute z-0 bottom-0 left-0 right-0" style="top: 60%;">-->
+                <!--                  <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="[networkSeriesCompute.tx[getConnectionId('root', peerId)]]">-->
+                <!--                  </apexchart>-->
+                <!--                </div>-->
+                <!--                <div class="absolute z-0 top-0 left-0 right-0" style="bottom: 60%;">-->
+                <!--                  <apexchart width="100%" height="100%" :options="peersPersist[getConnectionId('root', peerId)].chartOptions" :series="[networkSeriesCompute.rx[getConnectionId('root', peerId)]]"-->
+                <!--                             style="transform: scaleY(-1);">-->
+                <!--                  </apexchart>-->
+                <!--                </div>-->
+
+                <div class="relative p-5 z-10 flex flex-row">
+                  <div class="h-10 w-10 mr-5 rounded-full bg-gray-50 relative">
+                    <img v-if="peerAvatars[peerId].src !== staticPeerIconSrc && peerAvatars[peerId].src !== roamingPeerIconSrc"
+                         :src="peerAvatars[peerId].src"
+                         class="w-10 rounded-full absolute top-0 left-0" />
+                    <img v-else
+                         :src="mobility === 'static' ? staticPeerIconSrc : roamingPeerIconSrc"
+                         class="w-4 m-3 absolute top-0 left-0">
+
+                    <div v-if="Object.keys(network.connections).includes(WireGuardHelper.getConnectionId('root', peerId))">
+                      <div v-if="network.connections[WireGuardHelper.getConnectionId('root', peerId)].latestHandshakeAt && ((new Date() - new Date(network.connections[WireGuardHelper.getConnectionId('root', peerId)].latestHandshakeAt) < 1000 * 60 * 10))">
+                        <div class="animate-ping w-4 h-4 p-1 bg-red-100 rounded-full absolute -bottom-1 -right-1"></div>
+                        <div class="w-2 h-2 bg-red-800 rounded-full absolute bottom-0 right-0"></div>
                       </div>
                     </div>
+                  </div>
 
-                    <div class="flex-grow">
+                  <div class="flex-grow">
 
-                      <!-- Name -->
-                      <div class="text-gray-700 group" :title="'Created at ' + new Date(peerDetails.createdAt)">
+                    <!-- Name -->
+                    <div class="text-gray-700 group" :title="'Created at ' + new Date(peerDetails.createdAt)">
 
-                        <!-- Show -->
-                        <input v-if="peerQuickEditNameId === peerId" v-model="peerQuickEditName"
-                               v-on:keyup.enter="api.updatePeerName(peerId, peerQuickEditName); peerQuickEditName = null; peerQuickEditNameId = null;"
-                               v-on:focusout="peerQuickEditName = null; peerQuickEditNameId = null;"
-                               :ref="`peer-${peerId}-name`"
-                               class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
-                        <button v-show="peerQuickEditNameId !== peerId"
-                                @click="peerEditWindowInitialize({ peerId: peerId }); peerConfigId = peerId; peerConfigWindow = 'edit';"
-                                class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
+                      <!-- Show -->
+                      <input v-if="peerQuickEditNameId === peerId" v-model="peerQuickEditName"
+                             v-on:keyup.enter="api.updatePeerName(peerId, peerQuickEditName); peerQuickEditName = null; peerQuickEditNameId = null;"
+                             v-on:focusout="peerQuickEditName = null; peerQuickEditNameId = null;"
+                             :ref="`peer-${peerId}-name`"
+                             class="rounded px-1 border-2 border-gray-100 focus:border-gray-200 outline-none w-30" />
+                      <button v-show="peerQuickEditNameId !== peerId"
+                              @click="peerEditWindowInitialize({ peerId: peerId }); peerConfigId = peerId; peerConfigWindow = 'edit';"
+                              class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.name}}</button>
 
-                        <!-- Edit -->
-                        <span v-if="peerQuickEditNameId !== peerId"
-                              @click="peerQuickEditName = peerDetails.name; peerQuickEditNameId = peerId; setTimeout(() => $refs[`peer-${peerId}-name`][0].select(), 1);"
-                              class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
+                      <!-- Edit -->
+                      <span v-if="peerQuickEditNameId !== peerId"
+                            @click="peerQuickEditName = peerDetails.name; peerQuickEditNameId = peerId; setTimeout(() => $refs[`peer-${peerId}-name`][0].select(), 1);"
+                            class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
                           <svg xmlns="http://www.w3.org/2000/svg"
                                class="h-4 w-4 inline align-middle opacity-25 hover:opacity-100" fill="none" viewBox="0 0 24 24"
                                stroke="currentColor">
@@ -230,13 +230,13 @@
                                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                         </span>
-                      </div>
+                    </div>
 
-                      <!-- Info -->
-                      <div class="text-gray-400 text-xs">
+                    <!-- Info -->
+                    <div class="text-gray-400 text-xs">
 
-                        <!-- Address -->
-                        <span class="group">
+                      <!-- Address -->
+                      <span class="group">
 
                           <!-- Show -->
                           <input v-show="peerQuickEditAddressId === peerId" v-model="peerQuickEditAddress"
@@ -247,7 +247,7 @@
                           <span v-show="peerQuickEditAddressId !== peerId"
                                 class="inline-block border-t-2 border-b-2 border-transparent">{{peerDetails.address}}</span>
 
-                          <!-- Edit -->
+                        <!-- Edit -->
                           <span v-show="peerQuickEditAddressId !== peerId"
                                 @click="peerQuickEditAddress = peerDetails.address; peerQuickEditAddressId = peerId; setTimeout(() => $refs[`peer-${peerId}-address`][0].select(), 1);"
                                 class="cursor-pointer opacity-5 group-hover:opacity-100 transition-opacity">
@@ -260,9 +260,9 @@
                           </span>
                         </span>
 
-                        <!-- Transfer TX -->
-                          <span v-if="networkAverageTrafficCompute.tx[WireGuardHelper.getConnectionId('root', peerId)] > 0"
-                                :title="'Total Download: ' + bytes(peersPersist[WireGuardHelper.getConnectionId('root', peerId)].transferTxPrevious)">
+                      <!-- Transfer TX -->
+                      <span v-if="networkAverageTrafficCompute.tx[WireGuardHelper.getConnectionId('root', peerId)] > 0"
+                            :title="'Total Download: ' + bytes(peersPersist[WireGuardHelper.getConnectionId('root', peerId)].transferTxPrevious)">
                             ·
                             <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                  fill="currentColor">
@@ -273,9 +273,9 @@
                             {{networkAverageTrafficCompute.tx[WireGuardHelper.getConnectionId('root', peerId)] | bytes}}/s
                           </span>
 
-                        <!-- Transfer RX -->
-                          <span v-if="networkAverageTrafficCompute.rx[WireGuardHelper.getConnectionId('root', peerId)] > 0"
-                                :title="'Total Upload: ' + bytes(peersPersist[WireGuardHelper.getConnectionId('root', peerId)].transferRxPrevious)">
+                      <!-- Transfer RX -->
+                      <span v-if="networkAverageTrafficCompute.rx[WireGuardHelper.getConnectionId('root', peerId)] > 0"
+                            :title="'Total Upload: ' + bytes(peersPersist[WireGuardHelper.getConnectionId('root', peerId)].transferRxPrevious)">
                             ·
                             <svg class="align-middle h-3 inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                  fill="currentColor">
@@ -286,75 +286,75 @@
                             {{networkAverageTrafficCompute.rx[WireGuardHelper.getConnectionId('root', peerId)] | bytes}}/s
                           </span>
 
-                        <!-- Last seen -->
-                        <span v-if="Object.keys(network.connections).includes(WireGuardHelper.getConnectionId('root', peerId))">
+                      <!-- Last seen -->
+                      <span v-if="Object.keys(network.connections).includes(WireGuardHelper.getConnectionId('root', peerId))">
                           <span v-show="network.connections[WireGuardHelper.getConnectionId('root', peerId)].latestHandshakeAt"
                                 :title="'Last seen at ' + new Date(network.connections[WireGuardHelper.getConnectionId('root', peerId)].latestHandshakeAt)">
                             · {{new Date(network.connections[WireGuardHelper.getConnectionId('root', peerId)].latestHandshakeAt) | timeago}}
                           </span>
                         </span>
-                      </div>
                     </div>
+                  </div>
 
-                    <div class="text-right">
-                      <div class="text-gray-400">
+                  <div class="text-right">
+                    <div class="text-gray-400">
 
-                        <!-- Enable/Disable -->
-  <!--                      <div v-if="peer.enabled === true" title="Disable Peer (not available for static peers)"-->
-  <!--                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-green-500 opacity-20 transition-all">-->
-  <!--                        <div class="rounded-full shadow-md w-4 h-4 m-1 ml-5 bg-white"></div>-->
-  <!--                      </div>-->
-  <!--                      <div v-if="peer.enabled === false" title="Enable Peer (not available for static peers)"-->
-  <!--                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-red-500 opacity-20 transition-all">-->
-  <!--                        <div class="rounded-full shadow-md w-4 h-4 m-1 bg-white"></div>-->
-  <!--                      </div>-->
+                      <!-- Enable/Disable -->
+                      <!--                      <div v-if="peer.enabled === true" title="Disable Peer (not available for static peers)"-->
+                      <!--                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-green-500 opacity-20 transition-all">-->
+                      <!--                        <div class="rounded-full shadow-md w-4 h-4 m-1 ml-5 bg-white"></div>-->
+                      <!--                      </div>-->
+                      <!--                      <div v-if="peer.enabled === false" title="Enable Peer (not available for static peers)"-->
+                      <!--                           class="inline-block align-middle shadow-md rounded-full w-10 h-6 mr-1 bg-red-500 opacity-20 transition-all">-->
+                      <!--                        <div class="rounded-full shadow-md w-4 h-4 m-1 bg-white"></div>-->
+                      <!--                      </div>-->
 
-                        <!-- Show QR-->
-                        <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                                title="Show QR Code" @click="peerQRId = peerId; QRCode.toCanvas(document.getElementById('qr-canvas'), WireGuardHelper.getPeerConfig(network, peerQRId))">
-                          <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                               stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                          </svg>
-                        </button>
+                      <!-- Show QR-->
+                      <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
+                              title="Show QR Code" @click="peerQRId = peerId; QRCode.toCanvas(document.getElementById('qr-canvas'), WireGuardHelper.getPeerConfig(network, peerQRId))">
+                        <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                      </button>
 
-                        <!-- Download Config -->
-                        <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
-                                title="Download Configuration" @click="WireGuardHelper.downloadPeerConfig(network, peerId)">
-                          <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                               stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                        </button>
+                      <!-- Download Config -->
+                      <button class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition"
+                              title="Download Configuration" @click="WireGuardHelper.downloadPeerConfig(network, peerId)">
+                        <svg class="w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                      </button>
 
-                        <!-- Delete -->
-                        <button class="align-middle p-2 rounded"
-                                :class="{'bg-gray-100 hover:bg-red-600 hover:text-white transition': peerId !== 'root', 'bg-gray-50': peerId === 'root'}"
-                                :title="peerId !== 'root' ? 'Delete Peer' : 'You can\'t delete the root peer'" @click="dialogPeerId = peerId; dialogId = 'delete-peer';" :disabled="peerId === 'root'">
-                          <svg class="w-5" :class="{'fill-gray-300': peerId === 'root'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                  clip-rule="evenodd" />
-                          </svg>
-                        </button>
-                      </div>
+                      <!-- Delete -->
+                      <button class="align-middle p-2 rounded"
+                              :class="{'bg-gray-100 hover:bg-red-600 hover:text-white transition': peerId !== 'root', 'bg-gray-50': peerId === 'root'}"
+                              :title="peerId !== 'root' ? 'Delete Peer' : 'You can\'t delete the root peer'" @click="dialogPeerId = peerId; dialogId = 'delete-peer';" :disabled="peerId === 'root'">
+                        <svg class="w-5" :class="{'fill-gray-300': peerId === 'root'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd"
+                                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-              <div v-if="network.peers === null" class="text-gray-200 p-5">
-                <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                     fill="currentColor">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                  </path>
-                </svg>
-              </div>
-              <div v-else-if="Object.keys(mobility === 'static' ? staticPeers : roamingPeers).length === 0">
-                <p class="text-center m-10 text-gray-400 text-sm">There are no {{ mobility }} peers yet.<br /><br />
+            </div>
+            <div v-if="network.peers === null" class="text-gray-200 p-5">
+              <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                   fill="currentColor">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+              </svg>
+            </div>
+            <div v-else-if="Object.keys(mobility === 'static' ? staticPeers : roamingPeers).length === 0">
+              <p class="text-center m-10 text-gray-400 text-sm">There are no {{ mobility }} peers yet.<br /><br />
                 <button @click="peerCreateWindowInitialize().then(() => peerCreateMobility = mobility);"
                         class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition" :disabled="webServerStatus !== 'up'">
                   <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -364,316 +364,94 @@
                   </svg>
                   <span class="text-sm">Add a Peer</span>
                 </button>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- QR Code-->
-        <div v-show="peerQRId">
-          <div class="bg-black bg-opacity-50 fixed top-0 right-0 left-0 bottom-0 flex items-center justify-center z-20">
-            <div class="bg-white rounded-md shadow-lg relative p-8">
-              <button @click="peerQRId = null" class="absolute right-4 top-4 text-gray-600 hover:text-gray-800">
-                <svg class="w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              <canvas id="qr-canvas"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dialog: Create -->
-        <custom-dialog v-if="peerCreateMobility" class="z-10"
-                       :left-button-text="'Cancel'"
-                       :left-button-click="() => { peerCreateMobility = ''; peerCreateWindowDeletePreamble().then(); }"
-                       :right-button-text="'Create'"
-                       :right-button-click="() => { createPeer(peerCreateMobility); peerCreateMobility = ''; }"
-                       :right-button-classes="['enabled:bg-green-700', 'enabled:hover:bg-green-800', 'enabled:focus:outline-none', 'bg-gray-200', 'disabled:hover:bg-gray-200', 'disabled:cursor-not-allowed', 'text-white']"
-                       :right-button-disabled="!peerCreateEligibilityOverall"
-                       icon="add">
-          <div class="mt-3 text-center sm:mt-0 sm:ml-2 sm:text-left">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">
-              New Peer
-            </h3>
-            <div class="mt-2">
-              <p class="text-sm text-gray-500">
-                <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                       type="text" v-model.trim="peerCreateName" placeholder="Name" :class="[peerCreateNameColor]"/>
               </p>
             </div>
-            <div v-show="peerCreateMobility === 'static'" class="mt-2">
-              <p class="text-sm text-gray-500">
-                <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                       type="text" v-model.trim="peerCreateEndpoint" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)" :class="[peerCreateEndpointColor]" />
-              </p>
-            </div>
-            <div class="mt-2">
-              <button type="button" @click="peerCreateShowAdvance = !peerCreateShowAdvance;">
-                <span class="text-sm text-gray-500 hover:underline">Advanced settings</span>
-                <span v-show="peerCreateShowAdvance === true" class="text-sm text-gray-500 hover:underline">&#x25B2;</span>
-                <span v-show="peerCreateShowAdvance === false" class="text-sm text-gray-500 hover:underline">&#x25BC;</span>
-              </button>
-
-              <div v-show="peerCreateShowAdvance === true" class="h-[18rem] w-[26rem] overflow-y-auto pr-1">
-                <div class="my-2 p-1 shadow-md border rounded bg-gray-100">
-                  <div class="text-gray-800">
-                    Reserved address: <strong>{{ peerCreateAddress }}</strong>
-                  </div>
-                </div>
-                <dnsmtu-island v-model="dnsmtuIslandData"
-                               :defaults="network.defaults.peers" ></dnsmtu-island>
-                <scripts-island v-model="scriptsIslandData"
-                                :defaults="network.defaults.peers"></scripts-island>
-                <connection-islands v-model="connectionIslandsData"
-                                    :focus-peer-id="peerCreatePeerId"
-                                    :focus-peer-name="peerCreateName"></connection-islands>
-              </div>
-            </div>
           </div>
-        </custom-dialog>
+        </div>
+      </div>
 
-        <!-- Configuration Window -->
-        <div v-if="false" class="fixed z-10 inset-0 overflow-y-auto">
-          <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
+      <!-- QR Code-->
+      <div v-show="peerQRId">
+        <div class="bg-black bg-opacity-50 fixed top-0 right-0 left-0 bottom-0 flex items-center justify-center z-20">
+          <div class="bg-white rounded-md shadow-lg relative p-8">
+            <button @click="peerQRId = null" class="absolute right-4 top-4 text-gray-600 hover:text-gray-800">
+              <svg class="w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <canvas id="qr-canvas"></canvas>
+          </div>
+        </div>
+      </div>
 
-            <!-- This element is to trick the browser into centering the modal contents. -->
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
-                 role="dialog" aria-modal="true">
-              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div class="sm:flex sm:items-start sm:mt-0 sm:mx-4">
+      <!-- Dialog: Create -->
+      <custom-dialog v-if="peerCreateMobility" class="z-10"
+                     :left-button-text="'Cancel'"
+                     :left-button-click="() => { peerCreateMobility = ''; peerCreateWindowDeletePreamble().then(); }"
+                     :right-button-text="'Create'"
+                     :right-button-click="() => { createPeer(peerCreateMobility); peerCreateMobility = ''; }"
+                     :right-button-classes="['enabled:bg-green-700', 'enabled:hover:bg-green-800', 'enabled:focus:outline-none', 'bg-gray-200', 'disabled:hover:bg-gray-200', 'disabled:cursor-not-allowed', 'text-white']"
+                     :right-button-disabled="!peerCreateEligibilityOverall"
+                     icon="add">
+        <div class="text-center sm:text-left">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            New Peer
+          </h3>
+          <div class="mt-2">
+            <p class="text-sm text-gray-500">
+              <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
+                     type="text" v-model.trim="peerCreateName" placeholder="Name" :class="[peerCreateNameColor]"/>
+            </p>
+          </div>
+          <div v-show="peerCreateMobility === 'static'" class="mt-2">
+            <p class="text-sm text-gray-500">
+              <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
+                     type="text" v-model.trim="peerCreateEndpoint" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)" :class="[peerCreateEndpointColor]" />
+            </p>
+          </div>
+          <div class="mt-2">
+            <button type="button" @click="peerCreateShowAdvance = !peerCreateShowAdvance;">
+              <span class="text-sm text-gray-500 hover:underline">Advanced settings</span>
+              <span v-show="peerCreateShowAdvance === true" class="text-sm text-gray-500 hover:underline">&#x25B2;</span>
+              <span v-show="peerCreateShowAdvance === false" class="text-sm text-gray-500 hover:underline">&#x25BC;</span>
+            </button>
 
-                  <div class="mt-3 text-center sm:text-left w-full">
-                    <div class="flex justify-between items-center">
-                      <h3 class="text-lg leading-6 font-medium text-gray-900 inline">
-                        Configuration for <strong>{{network.peers[peerConfigId].name}}</strong>:
-                      </h3>
-                      <span class="order-last">
-                        <button v-show="peerConfigWindow === 'edit'" class="align-middle bg-gray-100 hover:enabled:bg-gray-600 hover:enabled:text-white disabled:text-blue-100 disabled:bg-gray-50 p-2 rounded transition special-fill"
-                                title="See the configuration differences for this peer" @click="peerConfigEditUpdateConfirmation().then(); peerConfigWindow = 'view-changes'" :disabled="Object.keys(peerEditChangedFieldsCompute[0]).length + Object.keys(peerEditChangedFieldsCompute[1]).length + Object.keys(peerEditChangedFieldsCompute[2]).length === 0">
-                          <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 122.742 122.881" xml:space="preserve">
-                            <g>
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0"
-                                    d="M5.709,23.974h47.709V5.691c0-1.581,0.643-3.015,1.679-4.05C56.108,0.629,57.492,0,59,0h58.163 c1.508,0,2.891,0.628,3.902,1.641c1.035,1.036,1.678,2.469,1.678,4.05v87.524c0,1.582-0.643,3.016-1.678,4.051 c-1.012,1.012-2.395,1.641-3.902,1.641H69.453v18.283c0,1.582-0.645,3.016-1.68,4.051c-1.012,1.012-2.395,1.641-3.902,1.641H5.709 c-1.509,0-2.891-0.629-3.903-1.641c-1.036-1.035-1.679-2.469-1.679-4.051V74.389C0.044,74.082,0,73.76,0,73.428 c0-0.334,0.044-0.656,0.127-0.963V29.666c0-1.582,0.643-3.016,1.679-4.051C2.818,24.603,4.2,23.974,5.709,23.974L5.709,23.974z M94.113,29.137c1.395-1.468,3.717-1.525,5.184-0.129c1.469,1.396,1.525,3.718,0.129,5.185L88.514,45.609h27.131V7.319H60.517 v16.655h3.354c1.508,0,2.891,0.628,3.902,1.641c1.035,1.035,1.68,2.469,1.68,4.051v61.922h46.191V52.963h-27.15l10.932,11.476 c1.396,1.469,1.34,3.789-0.129,5.186c-1.467,1.396-3.789,1.338-5.184-0.129L77.27,51.815c-1.34-1.407-1.354-3.634,0-5.057 L94.113,29.137L94.113,29.137z M22.943,58.333c-1.396-1.468-1.338-3.789,0.129-5.185c1.468-1.396,3.789-1.338,5.185,0.129 L45.1,70.898c1.354,1.424,1.34,3.65-0.001,5.057L28.257,93.637c-1.396,1.467-3.717,1.525-5.185,0.129 c-1.467-1.395-1.525-3.717-0.129-5.184l10.932-11.479H7.227v38.459h55.127v-84.27H7.227V69.75h26.628L22.943,58.333L22.943,58.333z"/>
-                            </g>
-                          </svg>
-                        </button>
-                        <button v-show="peerConfigWindow === 'file' || peerConfigWindow === 'view-changes'" class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition special-fill-edit"
-                                title="Edit the configuration for this peer" @click="peerConfigWindow = 'edit'">
-                          <svg xmlns="http://www.w3.org/2000/svg"
-                               class="w-5" fill="none" viewBox="0 0 24 24"
-                               stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button v-show="peerConfigWindow === 'edit'" class="align-middle bg-gray-100 hover:bg-gray-600 hover:text-white p-2 rounded transition special-fill"
-                                title="See the configuration file for this peer" @click="peerConfigWindow = 'file'">
-                          <svg xmlns="http://www.w3.org/2000/svg"
-                               class="w-5" fill="none" viewBox="0 0 24 24"
-                               stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0"
-                                  d="M 6 2 C 4.9057453 2 4 2.9057453 4 4 L 4 20 C 4 21.094255 4.9057453 22 6 22 L 18 22 C 19.094255 22 20 21.094255 20 20 L 20 8 L 14 2 L 6 2 z M 6 4 L 13 4 L 13 9 L 18 9 L 18 20 L 6 20 L 6 4 z M 8 12 L 8 14 L 16 14 L 16 12 L 8 12 z M 8 16 L 8 18 L 16 18 L 16 16 L 8 16 z"/>
-                          </svg>
-                        </button>
-                      </span>
-                    </div>
-
-                     <!-- show config -->
-                    <div v-show="peerConfigWindow === 'file'" class="mt-2 w-full overflow-scroll h-96">
-                      <span class="text-sm text-gray-500 whitespace-pre">{{ WireGuardHelper.getPeerConfig(network, peerConfigId) }}</span>
-                    </div>
-
-                    <!-- edit config -->
-                    <div v-show="peerConfigWindow === 'edit'" class="mt-2 w-full overflow-auto h-96">
-
-                      <div class="m-2 p-1 shadow-md border rounded" :class="[peerEditConfigColor]">
-                        <div class="my-0.5 truncate flex items-center relative" :class="[peerEditNameColor !== 'bg-white' ? 'highlight-undo-box' : '']">
-                          <span class="text-gray-800 text-xs mr-1">
-                            <strong class="text-sm">Name:</strong>
-                          </span>
-                          <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
-                                 type="text" placeholder="Name"
-                                 v-model="peerEditName" :class="[peerEditNameColor]"/>
-                          <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                                    title="Undo Changes"
-                                    :disabled="peerEditNameColor === 'bg-white'"
-                                    @click="peerEditName = network.peers[peerConfigId].name">
-                              <img class="w-4" :src="returnIconSrc"/>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div class="mb-0.5 truncate flex items-center relative" :class="[peerEditAddressColor !== 'bg-white' ? 'highlight-undo-box' : '']">
-                          <span class="text-gray-800 text-xs mr-1">
-                            <strong class="text-sm">Address:</strong>
-                          </span>
-                          <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
-                                 type="text" :placeholder="`Address (e.g. ${WireGuardHelper.getNextAvailableAddress(network)})`"
-                                 v-model="peerEditAddress" :class="[peerEditAddressColor]"/>
-                          <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                                    title="Undo Changes"
-                                    :disabled="peerEditAddressColor === 'bg-white'"
-                                    @click="peerEditAddress = network.peers[peerConfigId].address">
-                              <img class="w-4" :src="returnIconSrc"/>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div class="form-check truncate flex items-center relative" :class="[peerEditEndpoint !== network.peers[peerConfigId].endpoint || peerEditMobility !== network.peers[peerConfigId].mobility ? 'highlight-undo-box' : '']">
-                          <label class="flex-none">
-                            <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static';" :checked="peerEditMobility === 'static'">
-                            <span class="text-gray-800 cursor-pointer text-xs mr-1">
-                              <strong class="text-sm">Static Endpoint:</strong>
-                          </span>
-                          </label>
-                          <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
-                                 type="text" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)"
-                                 v-model="peerEditEndpoint"
-                                 :class="[peerEditEndpointColor]"
-                                 :disabled="peerEditMobility !== 'static'"/>
-                          <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                            <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                                    title="Undo Changes"
-                                    :disabled="peerEditEndpoint === network.peers[peerConfigId].endpoint && peerEditMobility === network.peers[peerConfigId].mobility"
-                                    @click="peerEditEndpoint = network.peers[peerConfigId].endpoint; peerEditMobility = network.peers[peerConfigId].mobility;">
-                              <img class="w-4" :src="returnIconSrc"/>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <dnsmtu-island v-model="dnsmtuIslandData"
-                                     :defaults="network.defaults.peers" ></dnsmtu-island>
-                      <scripts-island v-model="scriptsIslandData"
-                                      :defaults="network.defaults.peers"></scripts-island>
-
-                      <div class="m-2 p-1 shadow-md border rounded relative" :class="[peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'bg-green-100' : 'bg-green-50', peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'highlight-undo-box' : '']">
-                        <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
-                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                                  title="Undo Changes"
-                                  :disabled="peerEditPublicKey === network.peers[peerConfigId].publicKey || peerEditPrivateKey === network.peers[peerConfigId].privateKey"
-                                  @click="peerEditPublicKey = network.peers[peerConfigId].publicKey; peerEditPrivateKey = network.peers[peerConfigId].privateKey">
-                            <img class="w-4" :src="returnIconSrc"/>
-                          </button>
-                        </div>
-                        <div class="overflow-x-auto">
-                          <div v-for="peerConfigKey in ['publicKey', 'privateKey', 'createdAt', 'updatedAt']">
-                            <div class="flex grid grid-cols-10 text-sm refresh-key">
-                              <div class="col-span-2">
-                              <span class="text-gray-800">
-                                  <strong>{{ peerConfigKey }}</strong>
-                              </span>
-                              </div>
-                              <div class="col-span-8 text-sm whitespace-nowrap">
-                                <span class="text-gray-800 text-xs">:</span>
-                                <div v-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs pr-4 inline-block">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</div>
-                                <div v-else class="pr-4 inline-block">
-                                  <button class="align-middle rounded bg-gray-100 hover:bg-gray-600 hover:text-white transition-all" @click="refreshPeerEditKeys()">
-                                    <img :src="refreshIconSrc">
-                                  </button>
-                                  <span v-if="peerConfigKey === 'publicKey'" class="text-gray-800 text-xs">{{ peerEditPublicKey }}</span>
-                                  <span v-else class="text-gray-800 text-xs">{{ peerEditPrivateKey }}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <connection-islands v-model="connectionIslandsData"
-                                          :focus-peer-id="peerConfigId"
-                                          :focus-peer-name="peerEditName"
-                                          :get-new-pre-shared-key="async () => { return await api.getNewPreSharedKey() }"></connection-islands>
-                    </div>
-
-                    <!-- show config -->
-                    <div v-show="peerConfigWindow === 'view-changes'" class="mt-2 w-full overflow-scroll h-96">
-                      <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
-                        <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                          <div v-if="peerChangedPeer || peerChangedConnections || !peerEditChangedFieldsCompute[3]">
-                            <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                            <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
-                            <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
-                            <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                          </div>
-                        </div>
-                        <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
-                          <div v-if="Object.keys(peerEditChangedFieldsCompute[1]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
-                        </div>
-                        <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
-                          <div v-if="Object.keys(peerEditChangedFieldsCompute[2]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
-                        </div>
-                        <div class="bg-red-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
-                          <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                          <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
-                        </div>
-                        <div class="bg-green-100 rounded-md overflow-scroll">
-                          <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
-                          <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                          <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            <div v-show="peerCreateShowAdvance === true" class="h-[18rem] w-[26rem] overflow-y-auto pr-3">
+              <div class="my-2 p-1 shadow-md border rounded bg-gray-100">
+                <div class="text-gray-800">
+                  Reserved address: <strong>{{ peerCreateAddress }}</strong>
                 </div>
               </div>
-              <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <!-- copy config -->
-                <button v-show="peerConfigWindow === 'file'" type="button"
-                        @click="navigator.clipboard.writeText(WireGuardHelper.getPeerConfig(network, peerConfigId)).then(() => {
-                                alert('successfully copied');
-                                })
-                                .catch(() => {
-                                alert('something went wrong');
-                                });"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
-                  Copy To Clipboard
-                </button>
-                <!-- Save Configuration -->
-                <button v-show="peerConfigWindow === 'edit' || peerConfigWindow === 'view-changes'" type="button"
-                        @click="peerConfigEditUpdateConfirmation().then(); dialogId = 'confirm-changes';"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-700 text-base font-medium text-white hover:bg-green-800 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm disabled:bg-gray-200 transition"
-                        :disabled="!(Object.keys(peerEditChangedFieldsCompute[0]).length + Object.keys(peerEditChangedFieldsCompute[1]).length + Object.keys(peerEditChangedFieldsCompute[2]).length > 0 && peerEditChangedFieldsCompute[3] && webServerStatus === 'up')">
-                  Save Configuration
-                </button>
-                <button type="button" @click="peerConfigId = null;"
-                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                  Cancel
-                </button>
-              </div>
+              <dnsmtu-island v-model="dnsmtuIslandData"
+                             :defaults="network.defaults.peers" ></dnsmtu-island>
+              <scripts-island v-model="scriptsIslandData"
+                              :defaults="network.defaults.peers"></scripts-island>
+              <connection-islands v-model="connectionIslandsData"
+                                  :focus-peer-id="peerCreatePeerId"
+                                  :focus-peer-name="peerCreateName"></connection-islands>
             </div>
           </div>
         </div>
+      </custom-dialog>
 
-        <custom-dialog v-if="peerConfigId" class="z-10"
-                       :left-button-text="'Cancel'"
-                       :left-button-click="() => { peerConfigId = null }"
-                       :right-button-text="peerConfigWindow === 'file' ? 'Copy To Clipboard' : 'Save Configuration'"
-                       :right-button-classes="['enabled:bg-green-700', 'enabled:hover:bg-green-800', 'enabled:focus:outline-none', 'bg-gray-200', 'disabled:hover:bg-gray-200', 'disabled:cursor-not-allowed', 'text-white']"
-                       :right-button-click="peerConfigWindow === 'file' ? () => { navigator.clipboard.writeText(WireGuardHelper.getPeerConfig(network, peerConfigId)).then(() => {
+      <custom-dialog v-if="peerConfigId" class="z-10"
+                     :left-button-text="'Cancel'"
+                     :left-button-click="() => { peerConfigId = null }"
+                     :right-button-text="peerConfigWindow === 'file' ? 'Copy To Clipboard' : 'Save Configuration'"
+                     :right-button-classes="['enabled:bg-green-700', 'enabled:hover:bg-green-800', 'enabled:focus:outline-none', 'bg-gray-200', 'disabled:hover:bg-gray-200', 'disabled:cursor-not-allowed', 'text-white']"
+                     :right-button-disabled="peerConfigWindow !== 'edit' || (Object.keys(peerEditChangedFieldsCompute[0]).length + Object.keys(peerEditChangedFieldsCompute[1]).length + Object.keys(peerEditChangedFieldsCompute[2]).length === 0)"
+                     :right-button-click="peerConfigWindow === 'file' ? () => { navigator.clipboard.writeText(WireGuardHelper.getPeerConfig(network, peerConfigId)).then(() => {
                                 alert('successfully copied');
                                 })
                                 .catch(() => {
                                 alert('something went wrong');
                                 }); } : () => { peerConfigEditUpdateConfirmation().then(); dialogId = 'confirm-changes'; }">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 inline">
-              Configuration for <strong>{{network.peers[peerConfigId].name}}</strong>:
-            </h3>
-            <span class="order-last">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 inline">
+            Configuration for <strong>{{network.peers[peerConfigId].name}}</strong>:
+          </h3>
+          <span class="order-last">
               <button v-show="peerConfigWindow === 'edit'" class="align-middle bg-gray-100 hover:enabled:bg-gray-600 hover:enabled:text-white disabled:text-blue-100 disabled:bg-gray-50 p-2 rounded transition special-fill"
                       title="See the configuration differences for this peer" @click="peerConfigEditUpdateConfirmation().then(); peerConfigWindow = 'view-changes'" :disabled="Object.keys(peerEditChangedFieldsCompute[0]).length + Object.keys(peerEditChangedFieldsCompute[1]).length + Object.keys(peerEditChangedFieldsCompute[2]).length === 0">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 122.742 122.881" xml:space="preserve">
@@ -702,206 +480,127 @@
                 </svg>
               </button>
             </span>
-          </div>
+        </div>
 
-          <!-- show config -->
-          <div v-show="peerConfigWindow === 'file'" class="mt-2 w-full overflow-scroll h-96">
-            <span class="text-sm text-gray-500 whitespace-pre bg-blue-50">{{ WireGuardHelper.getPeerConfig(network, peerConfigId) }}</span>
-          </div>
+        <!-- show config -->
+        <div v-show="peerConfigWindow === 'file'" class="mt-2 w-full overflow-scroll h-96">
+          <span class="text-sm text-gray-500 whitespace-pre">{{ WireGuardHelper.getPeerConfig(network, peerConfigId) }}</span>
+        </div>
 
-          <!-- edit config -->
-          <div v-show="peerConfigWindow === 'edit'" class="mt-2 w-full overflow-auto h-96">
+        <!-- edit config -->
+        <div v-show="peerConfigWindow === 'edit'" class="mt-2 w-full overflow-auto h-96">
 
-            <div class="m-2 p-1 shadow-md border rounded" :class="[peerEditConfigColor]">
-              <div class="my-0.5 truncate flex items-center relative" :class="[peerEditNameColor !== 'bg-white' ? 'highlight-undo-box' : '']">
+          <div class="my-2 mr-2 p-1 shadow-md border rounded" :class="[peerEditConfigColor]">
+            <div class="my-0.5 truncate flex items-center relative" :class="[peerEditNameColor !== 'bg-white' ? 'highlight-undo-box' : '']">
                           <span class="text-gray-800 text-xs mr-1">
                             <strong class="text-sm">Name:</strong>
                           </span>
-                <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
-                       type="text" placeholder="Name"
-                       v-model="peerEditName" :class="[peerEditNameColor]"/>
-                <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                  <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                          title="Undo Changes"
-                          :disabled="peerEditNameColor === 'bg-white'"
-                          @click="peerEditName = network.peers[peerConfigId].name">
-                    <img class="w-4" :src="returnIconSrc"/>
-                  </button>
-                </div>
-              </div>
-
-              <div class="mb-0.5 truncate flex items-center relative" :class="[peerEditAddressColor !== 'bg-white' ? 'highlight-undo-box' : '']">
-                          <span class="text-gray-800 text-xs mr-1">
-                            <strong class="text-sm">Address:</strong>
-                          </span>
-                <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
-                       type="text" :placeholder="`Address (e.g. ${WireGuardHelper.getNextAvailableAddress(network)})`"
-                       v-model="peerEditAddress" :class="[peerEditAddressColor]"/>
-                <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                  <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                          title="Undo Changes"
-                          :disabled="peerEditAddressColor === 'bg-white'"
-                          @click="peerEditAddress = network.peers[peerConfigId].address">
-                    <img class="w-4" :src="returnIconSrc"/>
-                  </button>
-                </div>
-              </div>
-
-              <div class="form-check truncate flex items-center relative" :class="[peerEditEndpoint !== network.peers[peerConfigId].endpoint || peerEditMobility !== network.peers[peerConfigId].mobility ? 'highlight-undo-box' : '']">
-                <label class="flex-none">
-                  <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static';" :checked="peerEditMobility === 'static'">
-                  <span class="text-gray-800 cursor-pointer text-xs mr-1">
-                              <strong class="text-sm">Static Endpoint:</strong>
-                          </span>
-                </label>
-                <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
-                       type="text" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)"
-                       v-model="peerEditEndpoint"
-                       :class="[peerEditEndpointColor]"
-                       :disabled="peerEditMobility !== 'static'"/>
-                <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
-                  <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
-                          title="Undo Changes"
-                          :disabled="peerEditEndpoint === network.peers[peerConfigId].endpoint && peerEditMobility === network.peers[peerConfigId].mobility"
-                          @click="peerEditEndpoint = network.peers[peerConfigId].endpoint; peerEditMobility = network.peers[peerConfigId].mobility;">
-                    <img class="w-4" :src="returnIconSrc"/>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <dnsmtu-island v-model="dnsmtuIslandData"
-                           :defaults="network.defaults.peers" class="m-2"></dnsmtu-island>
-            <scripts-island v-model="scriptsIslandData"
-                            :defaults="network.defaults.peers" class="m-2"></scripts-island>
-
-            <div class="m-2 p-1 shadow-md border rounded relative" :class="[peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'bg-green-100' : 'bg-green-50', peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'highlight-undo-box' : '']">
-              <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+              <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
+                     type="text" placeholder="Name"
+                     v-model="peerEditName" :class="[peerEditNameColor]"/>
+              <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
                 <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                         title="Undo Changes"
-                        :disabled="peerEditPublicKey === network.peers[peerConfigId].publicKey || peerEditPrivateKey === network.peers[peerConfigId].privateKey"
-                        @click="peerEditPublicKey = network.peers[peerConfigId].publicKey; peerEditPrivateKey = network.peers[peerConfigId].privateKey">
+                        :disabled="peerEditNameColor === 'bg-white'"
+                        @click="peerEditName = network.peers[peerConfigId].name">
                   <img class="w-4" :src="returnIconSrc"/>
                 </button>
               </div>
-              <div class="overflow-x-auto">
-                <div v-for="peerConfigKey in ['publicKey', 'privateKey', 'createdAt', 'updatedAt']">
-                  <div class="flex grid grid-cols-10 text-sm refresh-key">
-                    <div class="col-span-2">
+            </div>
+
+            <div class="mb-0.5 truncate flex items-center relative" :class="[peerEditAddressColor !== 'bg-white' ? 'highlight-undo-box' : '']">
+                          <span class="text-gray-800 text-xs mr-1">
+                            <strong class="text-sm">Address:</strong>
+                          </span>
+              <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
+                     type="text" :placeholder="`Address (e.g. ${WireGuardHelper.getNextAvailableAddress(network)})`"
+                     v-model="peerEditAddress" :class="[peerEditAddressColor]"/>
+              <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                        title="Undo Changes"
+                        :disabled="peerEditAddressColor === 'bg-white'"
+                        @click="peerEditAddress = network.peers[peerConfigId].address">
+                  <img class="w-4" :src="returnIconSrc"/>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-check truncate flex items-center relative" :class="[peerEditEndpoint !== network.peers[peerConfigId].endpoint || peerEditMobility !== network.peers[peerConfigId].mobility ? 'highlight-undo-box' : '']">
+              <label class="flex-none">
+                <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" @change="peerEditMobility = peerEditMobility === 'static' ? 'roaming' : 'static';" :checked="peerEditMobility === 'static'">
+                <span class="text-gray-800 cursor-pointer text-xs mr-1">
+                              <strong class="text-sm">Static Endpoint:</strong>
+                          </span>
+              </label>
+              <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
+                     type="text" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)"
+                     v-model="peerEditEndpoint"
+                     :class="[peerEditEndpointColor]"
+                     :disabled="peerEditMobility !== 'static'"/>
+              <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                        title="Undo Changes"
+                        :disabled="peerEditEndpoint === network.peers[peerConfigId].endpoint && peerEditMobility === network.peers[peerConfigId].mobility"
+                        @click="peerEditEndpoint = network.peers[peerConfigId].endpoint; peerEditMobility = network.peers[peerConfigId].mobility;">
+                  <img class="w-4" :src="returnIconSrc"/>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <dnsmtu-island v-model="dnsmtuIslandData"
+                         :defaults="network.defaults.peers" class="my-2 mr-2"></dnsmtu-island>
+          <scripts-island v-model="scriptsIslandData"
+                          :defaults="network.defaults.peers" class="my-2 mr-2"></scripts-island>
+
+          <div class="my-2 mr-2 p-1 shadow-md border rounded relative" :class="[peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'bg-green-100' : 'bg-green-50', peerEditPublicKey !== network.peers[peerConfigId].publicKey || peerEditPrivateKey !== network.peers[peerConfigId].privateKey ? 'highlight-undo-box' : '']">
+            <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+              <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
+                      title="Undo Changes"
+                      :disabled="peerEditPublicKey === network.peers[peerConfigId].publicKey || peerEditPrivateKey === network.peers[peerConfigId].privateKey"
+                      @click="peerEditPublicKey = network.peers[peerConfigId].publicKey; peerEditPrivateKey = network.peers[peerConfigId].privateKey">
+                <img class="w-4" :src="returnIconSrc"/>
+              </button>
+            </div>
+            <div class="overflow-x-auto">
+              <div v-for="peerConfigKey in ['publicKey', 'privateKey', 'createdAt', 'updatedAt']">
+                <div class="flex grid grid-cols-10 text-sm refresh-key">
+                  <div class="col-span-2">
                               <span class="text-gray-800">
                                   <strong>{{ peerConfigKey }}</strong>
                               </span>
-                    </div>
-                    <div class="col-span-8 text-sm whitespace-nowrap">
-                      <span class="text-gray-800 text-xs">:</span>
-                      <div v-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs pr-4 inline-block">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</div>
-                      <div v-else class="pr-4 inline-block">
-                        <button class="align-middle rounded bg-gray-100 hover:bg-gray-600 hover:text-white transition-all" @click="refreshPeerEditKeys()">
-                          <img :src="refreshIconSrc">
-                        </button>
-                        <span v-if="peerConfigKey === 'publicKey'" class="text-gray-800 text-xs">{{ peerEditPublicKey }}</span>
-                        <span v-else class="text-gray-800 text-xs">{{ peerEditPrivateKey }}</span>
-                      </div>
+                  </div>
+                  <div class="col-span-8 text-sm whitespace-nowrap">
+                    <span class="text-gray-800 text-xs">:</span>
+                    <div v-if="['createdAt', 'updatedAt'].includes(peerConfigKey)" class="text-gray-800 text-xs pr-4 inline-block">{{ new Date(network.peers[peerConfigId][peerConfigKey]).toString() }}</div>
+                    <div v-else class="pr-4 inline-block">
+                      <button class="align-middle rounded bg-gray-100 hover:bg-gray-600 hover:text-white transition-all" @click="refreshPeerEditKeys()">
+                        <img :src="refreshIconSrc">
+                      </button>
+                      <span v-if="peerConfigKey === 'publicKey'" class="text-gray-800 text-xs">{{ peerEditPublicKey }}</span>
+                      <span v-else class="text-gray-800 text-xs">{{ peerEditPrivateKey }}</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
-            <connection-islands v-model="connectionIslandsData"
-                                :focus-peer-id="peerConfigId"
-                                :focus-peer-name="peerEditName"
-                                :get-new-pre-shared-key="async () => { return await api.getNewPreSharedKey() }" class="m-2"></connection-islands>
           </div>
 
-          <!-- show config -->
-          <div v-show="peerConfigWindow === 'view-changes'" class="mt-2 w-full overflow-scroll h-96">
-            <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
-              <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
-                <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                <div v-if="peerChangedPeer || peerChangedConnections || !peerEditChangedFieldsCompute[3]">
-                  <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                  <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
-                  <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
-                  <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                </div>
-              </div>
-              <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
-                <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
-                <div v-if="Object.keys(peerEditChangedFieldsCompute[1]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
-              </div>
-              <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
-                <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
-                <div v-if="Object.keys(peerEditChangedFieldsCompute[2]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
-              </div>
-              <div class="bg-red-100 rounded-md overflow-scroll">
-                <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
-                <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
-              </div>
-              <div class="bg-green-100 rounded-md overflow-scroll">
-                <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
-                <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
-              </div>
-            </div>
-          </div>
-        </custom-dialog>
+          <connection-islands v-model="connectionIslandsData"
+                              :focus-peer-id="peerConfigId"
+                              :focus-peer-name="peerEditName"
+                              :get-new-pre-shared-key="async () => { return await api.getNewPreSharedKey() }" class="my-2 mr-2"></connection-islands>
+        </div>
 
-        <!-- Dialog: WireGuard Enable/Disable -->
-        <custom-dialog v-if="dialogId === 'network-toggle'" class="z-10"
-                       :left-button-text="'Cancel'"
-                       :left-button-click="() => { dialogId = null }"
-                       :right-button-text="wireguardStatus === 'up' ? 'Disable' : 'Enable'"
-                       :right-button-classes="wireguardStatus === 'up' ? ['text-white', 'bg-red-600', 'hover:bg-red-700'] : ['text-white', 'bg-green-600', 'hover:bg-green-700']"
-                       :right-button-click="() => { toggleWireGuardNetworking(); dialogId = null; }"
-                       icon="danger">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
-            {{ wireguardStatus === 'up' ? 'Disable' : 'Enable' }} the WireGuard Network
-          </h3>
-          <div class="mt-2 text-sm text-gray-500">
-            Are you sure you want to {{ wireguardStatus === 'up' ? 'disable' : 'enable' }} the WireGuard network?
-          </div>
-        </custom-dialog>
-
-        <!-- Dialog: Delete -->
-        <custom-dialog v-if="dialogId === 'delete-peer'" class="z-10"
-                       :left-button-text="'Cancel'"
-                       :left-button-click="() => { dialogId = null }"
-                       :right-button-text="'Delete'"
-                       :right-button-classes="['text-white', 'bg-red-600', 'hover:bg-red-700']"
-                       :right-button-click="() => { api.deletePeer(dialogPeerId).then(); dialogId = null; }"
-                       icon="danger">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
-            Delete Peer
-          </h3>
-          <div class="mt-2 text-sm text-gray-500">
-            Are you sure you want to delete <strong>{{ network.peers[dialogPeerId].name }}</strong>? This action cannot be undone.
-          </div>
-        </custom-dialog>
-
-        <!-- Dialog: CreateError -->
-        <custom-dialog v-if="dialogId === 'confirm-changes'" class="z-20"
-                       :left-button-text="'Cancel'"
-                       :left-button-click="() => { dialogId = null }"
-                       :right-button-text="'Do it!'"
-                       :right-button-classes="['text-white', 'bg-green-600', 'hover:bg-green-700']"
-                       :right-button-click="() => { peerConfigEditApply().then(); peerConfigId = null; peerConfigWindow = 'edit'; dialogId = null; }"
-                       icon="danger">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
-            Confirm changes for <strong>{{ network.peers[peerConfigId].name }}</strong>
-          </h3>
-          <div class="mt-2 text-sm text-gray-500">
-            Are you sure you want to make these changes?
-          </div>
-
-          <div class="m-2 text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
+        <!-- show config -->
+        <div v-show="peerConfigWindow === 'view-changes'" class="mt-2 w-full overflow-scroll h-96">
+          <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
             <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
               <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-              <div v-if="Object.keys(peerEditChangedFieldsCompute[0]).length > 0 || !peerEditChangedFieldsCompute[3]">
+              <div v-if="peerChangedPeer || peerChangedConnections || !peerEditChangedFieldsCompute[3]">
                 <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                <div v-else-if="Object.keys(peerEditChangedFieldsCompute[0].peers).length > 0 && Object.keys(peerEditChangedFieldsCompute[0].connections).length === 0" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
-                <div v-else-if="Object.keys(peerEditChangedFieldsCompute[0].peers).length === 0 && Object.keys(peerEditChangedFieldsCompute[0].connections).length > 0" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
+                <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
+                <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
                 <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
               </div>
             </div>
@@ -924,93 +623,172 @@
               <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
             </div>
           </div>
-        </custom-dialog>
+        </div>
+      </custom-dialog>
 
-        <!-- Dialog: Can't Create Peer -->
-        <custom-dialog v-if="dialogId === 'cant-create-peer'" class="z-10"
-                       :left-button-text="'Cancel'"
-                       :left-button-click="() => { dialogId = null }"
-                       icon="danger">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
-            Error while preparing peer creation window
-          </h3>
-          <div class="mt-2 text-sm text-gray-500">
-            There are no addresses left to be reserved. A new peer can't be created until the reserved addresses pool is reset, or you have reached the peer limit.
+      <!-- Dialog: WireGuard Enable/Disable -->
+      <custom-dialog v-if="dialogId === 'network-toggle'" class="z-10"
+                     :left-button-text="'Cancel'"
+                     :left-button-click="() => { dialogId = null }"
+                     :right-button-text="wireguardStatus === 'up' ? 'Disable' : 'Enable'"
+                     :right-button-classes="wireguardStatus === 'up' ? ['text-white', 'bg-red-600', 'hover:bg-red-700'] : ['text-white', 'bg-green-600', 'hover:bg-green-700']"
+                     :right-button-click="() => { toggleWireGuardNetworking(); dialogId = null; }"
+                     icon="danger">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          {{ wireguardStatus === 'up' ? 'Disable' : 'Enable' }} the WireGuard Network
+        </h3>
+        <div class="mt-2 text-sm text-gray-500">
+          Are you sure you want to {{ wireguardStatus === 'up' ? 'disable' : 'enable' }} the WireGuard network?
+        </div>
+      </custom-dialog>
+
+      <!-- Dialog: Delete -->
+      <custom-dialog v-if="dialogId === 'delete-peer'" class="z-10"
+                     :left-button-text="'Cancel'"
+                     :left-button-click="() => { dialogId = null }"
+                     :right-button-text="'Delete'"
+                     :right-button-classes="['text-white', 'bg-red-600', 'hover:bg-red-700']"
+                     :right-button-click="() => { api.deletePeer(dialogPeerId).then(); dialogId = null; }"
+                     icon="danger">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Delete Peer
+        </h3>
+        <div class="mt-2 text-sm text-gray-500">
+          Are you sure you want to delete <strong>{{ network.peers[dialogPeerId].name }}</strong>? This action cannot be undone.
+        </div>
+      </custom-dialog>
+
+      <!-- Dialog: CreateError -->
+      <custom-dialog v-if="dialogId === 'confirm-changes'" class="z-20"
+                     :left-button-text="'Cancel'"
+                     :left-button-click="() => { dialogId = null }"
+                     :right-button-text="'Do it!'"
+                     :right-button-classes="['text-white', 'bg-green-600', 'hover:bg-green-700']"
+                     :right-button-click="() => { peerConfigEditApply().then(); peerConfigId = null; peerConfigWindow = 'edit'; dialogId = null; }"
+                     icon="danger">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Confirm changes for <strong>{{ network.peers[peerConfigId].name }}</strong>
+        </h3>
+        <div class="mt-2 text-sm text-gray-500">
+          Are you sure you want to make these changes?
+        </div>
+
+        <div class="m-2 text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
+          <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
+            <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
+            <div v-if="Object.keys(peerEditChangedFieldsCompute[0]).length > 0 || !peerEditChangedFieldsCompute[3]">
+              <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+              <div v-else-if="Object.keys(peerEditChangedFieldsCompute[0].peers).length > 0 && Object.keys(peerEditChangedFieldsCompute[0].connections).length === 0" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
+              <div v-else-if="Object.keys(peerEditChangedFieldsCompute[0].peers).length === 0 && Object.keys(peerEditChangedFieldsCompute[0].connections).length > 0" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
+              <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+            </div>
           </div>
-        </custom-dialog>
-
-      </div>
-
-      <div v-if="authenticated === false">
-        <h1 class="text-4xl font-medium my-16 text-gray-700 text-center">WireGuard</h1>
-
-        <form @submit="login" class="shadow rounded-md bg-white mx-auto w-64 p-5 overflow-hidden mt-10">
-          <!-- Avatar -->
-          <div class="h-20 w-20 mb-10 mt-5 mx-auto rounded-full bg-red-800 relative overflow-hidden">
-            <svg class="w-10 h-10 m-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-              fill="currentColor">
-              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-            </svg>
+          <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
+            <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
+            <div v-if="Object.keys(peerEditChangedFieldsCompute[1]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
           </div>
+          <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
+            <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
+            <div v-if="Object.keys(peerEditChangedFieldsCompute[2]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
+          </div>
+          <div class="bg-red-100 rounded-md overflow-scroll">
+            <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
+            <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
+            <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
+          </div>
+          <div class="bg-green-100 rounded-md overflow-scroll">
+            <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
+            <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
+            <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
+          </div>
+        </div>
+      </custom-dialog>
 
-          <input type="password" name="password" placeholder="Password" v-model="password"
-            class="px-3 py-2 text-sm text-gray-500 mb-5 border-2 border-gray-100 rounded-lg w-full focus:border-red-800 outline-none" />
-
-          <button v-if="authenticating"
-            class="bg-red-800 w-full rounded shadow py-2 text-sm text-white cursor-not-allowed">
-            <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-              fill="currentColor">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-              </path>
-            </svg>
-          </button>
-          <input v-if="!authenticating && password" type="submit"
-            class="bg-red-800 w-full rounded shadow py-2 text-sm text-white hover:bg-red-700 transition cursor-pointer"
-            value="Sign In">
-          <input v-if="!authenticating && !password" type="submit"
-            class="bg-gray-200 w-full rounded shadow py-2 text-sm text-white cursor-not-allowed" value="Sign In">
-        </form>
-      </div>
-
-      <div v-if="authenticated === null" class="text-gray-300 pt-24 pb-12">
-
-        <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-          fill="currentColor">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-          </path>
-        </svg>
-
-      </div>
+      <!-- Dialog: Can't Create Peer -->
+      <custom-dialog v-if="dialogId === 'cant-create-peer'" class="z-10"
+                     :left-button-text="'Cancel'"
+                     :left-button-click="() => { dialogId = null }"
+                     icon="danger">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+          Error while preparing peer creation window
+        </h3>
+        <div class="mt-2 text-sm text-gray-500">
+          There are no addresses left to be reserved. A new peer can't be created until the reserved addresses pool is reset, or you have reached the peer limit.
+        </div>
+      </custom-dialog>
 
     </div>
 
-    <p class="text-center m-10 text-gray-300 text-xs">Made by <a target="_blank" class="hover:underline"
-        href="https://emilenijssen.nl/?ref=wg-easy">Emile Nijssen</a> · <a class="hover:underline"
-        href="https://github.com/sponsors/WeeJeWel" target="_blank">Donate</a> · <a class="hover:underline"
-        href="https://github.com/weejewel/wg-easy" target="_blank">GitHub</a>
-    </p>
+    <div v-if="authenticated === false">
+      <h1 class="text-4xl font-medium my-16 text-gray-700 text-center">WireGuard</h1>
 
+      <form @submit="login" class="shadow rounded-md bg-white mx-auto w-64 p-5 overflow-hidden mt-10">
+        <!-- Avatar -->
+        <div class="h-20 w-20 mb-10 mt-5 mx-auto rounded-full bg-red-800 relative overflow-hidden">
+          <svg class="w-10 h-10 m-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+               fill="currentColor">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+          </svg>
+        </div>
+
+        <input type="password" name="password" placeholder="Password" v-model="password"
+               class="px-3 py-2 text-sm text-gray-500 mb-5 border-2 border-gray-100 rounded-lg w-full focus:border-red-800 outline-none" />
+
+        <button v-if="authenticating"
+                class="bg-red-800 w-full rounded shadow py-2 text-sm text-white cursor-not-allowed">
+          <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+               fill="currentColor">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+          </svg>
+        </button>
+        <input v-if="!authenticating && password" type="submit"
+               class="bg-red-800 w-full rounded shadow py-2 text-sm text-white hover:bg-red-700 transition cursor-pointer"
+               value="Sign In">
+        <input v-if="!authenticating && !password" type="submit"
+               class="bg-gray-200 w-full rounded shadow py-2 text-sm text-white cursor-not-allowed" value="Sign In">
+      </form>
+    </div>
+
+    <div v-if="authenticated === null" class="text-gray-300 pt-24 pb-12">
+
+      <svg class="w-5 animate-spin mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+           fill="currentColor">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+
+    </div>
 
   </div>
 
-  <script src="./js/vendor/vue.min.js"></script>
-  <script src="./js/vendor/apexcharts.min.js"></script>
-  <script src="./js/vendor/vue-apexcharts.min.js"></script>
-  <script src="./js/vendor/md5.min.js"></script>
-  <script src="./js/vendor/timeago.min.js"></script>
-  <script src="./js/vendor/force-graph.js"></script>
-  <script src="./js/vendor/qrcode.js"></script>
-  <script src="./js/WireGuardHelper.js"></script>
-  <script src="./js/components/islands/dnsmtu.js"></script>
-  <script src="./js/components/islands/scripts.js"></script>
-  <script src="./js/components/islands/connections.js"></script>
-  <script src="./js/components/custom-dialog.js"></script>
-  <script src="./js/api.js"></script>
-  <script src="./js/app.js"></script>
+  <p class="text-center m-10 text-gray-300 text-xs">Made by <a target="_blank" class="hover:underline"
+                                                               href="https://emilenijssen.nl/?ref=wg-easy">Emile Nijssen</a> · <a class="hover:underline"
+                                                                                                                                  href="https://github.com/sponsors/WeeJeWel" target="_blank">Donate</a> · <a class="hover:underline"
+                                                                                                                                                                                                              href="https://github.com/weejewel/wg-easy" target="_blank">GitHub</a>
+  </p>
+
+
+</div>
+
+<script src="./js/vendor/vue.min.js"></script>
+<script src="./js/vendor/apexcharts.min.js"></script>
+<script src="./js/vendor/vue-apexcharts.min.js"></script>
+<script src="./js/vendor/md5.min.js"></script>
+<script src="./js/vendor/timeago.min.js"></script>
+<script src="./js/vendor/force-graph.js"></script>
+<script src="./js/vendor/qrcode.js"></script>
+<script src="./js/WireGuardHelper.js"></script>
+<script src="./js/components/islands/dnsmtu.js"></script>
+<script src="./js/components/islands/scripts.js"></script>
+<script src="./js/components/islands/connections.js"></script>
+<script src="./js/components/custom-dialog.js"></script>
+<script src="./js/api.js"></script>
+<script src="./js/app.js"></script>
 </body>
 
 </html>
