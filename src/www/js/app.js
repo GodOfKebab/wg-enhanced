@@ -82,7 +82,7 @@ new Vue({
       latestHandshakeAt: {},
       preSharedKey: {},
       context: '',
-      changed: false,
+      changedFields: {},
       error: null,
     },
 
@@ -690,8 +690,8 @@ new Vue({
       this.peerEditNewConfig = JSON.parse(JSON.stringify(this.peerEditOldConfig)); // deep copy
 
       // apply changed fields
-      if (Object.keys(changedFields).length) {
-        if (Object.keys(changedFields.peers).length) {
+      if (Object.keys(changedFields).length > 0) {
+        if ('peers' in changedFields) {
           for (const [field, value] of Object.entries(changedFields.peers[this.peerConfigId])) {
             if (field === 'dns' || field === 'mtu') {
               for (const [fieldDNSMTU, valueDNSMTU] of Object.entries(value)) {
@@ -979,49 +979,11 @@ new Vue({
         ];
       }
 
-      if (this.connectionIslandsData.changed) {
-        const changedConnections = {};
-        for (const peerId of [...this.connectionIslandsData.attachedStaticPeers, ...this.connectionIslandsData.attachedRoamingPeers]) {
-          const connectionId = WireGuardHelper.getConnectionId(this.peerConfigId, peerId);
-          const changedSubFields = {};
-          if (Object.keys(this.network.connections).includes(connectionId)) {
-            if (this.connectionIslandsData.isConnectionEnabled[connectionId] !== this.network.connections[connectionId].enabled) {
-              changedSubFields.enabled = this.connectionIslandsData.isConnectionEnabled[connectionId];
-            }
-
-            if (this.connectionIslandsData.allowedIPsAtoB[connectionId] !== this.network.connections[connectionId].allowedIPsAtoB) {
-              changedSubFields.allowedIPsAtoB = this.connectionIslandsData.allowedIPsAtoB[connectionId];
-            }
-
-            if (this.connectionIslandsData.allowedIPsBtoA[connectionId] !== this.network.connections[connectionId].allowedIPsBtoA) {
-              changedSubFields.allowedIPsBtoA = this.connectionIslandsData.allowedIPsBtoA[connectionId];
-            }
-
-            if (this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] !== this.network.connections[connectionId].persistentKeepalive.enabled) {
-              changedSubFields.persistentKeepalive = { enabled: this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] };
-            }
-
-            if (this.connectionIslandsData.persistentKeepaliveValue[connectionId] !== this.network.connections[connectionId].persistentKeepalive.value) {
-              if ('persistentKeepalive' in changedSubFields) {
-                changedSubFields.persistentKeepalive.value = this.connectionIslandsData.persistentKeepaliveValue[connectionId];
-              } else {
-                changedSubFields.persistentKeepalive = { value: this.connectionIslandsData.persistentKeepaliveValue[connectionId] };
-              }
-            }
-
-            if (this.connectionIslandsData.preSharedKey[connectionId] !== this.network.connections[connectionId].preSharedKey) {
-              changedSubFields.preSharedKey = this.connectionIslandsData.preSharedKey[connectionId];
-            }
-
-            if (Object.keys(changedSubFields).length > 0) {
-              changedConnections[connectionId] = changedSubFields;
-            }
-          }
-        }
-
-        if (Object.keys(changedConnections).length > 0) {
-          changedFields.connections = changedConnections;
-        }
+      // check for the changes in the peer's connections
+      if (Object.keys(this.connectionIslandsData.changedFields).length > 0) {
+        changedFields.connections = this.connectionIslandsData.changedFields;
+      } else {
+        delete changedFields.connections;
       }
 
       const attachedPeerIds = [...this.connectionIslandsData.attachedStaticPeers, ...this.connectionIslandsData.attachedRoamingPeers];
@@ -1054,7 +1016,7 @@ new Vue({
       }
 
       return [
-        Object.keys(changedFields.peers).length + Object.keys(changedFields.connections).length > 0 ? changedFields : {},
+        changedFields,
         Object.keys(addedFields.connections).length > 0 ? addedFields : {},
         Object.keys(removedFields.connections).length > 0 ? removedFields : {},
         true,

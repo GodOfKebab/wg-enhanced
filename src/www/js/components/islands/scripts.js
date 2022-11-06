@@ -24,7 +24,7 @@ const scriptsIsland = Vue.component('scripts-island', {
   created() {
     this.rollbackData = JSON.parse(JSON.stringify(this.value));
     this.value.changedFields = {};
-    this.value.changed = false;
+    this.value.error = null;
   },
   template: `<div class="p-1 shadow-md border rounded" :class="[colors.div]">
                <div class="text-gray-800 mb-0.5">

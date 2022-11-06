@@ -597,10 +597,10 @@
           <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
             <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
               <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-              <div v-if="peerChangedPeer || peerChangedConnections || !peerEditChangedFieldsCompute[3]">
+              <div v-if="Object.keys(peerEditChangedFieldsCompute[0]).length > 0 || !peerEditChangedFieldsCompute[3]">
                 <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                <div v-else-if="peerChangedPeer && !peerChangedConnections" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
-                <div v-else-if="!peerChangedPeer && peerChangedConnections" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
+                <div v-else-if="('peers' in peerEditChangedFieldsCompute[0]) && !('connections' in peerEditChangedFieldsCompute[0])" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
+                <div v-else-if="!('peers' in peerEditChangedFieldsCompute[0]) && ('connections' in peerEditChangedFieldsCompute[0])" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
                 <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
               </div>
             </div>

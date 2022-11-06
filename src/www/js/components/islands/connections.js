@@ -22,11 +22,12 @@ const connectionIslands = Vue.component('connection-islands', {
   },
   created() {
     this.rollbackData = JSON.parse(JSON.stringify(this.value));
-    this.value.changed = false;
+    this.value.changedFields = {};
     for (const peerId of [...Object.keys(this.value.staticPeers), ...Object.keys(this.value.roamingPeers)]) {
       const connectionId = WireGuardHelper.getConnectionId(this.focusPeerId, peerId);
       this.connectionChanged[connectionId] = false;
     }
+    this.value.error = null;
   },
   template: `<div v-if="Object.keys(value.staticPeers).length + Object.keys(value.roamingPeers).length > 0">
                <div class="my-2 p-1 shadow-md border rounded relative" :class="[color.selectionDiv, JSON.stringify(value.attachedStaticPeers) === JSON.stringify(rollbackData.attachedStaticPeers) && JSON.stringify(value.attachedRoamingPeers) === JSON.stringify(rollbackData.attachedRoamingPeers) ? '' : 'highlight-undo-box']">
@@ -228,31 +229,33 @@ const connectionIslands = Vue.component('connection-islands', {
         attachedPeerDiv: {},
         selectionDiv: WireGuardHelper.checkField('peerCount', [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) ? 'bg-green-50' : 'bg-red-50',
       };
-      let changed = JSON.stringify([...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) !== JSON.stringify([...this.rollbackData.attachedStaticPeers, ...this.rollbackData.attachedRoamingPeers]);
+      // let changed = JSON.stringify([...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) !== JSON.stringify([...this.rollbackData.attachedStaticPeers, ...this.rollbackData.attachedRoamingPeers]);
+      const changedFields = {};
       let error = null;
       for (const peerId of [...this.value.attachedStaticPeers, ...this.value.attachedRoamingPeers]) {
         const connectionId = WireGuardHelper.getConnectionId(this.focusPeerId, peerId);
         try {
+          changedFields[connectionId] = {};
           // eslint-disable-next-line no-nested-ternary
           color.allowedIPsAtoB[connectionId] = this.value.context === 'create' || this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]
             ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          if (this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]) changedFields[connectionId].allowedIPsAtoB = this.value.allowedIPsAtoB[connectionId];
           error = color.allowedIPsAtoB[connectionId] === 'bg-red-200' ? `${connectionId}'s 'allowedIPsAtoB' field` : error;
 
           // eslint-disable-next-line no-nested-ternary
           color.allowedIPsBtoA[connectionId] = this.value.context === 'create' || this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]
             ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          if (this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]) changedFields[connectionId].allowedIPsBtoA = this.value.allowedIPsBtoA[connectionId];
           error = color.allowedIPsBtoA[connectionId] === 'bg-red-200' ? `${connectionId}'s 'allowedIPsBtoA' field` : error;
 
           // eslint-disable-next-line no-nested-ternary
           color.persistentKeepalive[connectionId] = this.value.context === 'create' || this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]
             ? this.value.persistentKeepaliveEnabled[connectionId] && WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          if (this.value.persistentKeepaliveEnabled[connectionId] !== this.rollbackData.persistentKeepaliveEnabled[connectionId]) changedFields[connectionId].persistentKeepaliveEnabled = this.value.persistentKeepaliveEnabled[connectionId];
+          if (this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]) changedFields[connectionId].persistentKeepaliveValue = this.value.persistentKeepaliveValue[connectionId];
           error = color.persistentKeepalive[connectionId] === 'bg-red-200' ? `${connectionId}'s 'persistentKeepalive' field` : error;
 
-          this.connectionChanged[connectionId] = this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]
-              || this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]
-              || this.value.persistentKeepaliveEnabled[connectionId] !== this.rollbackData.persistentKeepaliveEnabled[connectionId]
-              || this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]
-              || this.value.preSharedKey[connectionId] !== this.rollbackData.preSharedKey[connectionId];
+          if (Object.keys(changedFields[connectionId]).length === 0) delete changedFields[connectionId];
 
           // eslint-disable-next-line no-nested-ternary
           color.attachedPeerDiv[connectionId] = ![color.allowedIPsAtoB[connectionId], color.allowedIPsBtoA[connectionId], this.value.persistentKeepaliveEnabled[connectionId] ? color.persistentKeepalive[connectionId] : ''].includes('bg-red-200') ? this.value.isConnectionEnabled[connectionId] ? this.connectionChanged[connectionId] || !(this.rollbackData.attachedStaticPeers.includes(peerId) || this.rollbackData.attachedRoamingPeers.includes(peerId)) ? 'bg-green-100' : 'bg-green-50' : 'bg-red-50' : 'bg-red-100';
@@ -264,9 +267,8 @@ const connectionIslands = Vue.component('connection-islands', {
           }
           console.log(e);
         }
-        changed ||= this.connectionChanged[connectionId];
       }
-      this.value.changed = changed;
+      this.value.changedFields = changedFields;
       this.value.error = error;
 
       return color;
