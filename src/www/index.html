@@ -440,7 +440,7 @@
                      :left-button-click="() => { peerConfigId = null }"
                      :right-button-text="peerConfigWindow === 'file' ? 'Copy To Clipboard' : 'Save Configuration'"
                      :right-button-classes="['enabled:bg-green-700', 'enabled:hover:bg-green-800', 'enabled:focus:outline-none', 'bg-gray-200', 'disabled:hover:bg-gray-200', 'disabled:cursor-not-allowed', 'text-white']"
-                     :right-button-disabled="peerConfigWindow !== 'edit' || (Object.keys(peerEditChangedFieldsCompute[0]).length + Object.keys(peerEditChangedFieldsCompute[1]).length + Object.keys(peerEditChangedFieldsCompute[2]).length === 0)"
+                     :right-button-disabled="peerConfigWindow !== 'file' && ((Object.keys(peerEditChangedFieldsCompute[0]).length + Object.keys(peerEditChangedFieldsCompute[1]).length + Object.keys(peerEditChangedFieldsCompute[2]).length === 0) || !peerEditChangedFieldsCompute[3])"
                      :right-button-click="peerConfigWindow === 'file' ? () => { navigator.clipboard.writeText(WireGuardHelper.getPeerConfig(network, peerConfigId)).then(() => {
                                 alert('successfully copied');
                                 })
