@@ -88,13 +88,9 @@ new Vue({
       error: null,
     },
 
-    peerCreatePeerId: '',
-    peerCreateName: '',
-    peerCreateAddress: '',
-    peerCreatePreambleExpiration: (new Date()).getTime(),
-    peerCreateMobility: '',
-    peerCreateEndpoint: '',
-    peerCreateShowAdvance: '',
+    createWindow: {
+      peerCreateMobility: '',
+    },
 
     peerQuickEditName: null,
     peerQuickEditNameId: null,
@@ -476,98 +472,6 @@ new Vue({
         this.api.wireguardEnable().then();
       }
     },
-    async peerCreateWindowInitialize() {
-      if ((new Date()).getTime() > this.peerCreatePreambleExpiration) {
-        try {
-          const { peerId, address, expiration } = await this.api.preamblePeer({ });
-          this.peerCreatePeerId = peerId;
-          this.peerCreateAddress = address;
-          this.peerCreatePreambleExpiration = expiration;
-        } catch (e) {
-          this.peerCreateMobility = '';
-          this.dialogId = 'cant-create-peer';
-        }
-      }
-
-      this.peerCreateName = '';
-      this.peerCreateEndpoint = '';
-      this.peerCreateShowAdvance = false;
-
-      this.dnsmtuIslandData.context = 'create';
-      this.dnsmtuIslandData.dns = JSON.parse(JSON.stringify(this.network.defaults.peers.dns));
-      this.dnsmtuIslandData.mtu = JSON.parse(JSON.stringify(this.network.defaults.peers.mtu));
-      this.dnsmtuIslandData.error = null;
-
-      this.scriptsIslandData.scripts = JSON.parse(JSON.stringify(this.network.defaults.peers.scripts));
-      this.scriptsIslandData.error = null;
-
-      this.connectionIslandsData.context = 'create';
-      this.connectionIslandsData.selectionBoxTitles = { static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' };
-      this.connectionIslandsData.staticPeers = this.staticPeers;
-      this.connectionIslandsData.roamingPeers = this.roamingPeers;
-      // enable the root server as default
-      this.connectionIslandsData.attachedStaticPeers = ['root'];
-      this.connectionIslandsData.attachedRoamingPeers = [];
-      this.connectionIslandsData.error = null;
-
-      for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
-        const connectionId = WireGuardHelper.getConnectionId(this.peerCreatePeerId, peerId);
-        const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
-
-        this.connectionIslandsData.isConnectionEnabled[connectionId] = true;
-        this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
-        this.connectionIslandsData.persistentKeepaliveValue[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
-        // eslint-disable-next-line no-nested-ternary
-        const allowedIPsNewToOld = peerDetails.mobility === 'static' ? (this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0') : `${this.network.peers[peerId].address}/32`;
-        const allowedIPsOldToNew = `${this.peerCreateAddress}/32`;
-        this.connectionIslandsData.allowedIPsAtoB[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsOldToNew : allowedIPsNewToOld;
-        this.connectionIslandsData.allowedIPsBtoA[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsNewToOld : allowedIPsOldToNew;
-
-        this.connectionIslandsData.latestHandshakeAt[connectionId] = null;
-        this.connectionIslandsData.preSharedKey[connectionId] = null;
-      }
-    },
-    async peerCreateWindowDeletePreamble() {
-      await this.api.deletePreamble({ peerId: this.peerCreatePeerId, address: this.peerCreateAddress });
-
-      // Reset the peerId, address and expiration time
-      this.peerCreatePeerId = '';
-      this.peerCreateAddress = '';
-      this.peerCreatePreambleExpiration = (new Date()).getTime();
-    },
-    createPeer() {
-      const attachedPeersCompact = [];
-      for (const peerId of [...this.connectionIslandsData.attachedStaticPeers, ...this.connectionIslandsData.attachedRoamingPeers]) {
-        const connectionId = WireGuardHelper.getConnectionId(this.peerCreatePeerId, peerId);
-        attachedPeersCompact.push({
-          peer: peerId,
-          enabled: this.connectionIslandsData.isConnectionEnabled[connectionId],
-          allowedIPsAtoB: this.connectionIslandsData.allowedIPsAtoB[connectionId],
-          allowedIPsBtoA: this.connectionIslandsData.allowedIPsBtoA[connectionId],
-          persistentKeepalive: {
-            enabled: this.connectionIslandsData.persistentKeepaliveEnabled[connectionId],
-            value: this.connectionIslandsData.persistentKeepaliveValue[connectionId],
-          },
-        });
-      }
-
-      this.api.createPeer({
-        peerId: this.peerCreatePeerId,
-        address: this.peerCreateAddress,
-        name: this.peerCreateName,
-        mobility: this.peerCreateMobility,
-        endpoint: this.peerCreateEndpoint,
-        dns: this.dnsmtuIslandData.dns,
-        mtu: this.dnsmtuIslandData.mtu,
-        scripts: this.scriptsIslandData.scripts,
-        attachedPeers: attachedPeersCompact,
-      }).then();
-
-      // Reset the peerId, address and expiration time
-      this.peerCreatePeerId = '';
-      this.peerCreateAddress = '';
-      this.peerCreatePreambleExpiration = (new Date()).getTime();
-    },
     peerEditWindowInitialize(options = {}) {
       const { peerId } = options;
       this.peerEditName = this.network.peers[peerId].name;
@@ -822,19 +726,6 @@ new Vue({
     },
   },
   computed: {
-    peerCreateNameColor() {
-      return WireGuardHelper.checkField('name', this.peerCreateName) ? 'bg-green-50' : 'bg-red-50';
-    },
-    peerCreateEndpointColor() {
-      return WireGuardHelper.checkField('endpoint', this.peerCreateEndpoint) ? 'bg-green-50' : 'bg-red-50';
-    },
-    peerCreateEligibilityOverall() {
-      return this.peerCreateNameColor !== 'bg-red-50'
-          && !(this.peerCreateMobility === 'static' && this.peerCreateEndpointColor === 'bg-red-50')
-          && !this.dnsmtuIslandData.error
-          && !this.scriptsIslandData.error
-          && !this.connectionIslandsData.error;
-    },
     peerEditNameColor() {
       // eslint-disable-next-line no-nested-ternary
       return this.peerEditName !== this.network.peers[this.peerConfigId].name
@@ -1114,5 +1005,6 @@ new Vue({
     'scripts-island': scriptsIsland,
     'connection-islands': connectionIslands,
     'custom-dialog': customDialog,
+    'create-window': createWindow,
   },
 });

@@ -160,7 +160,7 @@
               <p class="text-2xl font-medium">{{ mobility[0].toUpperCase() + mobility.slice(1) }} Peers</p>
             </div>
             <div class="flex-shrink-0">
-              <button @click="peerCreateWindowInitialize().then(() => peerCreateMobility = mobility);"
+              <button @click="createWindow.peerCreateMobility = mobility;"
                       class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition"
                       :disabled="webServerStatus !== 'up'">
                 <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -355,7 +355,7 @@
             </div>
             <div v-else-if="Object.keys(mobility === 'static' ? staticPeers : roamingPeers).length === 0">
               <p class="text-center m-10 text-gray-400 text-sm">There are no {{ mobility }} peers yet.<br /><br />
-                <button @click="peerCreateWindowInitialize().then(() => peerCreateMobility = mobility);"
+                <button @click="createWindow.peerCreateMobility = mobility;"
                         class="enabled:hover:bg-green-700 enabled:hover:border-green-700 disabled:bg-gray-300 disabled:border-gray-300 enabled:hover:text-white text-gray-700 border-2 border-gray-100 py-2 px-4 rounded inline-flex items-center transition" :disabled="webServerStatus !== 'up'">
                   <svg class="w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                        stroke="currentColor">
@@ -386,54 +386,13 @@
       </div>
 
       <!-- Dialog: Create -->
-      <custom-dialog v-if="peerCreateMobility" class="z-10"
-                     :left-button-text="'Cancel'"
-                     :left-button-click="() => { peerCreateMobility = ''; peerCreateWindowDeletePreamble().then(); }"
-                     :right-button-text="'Create'"
-                     :right-button-click="() => { createPeer(peerCreateMobility); peerCreateMobility = ''; }"
-                     :right-button-classes="['enabled:bg-green-700', 'enabled:hover:bg-green-800', 'enabled:focus:outline-none', 'bg-gray-200', 'disabled:hover:bg-gray-200', 'disabled:cursor-not-allowed', 'text-white']"
-                     :right-button-disabled="!peerCreateEligibilityOverall"
-                     icon="add">
-        <div class="text-center sm:text-left">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
-            New Peer
-          </h3>
-          <div class="mt-2">
-            <p class="text-sm text-gray-500">
-              <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                     type="text" v-model.trim="peerCreateName" placeholder="Name" :class="[peerCreateNameColor]"/>
-            </p>
-          </div>
-          <div v-show="peerCreateMobility === 'static'" class="mt-2">
-            <p class="text-sm text-gray-500">
-              <input class="rounded p-2 border-2 border-gray-100 focus:border-gray-200 outline-none w-full"
-                     type="text" v-model.trim="peerCreateEndpoint" placeholder="Endpoint (e.g. 1.2.3.4:51820 example.com:51820)" :class="[peerCreateEndpointColor]" />
-            </p>
-          </div>
-          <div class="mt-2">
-            <button type="button" @click="peerCreateShowAdvance = !peerCreateShowAdvance;">
-              <span class="text-sm text-gray-500 hover:underline">Advanced settings</span>
-              <span v-show="peerCreateShowAdvance === true" class="text-sm text-gray-500 hover:underline">&#x25B2;</span>
-              <span v-show="peerCreateShowAdvance === false" class="text-sm text-gray-500 hover:underline">&#x25BC;</span>
-            </button>
-
-            <div v-show="peerCreateShowAdvance === true" class="h-[18rem] w-[26rem] overflow-y-auto pr-3">
-              <div class="my-2 p-1 shadow-md border rounded bg-gray-100">
-                <div class="text-gray-800">
-                  Reserved address: <strong>{{ peerCreateAddress }}</strong>
-                </div>
-              </div>
-              <dnsmtu-island v-model="dnsmtuIslandData"
-                             :defaults="network.defaults.peers" ></dnsmtu-island>
-              <scripts-island v-model="scriptsIslandData"
-                              :defaults="network.defaults.peers"></scripts-island>
-              <connection-islands v-model="connectionIslandsData"
-                                  :focus-peer-id="peerCreatePeerId"
-                                  :focus-peer-name="peerCreateName"></connection-islands>
-            </div>
-          </div>
-        </div>
-      </custom-dialog>
+      <create-window v-if="createWindow.peerCreateMobility" class="z-10"
+                     v-model="createWindow"
+                     :network="network"
+                     :static-peers="staticPeers"
+                     :roaming-peers="roamingPeers"
+                     :api="api"
+                     :dialog-id="dialogId"></create-window>
 
       <custom-dialog v-if="peerConfigId" class="z-10"
                      :left-button-text="'Cancel'"
@@ -787,6 +746,7 @@
 <script src="./js/components/islands/scripts.js"></script>
 <script src="./js/components/islands/connections.js"></script>
 <script src="./js/components/custom-dialog.js"></script>
+<script src="./js/components/create-window.js"></script>
 <script src="./js/api.js"></script>
 <script src="./js/app.js"></script>
 </body>
