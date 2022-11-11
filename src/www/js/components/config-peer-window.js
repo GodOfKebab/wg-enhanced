@@ -19,24 +19,19 @@ const configPeerWindow = Vue.component('config-peer-window', {
       dialogId: '',
 
       dnsmtuIslandData: {
-        dns: { enabled: false, value: '' },
-        mtu: { enabled: false, value: '' },
-        context: '',
+        dns: this.network.peers[this.value.id].dns,
+        mtu: this.network.peers[this.value.id].mtu,
+        context: 'edit',
         changedFields: {},
         error: null,
       },
       scriptsIslandData: {
-        scripts: {
-          PreUp: { enabled: false, value: '' },
-          PostUp: { enabled: false, value: '' },
-          PreDown: { enabled: false, value: '' },
-          PostDown: { enabled: false, value: '' },
-        },
+        scripts: this.network.peers[this.value.id].scripts,
         changedFields: {},
         error: null,
       },
       connectionIslandsData: {
-        selectionBoxTitles: { static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' },
+        selectionBoxTitles: { static: 'Attached static peers:', roaming: 'Attached roaming peers:' },
         staticPeers: {},
         roamingPeers: {},
         attachedStaticPeers: [],
@@ -48,7 +43,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
         allowedIPsBtoA: {},
         latestHandshakeAt: {},
         preSharedKey: {},
-        context: '',
+        context: 'edit',
         addedFields: {},
         removedFields: {},
         changedFields: {},
@@ -56,22 +51,83 @@ const configPeerWindow = Vue.component('config-peer-window', {
       },
 
       peerConfigWindow: 'edit',
-      peerEditName: '',
-      peerEditAddress: '',
-      peerEditMobility: '',
-      peerEditEndpoint: '',
-      peerEditPublicKey: '',
-      peerEditPrivateKey: '',
-      peerChangedPeer: false,
-      peerChangedConnections: false,
-      peerAddedConnections: false,
-      peerRemovedConnections: false,
+      peerEditName: this.network.peers[this.value.id].name,
+      peerEditAddress: this.network.peers[this.value.id].address,
+      peerEditMobility: this.network.peers[this.value.id].mobility,
+      peerEditEndpoint: this.network.peers[this.value.id].endpoint,
+      peerEditPublicKey: this.network.peers[this.value.id].publicKey,
+      peerEditPrivateKey: this.network.peers[this.value.id].privateKey,
       peerEditOldConfig: { peers: {}, connections: {} },
       peerEditNewConfig: { peers: {}, connections: {} },
     };
   },
-  beforeCreate() {
-    this.peerEditWindowInitialize({ peerId: this.value.id });
+  created() {
+    this.peerEditOldConfig.peers[this.value.id] = {
+      name: this.network.peers[this.value.id].name,
+      address: this.network.peers[this.value.id].address,
+      mobility: this.network.peers[this.value.id].mobility,
+      endpoint: this.network.peers[this.value.id].endpoint,
+      publicKey: this.network.peers[this.value.id].publicKey,
+      privateKey: this.network.peers[this.value.id].privateKey,
+      dns: this.network.peers[this.value.id].dns,
+      mtu: this.network.peers[this.value.id].mtu,
+      scripts: this.network.peers[this.value.id].scripts,
+    };
+
+    // To enforce order of static > roaming connections when listed in the view
+    for (const [staticPeerId, staticPeerDetails] of Object.entries(this.staticPeers)) {
+      if (staticPeerId === this.value.id) continue;
+      this.connectionIslandsData.staticPeers[staticPeerId] = staticPeerDetails;
+      const connectionId = WireGuardHelper.getConnectionId(staticPeerId, this.value.id);
+      if (Object.keys(this.network.connections).includes(connectionId)) this.connectionIslandsData.attachedStaticPeers.push(staticPeerId);
+    }
+    for (const [roamingPeerId, roamingPeerDetails] of Object.entries(this.roamingPeers)) {
+      if (roamingPeerId === this.value.id) continue;
+      this.connectionIslandsData.roamingPeers[roamingPeerId] = roamingPeerDetails;
+      const connectionId = WireGuardHelper.getConnectionId(roamingPeerId, this.value.id);
+      if (Object.keys(this.network.connections).includes(connectionId)) this.connectionIslandsData.attachedRoamingPeers.push(roamingPeerId);
+    }
+
+    for (const [connectionId, connection] of Object.entries(this.network.connections)) {
+      if (connectionId.includes(this.value.id)) {
+        this.connectionIslandsData.isConnectionEnabled[connectionId] = connection.enabled;
+        this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] = connection.persistentKeepalive.enabled;
+        this.connectionIslandsData.persistentKeepaliveValue[connectionId] = connection.persistentKeepalive.value.toString();
+        this.connectionIslandsData.allowedIPsAtoB[connectionId] = connection.allowedIPsAtoB;
+        this.connectionIslandsData.allowedIPsBtoA[connectionId] = connection.allowedIPsBtoA;
+        this.connectionIslandsData.latestHandshakeAt[connectionId] = connection.latestHandshakeAt;
+        this.connectionIslandsData.preSharedKey[connectionId] = connection.preSharedKey;
+
+        this.peerEditOldConfig.connections[connectionId] = {
+          enabled: connection.enabled,
+          persistentKeepalive: connection.persistentKeepalive,
+          allowedIPsAtoB: connection.allowedIPsAtoB,
+          allowedIPsBtoA: connection.allowedIPsBtoA,
+          preSharedKey: connection.preSharedKey,
+        };
+      }
+    }
+
+    // Fill out the default fields for new connections
+    for (const [otherPeerId, peerDetails] of Object.entries(this.network.peers)) {
+      if (otherPeerId === this.value.id) continue;
+      const connectionId = WireGuardHelper.getConnectionId(this.value.id, otherPeerId);
+      const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+
+      if (Object.keys(this.network.connections).includes(connectionId)) continue;
+
+      this.connectionIslandsData.isConnectionEnabled[connectionId] = true;
+      this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
+      this.connectionIslandsData.persistentKeepaliveValue[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
+      // eslint-disable-next-line no-nested-ternary
+      const allowedIPsThisToOther = `${this.network.peers[otherPeerId].address}/32`;
+      const allowedIPsOtherToThis = `${this.network.peers[this.value.id].address}/32`;
+      this.connectionIslandsData.allowedIPsAtoB[connectionId] = (a === otherPeerId && b === this.value.id) ? allowedIPsOtherToThis : allowedIPsThisToOther;
+      this.connectionIslandsData.allowedIPsBtoA[connectionId] = (a === otherPeerId && b === this.value.id) ? allowedIPsThisToOther : allowedIPsOtherToThis;
+
+      this.connectionIslandsData.latestHandshakeAt[connectionId] = null;
+      this.connectionIslandsData.preSharedKey[connectionId] = null;
+    }
   },
   template: `<div>
                <custom-dialog class="z-10"
@@ -265,7 +321,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
                  </div>
                </custom-dialog>
                
-               <!-- Dialog: CreateError -->
+               <!-- Dialog: Confirm -->
                <custom-dialog v-if="dialogId === 'confirm-changes'" class="z-20"
                               :left-button-text="'Cancel'"
                               :left-button-click="() => { dialogId = null }"
@@ -312,109 +368,6 @@ const configPeerWindow = Vue.component('config-peer-window', {
                </custom-dialog>
              </div>`,
   methods: {
-    peerEditWindowInitialize(options = {}) {
-      const { peerId } = options;
-      this.peerEditName = this.network.peers[peerId].name;
-      this.peerEditAddress = this.network.peers[peerId].address;
-      this.peerEditMobility = this.network.peers[peerId].mobility;
-      this.peerEditEndpoint = this.network.peers[peerId].endpoint;
-
-      this.peerEditPublicKey = this.network.peers[peerId].publicKey;
-      this.peerEditPrivateKey = this.network.peers[peerId].privateKey;
-
-      this.dnsmtuIslandData.context = 'edit';
-      this.dnsmtuIslandData.dns = JSON.parse(JSON.stringify(this.network.peers[peerId].dns));
-      this.dnsmtuIslandData.mtu = JSON.parse(JSON.stringify(this.network.peers[peerId].mtu));
-      this.dnsmtuIslandData.error = null;
-
-      this.scriptsIslandData.scripts = JSON.parse(JSON.stringify(this.network.peers[peerId].scripts));
-      this.scriptsIslandData.error = null;
-
-      this.peerEditOldConfig.peers[peerId] = {
-        name: this.network.peers[peerId].name,
-        address: this.network.peers[peerId].address,
-        mobility: this.network.peers[peerId].mobility,
-        endpoint: this.network.peers[peerId].endpoint,
-        publicKey: this.network.peers[peerId].publicKey,
-        privateKey: this.network.peers[peerId].privateKey,
-        dns: this.network.peers[peerId].dns,
-        mtu: this.network.peers[peerId].mtu,
-        scripts: this.network.peers[peerId].scripts,
-      };
-
-      this.connectionIslandsData.context = 'edit';
-      this.connectionIslandsData.selectionBoxTitles = { static: 'Attached static peers:', roaming: 'Attached roaming peers:' };
-      this.connectionIslandsData.staticPeers = {};
-      for (const [staticPeerId, staticPeerDetails] of Object.entries(this.staticPeers)) {
-        if (staticPeerId === peerId) continue;
-        this.connectionIslandsData.staticPeers[staticPeerId] = staticPeerDetails;
-      }
-      this.connectionIslandsData.roamingPeers = {};
-      for (const [roamingPeerId, roamingPeerDetails] of Object.entries(this.roamingPeers)) {
-        if (roamingPeerId === peerId) continue;
-        this.connectionIslandsData.roamingPeers[roamingPeerId] = roamingPeerDetails;
-      }
-
-      // To enforce order of static > roaming connections when listed in the view
-      this.connectionIslandsData.attachedStaticPeers = [];
-      this.connectionIslandsData.attachedRoamingPeers = [];
-      for (const staticPeerId of Object.keys(this.staticPeers)) {
-        if (staticPeerId === peerId) continue;
-        const connectionId = WireGuardHelper.getConnectionId(staticPeerId, peerId);
-        if (Object.keys(this.network.connections).includes(connectionId)) this.connectionIslandsData.attachedStaticPeers.push(staticPeerId);
-      }
-      for (const roamingPeerId of Object.keys(this.roamingPeers)) {
-        if (roamingPeerId === peerId) continue;
-        const connectionId = WireGuardHelper.getConnectionId(roamingPeerId, peerId);
-        if (Object.keys(this.network.connections).includes(connectionId)) this.connectionIslandsData.attachedRoamingPeers.push(roamingPeerId);
-      }
-      this.connectionIslandsData.error = null;
-
-      this.peerEditOldConfig.connections = {};
-      this.connectionIslandsData.isConnectionEnabled = {};
-      this.connectionIslandsData.persistentKeepaliveEnabled = {};
-      this.connectionIslandsData.persistentKeepaliveValue = {};
-      this.connectionIslandsData.allowedIPsAtoB = {};
-      this.connectionIslandsData.allowedIPsBtoA = {};
-      for (const [connectionId, connection] of Object.entries(this.network.connections)) {
-        if (connectionId.includes(peerId)) {
-          this.connectionIslandsData.isConnectionEnabled[connectionId] = connection.enabled;
-          this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] = connection.persistentKeepalive.enabled;
-          this.connectionIslandsData.persistentKeepaliveValue[connectionId] = connection.persistentKeepalive.value.toString();
-          this.connectionIslandsData.allowedIPsAtoB[connectionId] = connection.allowedIPsAtoB;
-          this.connectionIslandsData.allowedIPsBtoA[connectionId] = connection.allowedIPsBtoA;
-          this.connectionIslandsData.latestHandshakeAt[connectionId] = connection.latestHandshakeAt;
-          this.connectionIslandsData.preSharedKey[connectionId] = connection.preSharedKey;
-
-          this.peerEditOldConfig.connections[connectionId] = {
-            enabled: connection.enabled,
-            persistentKeepalive: connection.persistentKeepalive,
-            allowedIPsAtoB: connection.allowedIPsAtoB,
-            allowedIPsBtoA: connection.allowedIPsBtoA,
-            preSharedKey: connection.preSharedKey,
-          };
-        }
-      }
-      for (const [otherPeerId, peerDetails] of Object.entries(this.network.peers)) {
-        if (otherPeerId === this.value.id) continue;
-        const connectionId = WireGuardHelper.getConnectionId(peerId, otherPeerId);
-        const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
-
-        if (Object.keys(this.connectionIslandsData.isConnectionEnabled).includes(connectionId)) continue;
-
-        this.connectionIslandsData.isConnectionEnabled[connectionId] = true;
-        this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
-        this.connectionIslandsData.persistentKeepaliveValue[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
-        // eslint-disable-next-line no-nested-ternary
-        const allowedIPsNewToOld = peerDetails.mobility === 'static' ? (this.peerCreateMobility === 'static' ? this.network.subnet : '0.0.0.0/0') : `${this.network.peers[otherPeerId].address}/32`;
-        const allowedIPsOldToNew = `${this.network.peers[peerId].address}/32`;
-        this.connectionIslandsData.allowedIPsAtoB[connectionId] = (a === otherPeerId && b === this.peerCreatePeerId) ? allowedIPsOldToNew : allowedIPsNewToOld;
-        this.connectionIslandsData.allowedIPsBtoA[connectionId] = (a === otherPeerId && b === this.peerCreatePeerId) ? allowedIPsNewToOld : allowedIPsOldToNew;
-
-        this.connectionIslandsData.latestHandshakeAt[connectionId] = null;
-        this.connectionIslandsData.preSharedKey[connectionId] = null;
-      }
-    },
     async refreshPeerEditKeys() {
       const { publicKey, privateKey } = await this.api.getNewKeyPairs();
       this.peerEditPublicKey = publicKey;
