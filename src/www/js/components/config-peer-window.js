@@ -6,6 +6,43 @@
 
 'use strict';
 
+const changeSum = Vue.component('change-sum', {
+  props: {
+    peerEditChangedFieldsCompute: Object,
+    peerEditOldConfig: Object,
+    peerEditNewConfig: Object,
+  },
+  template: `<div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
+               <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
+                 <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
+                 <div v-if="Object.keys(peerEditChangedFieldsCompute[0]).length > 0 || !peerEditChangedFieldsCompute[3]">
+                   <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+                   <div v-else-if="('peers' in peerEditChangedFieldsCompute[0]) && !('connections' in peerEditChangedFieldsCompute[0])" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
+                   <div v-else-if="!('peers' in peerEditChangedFieldsCompute[0]) && ('connections' in peerEditChangedFieldsCompute[0])" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
+                   <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
+                 </div>
+               </div>
+               <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
+                 <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
+                 <div v-if="Object.keys(peerEditChangedFieldsCompute[1]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
+               </div>
+               <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
+                 <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
+                 <div v-if="Object.keys(peerEditChangedFieldsCompute[2]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
+               </div>
+               <div class="bg-red-100 rounded-md overflow-scroll">
+                 <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
+                 <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
+                 <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
+               </div>
+               <div class="bg-green-100 rounded-md overflow-scroll">
+                 <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
+                 <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
+                 <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
+               </div>
+             </div>`,
+});
+
 const configPeerWindow = Vue.component('config-peer-window', {
   props: {
     value: String,
@@ -289,35 +326,9 @@ const configPeerWindow = Vue.component('config-peer-window', {
          
                   <!-- show config -->
                  <div v-show="peerConfigWindow === 'view-changes'" class="mt-2 w-full overflow-scroll h-96">
-                   <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
-                     <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                       <div v-if="Object.keys(peerEditChangedFieldsCompute[0]).length > 0 || !peerEditChangedFieldsCompute[3]">
-                         <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                         <div v-else-if="('peers' in peerEditChangedFieldsCompute[0]) && !('connections' in peerEditChangedFieldsCompute[0])" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
-                         <div v-else-if="!('peers' in peerEditChangedFieldsCompute[0]) && ('connections' in peerEditChangedFieldsCompute[0])" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
-                         <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                       </div>
-                     </div>
-                     <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
-                       <div v-if="Object.keys(peerEditChangedFieldsCompute[1]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
-                     </div>
-                     <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
-                       <div v-if="Object.keys(peerEditChangedFieldsCompute[2]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
-                     </div>
-                     <div class="bg-red-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
-                       <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                       <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
-                     </div>
-                     <div class="bg-green-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
-                       <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                       <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
-                     </div>
-                   </div>
+                   <change-sum :peer-edit-changed-fields-compute="peerEditChangedFieldsCompute"
+                               :peer-edit-old-config="peerEditOldConfig"
+                               :peer-edit-new-config="peerEditNewConfig"></change-sum>
                  </div>
                </custom-dialog>
                
@@ -336,35 +347,9 @@ const configPeerWindow = Vue.component('config-peer-window', {
                   Are you sure you want to make these changes?
                  </div>
          
-                   <div class="text-sm text-gray-500 whitespace-pre grid grid-cols-2 gap-1">
-                     <div class="col-span-2 bg-blue-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-blue-200 p-1">Changed fields</strong>
-                       <div v-if="Object.keys(peerEditChangedFieldsCompute[0]).length > 0 || !peerEditChangedFieldsCompute[3]">
-                         <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                         <div v-else-if="('peers' in peerEditChangedFieldsCompute[0]) && !('connections' in peerEditChangedFieldsCompute[0])" class="p-1">{{ JSON.stringify({ peers: peerEditChangedFieldsCompute[0].peers }, false, 2) }}</div>
-                         <div v-else-if="!('peers' in peerEditChangedFieldsCompute[0]) && ('connections' in peerEditChangedFieldsCompute[0])" class="p-1">{{ JSON.stringify({ connections: peerEditChangedFieldsCompute[0].connections }, false, 2) }}</div>
-                         <div v-else class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[0], false, 2) }}</div>
-                       </div>
-                     </div>
-                     <div class="col-span-2 bg-green-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">Added fields</strong>
-                       <div v-if="Object.keys(peerEditChangedFieldsCompute[1]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[1], false, 2) }}</div>
-                     </div>
-                     <div class="col-span-2 bg-red-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Removed fields</strong>
-                       <div v-if="Object.keys(peerEditChangedFieldsCompute[2]).length > 0" class="p-1">{{ JSON.stringify(peerEditChangedFieldsCompute[2], false, 2) }}</div>
-                     </div>
-                     <div class="bg-red-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-red-200 p-1">Old configuration</strong>
-                       <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                       <div v-else class="p-1">{{ JSON.stringify(peerEditOldConfig, false, 2) }}</div>
-                     </div>
-                     <div class="bg-green-100 rounded-md overflow-scroll">
-                       <strong class="text-gray-600 justify-center rounded-md bg-green-200 p-1">New configuration</strong>
-                       <div v-if="!peerEditChangedFieldsCompute[3]" class="p-1">{}</div>
-                       <div v-else class="p-1">{{ JSON.stringify(peerEditNewConfig, false, 2) }}</div>
-                     </div>
-                   </div>
+                 <change-sum :peer-edit-changed-fields-compute="peerEditChangedFieldsCompute"
+                             :peer-edit-old-config="peerEditOldConfig"
+                             :peer-edit-new-config="peerEditNewConfig"></change-sum>
                </custom-dialog>
              </div>`,
   methods: {
@@ -609,5 +594,8 @@ const configPeerWindow = Vue.component('config-peer-window', {
         true,
       ];
     },
+  },
+  components: {
+    'change-sum': changeSum,
   },
 });
