@@ -88,14 +88,14 @@ class API {
     return this.call({
       method: 'get',
       path: `/wireguard/peer/preamble/${peerId}/${address}`,
-    }).catch(this.onCatch).finally(this.onFinally);
+    });
   }
 
   async deletePreamble({ peerId, address }) {
     return this.call({
       method: 'delete',
       path: `/wireguard/peer/preamble/${peerId}/${address}`,
-    }).catch(this.onCatch).finally(this.onFinally);
+    });
   }
 
   async createPeer({ peerId, address, name, mobility, dns, mtu, endpoint, scripts, attachedPeers }) {

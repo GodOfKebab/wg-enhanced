@@ -88,8 +88,8 @@ new Vue({
       error: null,
     },
 
-    createWindow: {
-      peerCreateMobility: '',
+    peerCreateWindow: {
+      mobility: '',
     },
 
     peerQuickEditName: null,
