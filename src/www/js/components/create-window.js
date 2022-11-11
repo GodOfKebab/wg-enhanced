@@ -60,7 +60,32 @@ const createWindow = Vue.component('create-window', {
     };
   },
   created() {
-    this.peerCreateWindowInitialize().then();
+    this.api.preamblePeer({ })
+      .then(resp => {
+        const { peerId, address, expiration } = resp;
+        this.peerCreatePeerId = peerId;
+        this.peerCreateAddress = address;
+        this.peerCreatePreambleExpiration = expiration;
+
+        for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
+          const connectionId = WireGuardHelper.getConnectionId(this.peerCreatePeerId, peerId);
+          const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
+
+          this.connectionIslandsData.isConnectionEnabled[connectionId] = true;
+          this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
+          this.connectionIslandsData.persistentKeepaliveValue[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
+          // eslint-disable-next-line no-nested-ternary
+          const allowedIPsNewToOld = peerDetails.mobility === 'static' ? (this.value.mobility === 'static' ? this.network.subnet : '0.0.0.0/0') : `${this.network.peers[peerId].address}/32`;
+          const allowedIPsOldToNew = `${this.peerCreateAddress}/32`;
+          this.connectionIslandsData.allowedIPsAtoB[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsOldToNew : allowedIPsNewToOld;
+          this.connectionIslandsData.allowedIPsBtoA[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsNewToOld : allowedIPsOldToNew;
+
+          this.connectionIslandsData.latestHandshakeAt[connectionId] = null;
+          this.connectionIslandsData.preSharedKey[connectionId] = null;
+        }
+      }).catch(() => {
+        this.dialogId = 'cant-create-peer';
+      });
   },
   template: `<div>
                <custom-dialog class="z-10"
@@ -104,7 +129,8 @@ const createWindow = Vue.component('create-window', {
                                       :defaults="network.defaults.peers" ></dnsmtu-island>
                        <scripts-island v-model="scriptsIslandData"
                                        :defaults="network.defaults.peers"></scripts-island>
-                       <connection-islands v-model="connectionIslandsData"
+                       <connection-islands v-if="peerCreatePeerId"
+                                           v-model="connectionIslandsData"
                                            :focus-peer-id="peerCreatePeerId"
                                            :focus-peer-name="peerCreateName"></connection-islands>
                      </div>
@@ -127,35 +153,6 @@ const createWindow = Vue.component('create-window', {
                </custom-dialog>
              </div>`,
   methods: {
-    async peerCreateWindowInitialize() {
-      if ((new Date()).getTime() > this.peerCreatePreambleExpiration) {
-        try {
-          const { peerId, address, expiration } = await this.api.preamblePeer({ });
-          this.peerCreatePeerId = peerId;
-          this.peerCreateAddress = address;
-          this.peerCreatePreambleExpiration = expiration;
-        } catch (e) {
-          this.dialogId = 'cant-create-peer';
-        }
-      }
-
-      for (const [peerId, peerDetails] of Object.entries(this.network.peers)) {
-        const connectionId = WireGuardHelper.getConnectionId(this.peerCreatePeerId, peerId);
-        const { a, b } = WireGuardHelper.getConnectionPeers(connectionId);
-
-        this.connectionIslandsData.isConnectionEnabled[connectionId] = true;
-        this.connectionIslandsData.persistentKeepaliveEnabled[connectionId] = this.network.defaults.connections.persistentKeepalive.enabled;
-        this.connectionIslandsData.persistentKeepaliveValue[connectionId] = this.network.defaults.connections.persistentKeepalive.value;
-        // eslint-disable-next-line no-nested-ternary
-        const allowedIPsNewToOld = peerDetails.mobility === 'static' ? (this.value.mobility === 'static' ? this.network.subnet : '0.0.0.0/0') : `${this.network.peers[peerId].address}/32`;
-        const allowedIPsOldToNew = `${this.peerCreateAddress}/32`;
-        this.connectionIslandsData.allowedIPsAtoB[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsOldToNew : allowedIPsNewToOld;
-        this.connectionIslandsData.allowedIPsBtoA[connectionId] = (a === peerId && b === this.peerCreatePeerId) ? allowedIPsNewToOld : allowedIPsOldToNew;
-
-        this.connectionIslandsData.latestHandshakeAt[connectionId] = null;
-        this.connectionIslandsData.preSharedKey[connectionId] = null;
-      }
-    },
     async peerCreateWindowDeletePreamble() {
       if (!(this.peerCreatePeerId || this.peerCreateAddress)) return;
       await this.api.deletePreamble({ peerId: this.peerCreatePeerId, address: this.peerCreateAddress });
