@@ -48,45 +48,7 @@ new Vue({
     peerAvatarCanvases: {},
     peerDeleteId: null,
     peerConfigId: null,
-    peerConfigWindow: 'edit',
     peerQRId: null,
-
-    dnsmtuIslandData: {
-      dns: { enabled: false, value: '' },
-      mtu: { enabled: false, value: '' },
-      context: '',
-      changedFields: {},
-      error: null,
-    },
-    scriptsIslandData: {
-      scripts: {
-        PreUp: { enabled: false, value: '' },
-        PostUp: { enabled: false, value: '' },
-        PreDown: { enabled: false, value: '' },
-        PostDown: { enabled: false, value: '' },
-      },
-      changedFields: {},
-      error: null,
-    },
-    connectionIslandsData: {
-      selectionBoxTitles: { static: 'Attach to these static peers:', roaming: 'Attach to these roaming peers:' },
-      staticPeers: {},
-      roamingPeers: {},
-      attachedStaticPeers: [],
-      attachedRoamingPeers: [],
-      isConnectionEnabled: {},
-      persistentKeepaliveEnabled: {},
-      persistentKeepaliveValue: {},
-      allowedIPsAtoB: {},
-      allowedIPsBtoA: {},
-      latestHandshakeAt: {},
-      preSharedKey: {},
-      context: '',
-      addedFields: {},
-      removedFields: {},
-      changedFields: {},
-      error: null,
-    },
 
     peerCreateWindow: {
       mobility: '',
@@ -391,7 +353,6 @@ new Vue({
           this.graph.graphData(this.forceGraphComputed);
           this.initializedGraph = true;
         } catch (e) {
-          console.log('my error: ');
           console.log(e);
         }
       }
@@ -409,7 +370,6 @@ new Vue({
           this.peerCreateAddress = address;
           this.peerCreatePreambleExpiration = expiration;
         } catch (e) {
-          this.peerCreateMobility = '';
           this.peerCreatePeerId = '';
           this.peerCreateAddress = '';
           this.dialogId = 'cant-create-peer';
