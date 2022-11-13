@@ -230,7 +230,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
                        <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
                               type="text" placeholder="Name"
                               v-model="peerEditName" :class="[peerEditNameColor]"/>
-                       <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                       <div v-if="peerEditNameColor !== 'bg-white'" class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                  title="Undo Changes"
                                  :disabled="peerEditNameColor === 'bg-white'"
@@ -247,7 +247,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
                        <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
                               type="text" :placeholder="\`Address (e.g. \${WireGuardHelper.getNextAvailableAddress(network)})\`"
                               v-model="peerEditAddress" :class="[peerEditAddressColor]"/>
-                       <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                       <div v-if="peerEditAddressColor !== 'bg-white'" class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                  title="Undo Changes"
                                  :disabled="peerEditAddressColor === 'bg-white'"
@@ -269,7 +269,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
                               v-model="peerEditEndpoint"
                               :class="[peerEditEndpointColor]"
                               :disabled="peerEditMobility !== 'static'"/>
-                       <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                       <div v-if="!(peerEditEndpoint === network.peers[value.id].endpoint && peerEditMobility === network.peers[value.id].mobility)" class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                  title="Undo Changes"
                                  :disabled="peerEditEndpoint === network.peers[value.id].endpoint && peerEditMobility === network.peers[value.id].mobility"
@@ -286,7 +286,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
                                    :defaults="network.defaults.peers" class="my-2 mr-2"></scripts-island>
          
                    <div class="my-2 mr-2 p-1 shadow-md border rounded relative" :class="[peerEditPublicKey !== network.peers[value.id].publicKey || peerEditPrivateKey !== network.peers[value.id].privateKey ? 'bg-green-100' : 'bg-green-50', peerEditPublicKey !== network.peers[value.id].publicKey || peerEditPrivateKey !== network.peers[value.id].privateKey ? 'highlight-undo-box' : '']">
-                     <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                     <div v-if="!(peerEditPublicKey === network.peers[value.id].publicKey || peerEditPrivateKey === network.peers[value.id].privateKey)"  class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                        <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                title="Undo Changes"
                                :disabled="peerEditPublicKey === network.peers[value.id].publicKey || peerEditPrivateKey === network.peers[value.id].privateKey"

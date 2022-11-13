@@ -43,7 +43,7 @@ const scriptsIsland = Vue.component('scripts-island', {
                           v-model="value.scripts[scriptField].value"
                           :class="[\`enabled:\${colors[scriptField]}\`]"
                           :disabled="!value.scripts[scriptField].enabled"/>
-                   <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
+                   <div v-if="!(value.scripts[scriptField].enabled === rollbackData.scripts[scriptField].enabled && value.scripts[scriptField].value === rollbackData.scripts[scriptField].value)" class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
                      <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                              title="Undo Changes"
                              :disabled="value.scripts[scriptField].enabled === rollbackData.scripts[scriptField].enabled && value.scripts[scriptField].value === rollbackData.scripts[scriptField].value"

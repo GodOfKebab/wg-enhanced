@@ -79,7 +79,7 @@ const connectionIslands = Vue.component('connection-islands', {
                      </div>
                    </div>
                  </div>
-                 <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                 <div v-if="!(JSON.stringify(value.attachedStaticPeers) === JSON.stringify(rollbackData.attachedStaticPeers) && JSON.stringify(value.attachedRoamingPeers) === JSON.stringify(rollbackData.attachedRoamingPeers))" class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                    <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                            title="Undo Changes"
                            :disabled="JSON.stringify(value.attachedStaticPeers) === JSON.stringify(rollbackData.attachedStaticPeers) && JSON.stringify(value.attachedRoamingPeers) === JSON.stringify(rollbackData.attachedRoamingPeers)"
@@ -101,7 +101,7 @@ const connectionIslands = Vue.component('connection-islands', {
                        </svg>
                      </button>
                    </div>
-                   <div class="inline-block float-right absolute z-20 right-[2.25rem] top-[0.25rem]">
+                   <div v-if="connectionChanged[WireGuardHelper.getConnectionId(focusPeerId, peerId)]"  class="inline-block float-right absolute z-20 right-[2.25rem] top-[0.25rem]">
                      <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                              title="Undo Changes"
                              @click="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)] = rollbackData.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]; value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)] = rollbackData.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]; value.persistentKeepaliveEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)] = rollbackData.persistentKeepaliveEnabled[WireGuardHelper.getConnectionId(focusPeerId, peerId)]; value.persistentKeepaliveValue[WireGuardHelper.getConnectionId(focusPeerId, peerId)] = rollbackData.persistentKeepaliveValue[WireGuardHelper.getConnectionId(focusPeerId, peerId)]; value.preSharedKey[WireGuardHelper.getConnectionId(focusPeerId, peerId)] = rollbackData.preSharedKey[WireGuardHelper.getConnectionId(focusPeerId, peerId)]; colorRefresh += 1;"

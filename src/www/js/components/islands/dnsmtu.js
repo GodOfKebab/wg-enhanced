@@ -53,7 +53,7 @@ const dnsmtuIsland = Vue.component('dnsmtu-island', {
                            Set MTU to {{ defaults[field].value }}
                          </option>
                        </datalist>
-                       <div class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
+                       <div v-if="!(value[field].enabled === rollbackData[field].enabled && value[field].value === rollbackData[field].value)" class="inline-block float-right absolute z-20 right-[0.2rem] top-[0rem]">
                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                  title="Undo Changes"
                                  :disabled="value[field].enabled === rollbackData[field].enabled && value[field].value === rollbackData[field].value"
