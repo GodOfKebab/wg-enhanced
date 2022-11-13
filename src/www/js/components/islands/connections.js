@@ -246,7 +246,7 @@ const connectionIslands = Vue.component('connection-islands', {
           // eslint-disable-next-line no-nested-ternary
           color.allowedIPsAtoB[connectionId] = this.value.context === 'create' || !this.allAttachedPeersPrev.includes(peerId) || this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]
             ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
-          if (this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId] && this.allAttachedPeersPrev.includes(peerId)) {
+          if (this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]) {
             changedFields[connectionId].allowedIPsAtoB = this.value.allowedIPsAtoB[connectionId];
           }
           error = color.allowedIPsAtoB[connectionId] === 'bg-red-200' ? `${connectionId}'s 'allowedIPsAtoB' field` : error;
@@ -254,7 +254,7 @@ const connectionIslands = Vue.component('connection-islands', {
           // eslint-disable-next-line no-nested-ternary
           color.allowedIPsBtoA[connectionId] = this.value.context === 'create' || !this.allAttachedPeersPrev.includes(peerId) || this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]
             ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
-          if (this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId] && this.allAttachedPeersPrev.includes(peerId)) {
+          if (this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]) {
             changedFields[connectionId].allowedIPsBtoA = this.value.allowedIPsBtoA[connectionId];
           }
           error = color.allowedIPsBtoA[connectionId] === 'bg-red-200' ? `${connectionId}'s 'allowedIPsBtoA' field` : error;
@@ -263,15 +263,16 @@ const connectionIslands = Vue.component('connection-islands', {
           // eslint-disable-next-line no-nested-ternary
           color.persistentKeepalive[connectionId] = this.value.context === 'create' || !this.allAttachedPeersPrev.includes(peerId) || this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]
             ? this.value.persistentKeepaliveEnabled[connectionId] && WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
-          if (this.value.persistentKeepaliveEnabled[connectionId] !== this.rollbackData.persistentKeepaliveEnabled[connectionId] && this.allAttachedPeersPrev.includes(peerId)) {
+          if (this.value.persistentKeepaliveEnabled[connectionId] !== this.rollbackData.persistentKeepaliveEnabled[connectionId]) {
             changedPersistentKeepalive.enabled = this.value.persistentKeepaliveEnabled[connectionId];
           }
-          if (this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId] && this.allAttachedPeersPrev.includes(peerId)) {
+          if (this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]) {
             changedPersistentKeepalive.value = this.value.persistentKeepaliveValue[connectionId];
           }
           if (Object.keys(changedPersistentKeepalive).length > 0) changedFields[connectionId].persistentKeepalive = changedPersistentKeepalive;
           error = color.persistentKeepalive[connectionId] === 'bg-red-200' ? `${connectionId}'s 'persistentKeepalive' field` : error;
 
+          this.connectionChanged[connectionId] = Object.keys(changedFields[connectionId]).length !== 0;
           if (Object.keys(changedFields[connectionId]).length === 0) delete changedFields[connectionId];
 
           if (!this.allAttachedPeersPrev.includes(peerId)) {
@@ -289,7 +290,7 @@ const connectionIslands = Vue.component('connection-islands', {
           }
 
           // eslint-disable-next-line no-nested-ternary
-          color.attachedPeerDiv[connectionId] = ![color.allowedIPsAtoB[connectionId], color.allowedIPsBtoA[connectionId], this.value.persistentKeepaliveEnabled[connectionId] ? color.persistentKeepalive[connectionId] : ''].includes('bg-red-200') ? this.value.isConnectionEnabled[connectionId] ? this.connectionChanged[connectionId] || !this.allAttachedPeersPrev.includes(peerId) ? 'bg-green-100' : 'bg-green-50' : 'bg-red-50' : 'bg-red-100';
+          color.attachedPeerDiv[connectionId] = ![color.allowedIPsAtoB[connectionId], color.allowedIPsBtoA[connectionId], this.value.persistentKeepaliveEnabled[connectionId] ? color.persistentKeepalive[connectionId] : ''].includes('bg-red-200') ? this.value.isConnectionEnabled[connectionId] ? this.connectionChanged[connectionId] || (!this.allAttachedPeersPrev.includes(peerId) && this.value.context === 'edit') ? 'bg-green-100' : 'bg-green-50' : 'bg-red-50' : 'bg-red-100';
         } catch (e) {
           this.connectionChanged[connectionId] = true;
           for (const colorField of Object.keys(color)) {

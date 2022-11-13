@@ -557,6 +557,12 @@ const configPeerWindow = Vue.component('config-peer-window', {
         ];
       }
 
+      if (Object.keys(this.connectionIslandsData.addedFields).length > 0) {
+        for (const [connectionId, connection] of Object.entries(this.connectionIslandsData.addedFields)) {
+          this.peerEditNewConfig.connections[connectionId] = connection;
+        }
+      }
+
       // check for the changes in the peer's connections
       if (Object.keys(this.connectionIslandsData.changedFields).length > 0) {
         changedFields.connections = this.connectionIslandsData.changedFields;
@@ -573,12 +579,6 @@ const configPeerWindow = Vue.component('config-peer-window', {
         }
       } else {
         delete changedFields.connections;
-      }
-
-      if (Object.keys(this.connectionIslandsData.addedFields).length > 0) {
-        for (const [connectionId, connection] of Object.entries(this.connectionIslandsData.addedFields)) {
-          this.peerEditNewConfig.connections[connectionId] = connection;
-        }
       }
 
       if (Object.keys(this.connectionIslandsData.removedFields).length > 0) {
