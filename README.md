@@ -18,49 +18,26 @@ Currently, there are two types of peers:
 * Static Peers with well-known endpoints
 * Roaming Peers with non-static endpoints and/or behind a NAT.
 
-[//]: # (<div>)
-
-[//]: # (    <div>)
-
-[//]: # (        <img src="./assets/home-page.png" width=50% />)
-
-[//]: # (    </div>)
-
-[//]: # (    <div>)
-
-[//]: # (        <img src="./assets/1.png" width=40% />)
-
-[//]: # (    </div>)
-
-[//]: # (    <div>)
-
-[//]: # (        <img src="./assets/1.png" width=40% />)
-
-[//]: # (    </div>)
-
-[//]: # (</div>)
-
 <table>
  <tr>
   <td rowspan="3">
     <img src="./assets/home-page.png" width="500"/>
   </td>
   <td>
-    <img src="./assets/1.png" width="300" />
+    <img src="./assets/1.png" width="270" />
   </td>
  </tr>
  <tr>
   <td>
-    <img src="./assets/2.png" width="300" />
+    <img src="./assets/2.png" width="270" />
   </td>
  </tr>
  <tr>
   <td>
-    <img src="./assets/3.png" width="300" />
+    <img src="./assets/3.png" width="270" />
   </td>
  </tr>
 </table>
-
 
 ## Features
 
