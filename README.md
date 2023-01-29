@@ -1,27 +1,86 @@
-# WireGuard Easy
+# WireGuard Enhanced
 
-[![Build & Publish Docker Image to Docker Hub](https://github.com/WeeJeWel/wg-easy/actions/workflows/deploy.yml/badge.svg?branch=production)](https://github.com/WeeJeWel/wg-easy/actions/workflows/deploy.yml)
-[![Lint](https://github.com/WeeJeWel/wg-easy/actions/workflows/lint.yml/badge.svg?branch=master)](https://github.com/WeeJeWel/wg-easy/actions/workflows/lint.yml)
-[![Docker](https://img.shields.io/docker/v/weejewel/wg-easy/latest)](https://hub.docker.com/r/weejewel/wg-easy)
-[![Docker](https://img.shields.io/docker/pulls/weejewel/wg-easy.svg)](https://hub.docker.com/r/weejewel/wg-easy)
-[![Sponsor](https://img.shields.io/github/sponsors/weejewel)](https://github.com/sponsors/WeeJeWel)
+[//]: # ([![Build & Publish Docker Image to Docker Hub]&#40;https://github.com/WeeJeWel/wg-easy/actions/workflows/deploy.yml/badge.svg?branch=production&#41;]&#40;https://github.com/WeeJeWel/wg-easy/actions/workflows/deploy.yml&#41;)
+
+[//]: # ([![Lint]&#40;https://github.com/WeeJeWel/wg-easy/actions/workflows/lint.yml/badge.svg?branch=master&#41;]&#40;https://github.com/WeeJeWel/wg-easy/actions/workflows/lint.yml&#41;)
+
+[//]: # ([![Docker]&#40;https://img.shields.io/docker/v/weejewel/wg-easy/latest&#41;]&#40;https://hub.docker.com/r/weejewel/wg-easy&#41;)
+
+[//]: # ([![Docker]&#40;https://img.shields.io/docker/pulls/weejewel/wg-easy.svg&#41;]&#40;https://hub.docker.com/r/weejewel/wg-easy&#41;)
+
+[//]: # ([![Sponsor]&#40;https://img.shields.io/github/sponsors/weejewel&#41;]&#40;https://github.com/sponsors/WeeJeWel&#41;)
+
+### This is a fork of the [wg-easy](https://github.com/WeeJeWel/wg-easy) project by [Emile Nijseen](https://emilenijssen.nl/?ref=wg-easy). 
 
 You have found the easiest way to install & manage WireGuard on any Linux host!
+Instead of displaying a server/client relationship, this fork enables the creation of multi-peer networks.
+Currently, there are two types of peers:
+* Static Peers with well-known endpoints
+* Roaming Peers with non-static endpoints and/or behind a NAT.
 
-<p align="center">
-  <img src="./assets/screenshot.png" width="802" />
-</p>
+[//]: # (<div>)
+
+[//]: # (    <div>)
+
+[//]: # (        <img src="./assets/home-page.png" width=50% />)
+
+[//]: # (    </div>)
+
+[//]: # (    <div>)
+
+[//]: # (        <img src="./assets/1.png" width=40% />)
+
+[//]: # (    </div>)
+
+[//]: # (    <div>)
+
+[//]: # (        <img src="./assets/1.png" width=40% />)
+
+[//]: # (    </div>)
+
+[//]: # (</div>)
+
+<table>
+ <tr>
+  <td rowspan="3">
+    <img src="./assets/home-page.png" width="500"/>
+  </td>
+  <td>
+    <img src="./assets/1.png" width="300" />
+  </td>
+ </tr>
+ <tr>
+  <td>
+    <img src="./assets/2.png" width="300" />
+  </td>
+ </tr>
+ <tr>
+  <td>
+    <img src="./assets/3.png" width="300" />
+  </td>
+ </tr>
+</table>
+
 
 ## Features
 
 * All-in-one: WireGuard + Web UI.
 * Easy installation, simple to use.
-* List, create, edit, delete, enable & disable clients.
+* List, create, edit, delete peers.
+* Enable and disable connections.
+* Regenerate public, private, and pre-shared keys.
+* Set PersistentKeepalive by connection.
+* Configure DNS and MTU fields for each peer.
+* Configure PreUp, PostUp, PreDown, PostDown scripts for each peer.
+* Create networks with multiple static peers.
 * Show a client's QR code.
 * Download a client's configuration file.
 * Statistics for which clients are connected.
 * Tx/Rx charts for each connected client.
 * Gravatar support.
+* An interactive network map.
+* Status indicator for the web server and a toggle for the WireGuard interface.
+
 
 ## Requirements
 
@@ -72,7 +131,7 @@ The Web UI will now be available on `http://0.0.0.0:51821`.
 
 ### 3. Sponsor
 
-Are you enjoying this project? [Buy me a beer!](https://github.com/sponsors/WeeJeWel) 🍻
+Are you enjoying this project? [Buy Emile a beer!](https://github.com/sponsors/WeeJeWel) 🍻
 
 ## Options
 
