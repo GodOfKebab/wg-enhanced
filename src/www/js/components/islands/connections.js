@@ -272,6 +272,10 @@ const connectionIslands = Vue.component('connection-islands', {
           if (Object.keys(changedPersistentKeepalive).length > 0) changedFields[connectionId].persistentKeepalive = changedPersistentKeepalive;
           error = color.persistentKeepalive[connectionId] === 'bg-red-200' ? `${connectionId}'s 'persistentKeepalive' field` : error;
 
+          if (this.value.preSharedKey[connectionId] !== this.rollbackData.preSharedKey[connectionId]) {
+            changedFields[connectionId].preSharedKey = this.value.preSharedKey[connectionId];
+          }
+
           this.connectionChanged[connectionId] = Object.keys(changedFields[connectionId]).length !== 0;
           if (Object.keys(changedFields[connectionId]).length === 0) delete changedFields[connectionId];
 
