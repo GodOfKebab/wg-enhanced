@@ -437,7 +437,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
             }
           }
           if (AtoBValue || BtoAValue) this.api.updateConnectionAllowedIPs(connectionId, AtoBValue, BtoAValue).then();
-          if (persistentKeepaliveEnabled || persistentKeepaliveValue) this.api.updateConnectionPersistentKeepalive(connectionId, persistentKeepaliveEnabled, persistentKeepaliveValue).then();
+          if (persistentKeepaliveEnabled !== null || persistentKeepaliveValue !== null) this.api.updateConnectionPersistentKeepalive(connectionId, persistentKeepaliveEnabled, persistentKeepaliveValue).then();
         }
       }
 
