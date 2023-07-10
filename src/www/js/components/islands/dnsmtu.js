@@ -33,7 +33,7 @@ const dnsmtuIsland = Vue.component('dnsmtu-island', {
                <div class="flex grid grid-cols-2 gap-2 mb-0.5">
                  <div v-for="field in ['dns', 'mtu']">
                    <div class="truncate">
-                     <div class="form-check truncate relative" :class="[value[field].enabled !== rollbackData[field].enabled || value[field].value !== rollbackData[field].value ? 'highlight-undo-box' : '']">
+                     <div class="form-check relative" :class="[value[field].enabled !== rollbackData[field].enabled || value[field].value !== rollbackData[field].value ? 'highlight-undo-box' : '']">
                        <label>
                          <input class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-1 cursor-pointer" type="checkbox" v-model="value[field].enabled">
                          <span class="text-gray-800 cursor-pointer text-xs">
