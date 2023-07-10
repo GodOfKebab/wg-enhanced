@@ -14,7 +14,7 @@ module.exports.WG_SUBNET = process.env.WG_SUBNET || '10.8.0.0/24';
 
 module.exports.WG_PRE_UP = process.env.WG_PRE_UP || '';
 module.exports.WG_POST_UP = process.env.WG_POST_UP || `
-iptables -t nat -A POSTROUTING -s ${module.exports.WG_DEFAULT_ADDRESS.replace('x', '0')}/24 -o ${module.exports.NETWORK_INTERFACE} -j MASQUERADE;
+iptables -t nat -A POSTROUTING -s ${module.exports.WG_SUBNET} -o ${module.exports.NETWORK_INTERFACE} -j MASQUERADE;
 iptables -A INPUT -p udp -m udp --dport 51820 -j ACCEPT;
 iptables -A FORWARD -i ${module.exports.WG_INTERFACE} -j ACCEPT;
 iptables -A FORWARD -o ${module.exports.WG_INTERFACE} -j ACCEPT;
