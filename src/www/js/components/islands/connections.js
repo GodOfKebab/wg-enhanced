@@ -261,8 +261,9 @@ const connectionIslands = Vue.component('connection-islands', {
 
           const changedPersistentKeepalive = {};
           // eslint-disable-next-line no-nested-ternary
-          color.persistentKeepalive[connectionId] = this.value.context === 'create' || !this.allAttachedPeersPrev.includes(peerId) || this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]
-            ? this.value.persistentKeepaliveEnabled[connectionId] && WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+          color.persistentKeepalive[connectionId] = !this.allAttachedPeersPrev.includes(peerId) || this.value.persistentKeepaliveEnabled[connectionId] !== this.rollbackData.persistentKeepaliveEnabled[connectionId]
+          || this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]
+            ? WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
           if (this.value.persistentKeepaliveEnabled[connectionId] !== this.rollbackData.persistentKeepaliveEnabled[connectionId]) {
             changedPersistentKeepalive.enabled = this.value.persistentKeepaliveEnabled[connectionId];
           }
