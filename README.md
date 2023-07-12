@@ -114,20 +114,30 @@ Are you enjoying this project? [Buy Emile a beer!](https://github.com/sponsors/W
 
 These options can be configured by setting environment variables using `-e KEY="VALUE"` in the `docker run` command.
 
-| Env | Default | Example | Description |
-| - | - | - | - |
-| `PASSWORD` | - | `foobar123` | When set, requires a password when logging in to the Web UI. |
-| `WG_HOST` | - | `vpn.myserver.com` | The public hostname of your VPN server. |
-| `WG_PORT` | `51820` | `12345` | The public UDP port of your VPN server. WireGuard will always listen on `51820` inside the Docker container. |
-| `WG_MTU` | `null` | `1420` | The MTU the clients will use. Server uses default WG MTU. |
-| `WG_PERSISTENT_KEEPALIVE` | `0` | `25` | Value in seconds to keep the "connection" open. |
-| `WG_DEFAULT_ADDRESS` | `10.8.0.x` | `10.6.0.x` | Clients IP address range. |
-| `WG_DEFAULT_DNS` | `1.1.1.1` | `8.8.8.8, 8.8.4.4` | DNS server clients will use. |
-| `WG_ALLOWED_IPS` | `0.0.0.0/0, ::/0` | `192.168.15.0/24, 10.0.1.0/24` | Allowed IPs clients will use. |
-| `WG_POST_UP` | `...` | `iptables ...` | See [config.js](https://github.com/WeeJeWel/wg-easy/blob/master/src/config.js#L19) for the default value. |
-| `WG_POST_DOWN` | `...` | `iptables ...` | See [config.js](https://github.com/WeeJeWel/wg-easy/blob/master/src/config.js#L26) for the default value. |
+| Env                               | Default           | Example             | Description                                                                                                               |
+|-----------------------------------|-------------------|---------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `PORT`                            | `51820`           | `12345`             | The internal HTTP port of your VPN management console. Web UI will listen on `51821` inside the Docker container.         |
+| `PASSWORD`                        | -                 | `foobar123`         | When set, requires a password when logging in to the Web UI.                                                              |
+| `WG_HOST`                         | -                 | `vpn.myserver.com`  | The public hostname of your VPN server.                                                                                   |
+| `WG_PORT`                         | `51820`           | `12345`             | The public and internal UDP port of your VPN server. WireGuard will listen on this (`51820`) inside the Docker container. |
+| `WG_DEFAULT_DNS`                  | `1.1.1.1`         | `8.8.8.8, 8.8.4.4`  | DNS server clients will use.                                                                                              |
+| `WG_DEFAULT_MTU`                  | `null`            | `1420`              | The MTU the clients will use. Server uses default WG MTU.                                                                 |
+| `WG_DEFAULT_PERSISTENT_KEEPALIVE` | `0`               | `25`                | Value in seconds to keep the "connection" open.                                                                           |
+| `WG_SUBNET`                       | `10.8.0.0/24`     | `10.6.0.0/16`       | Clients IP address range.                                                                                                 |
+| `NETWORK_INTERFACE`               | `eth0`            | `eth1`              | Host's public network interface.                                                                                          |
+| `WG_INTERFACE`                    | `wg0`             | `utun3`             | Host's WireGuard network interface.                                                                                       |
+| `WG_PATH`                         | `/etc/wireguard/` | `~/.wireguard/test` | WireGuard config folder path for wg-quick.                                                                                |
+| `WG_PREAMBLE_EXPIRATON`           | `30000`           | `60000`             | When creating a new peer, reserve an IP address for this long (in ms).                                                    |
+| `WG_PRE_UP`                       | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the host.                                             |
+| `WG_PRE_DOWN`                     | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the host.                                             |
+| `WG_POST_UP`                      | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the host.                                             |
+| `WG_POST_DOWN`                    | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the host.                                             |
+| `WG_DEFAULT_PRE_UP`               | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the client.                                           |
+| `WG_DEFAULT_PRE_DOWN`             | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the client.                                           |
+| `WG_DEFAULT_POST_UP`              | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the client.                                           |
+| `WG_DEFAULT_POST_DOWN`            | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the client.                                           |
 
-> If you change `WG_PORT`, make sure to also change the exposed port.
+> If you change `PORT` or `WG_PORT`, make sure to also change the exposed port(s).
 
 # Updating
 

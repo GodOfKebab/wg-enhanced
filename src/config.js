@@ -15,7 +15,7 @@ module.exports.WG_SUBNET = process.env.WG_SUBNET || '10.8.0.0/24';
 module.exports.WG_PRE_UP = process.env.WG_PRE_UP || '';
 module.exports.WG_POST_UP = process.env.WG_POST_UP || `
 iptables -t nat -A POSTROUTING -s ${module.exports.WG_SUBNET} -o ${module.exports.NETWORK_INTERFACE} -j MASQUERADE;
-iptables -A INPUT -p udp -m udp --dport 51820 -j ACCEPT;
+iptables -A INPUT -p udp -m udp --dport ${module.exports.WG_PORT} -j ACCEPT;
 iptables -A FORWARD -i ${module.exports.WG_INTERFACE} -j ACCEPT;
 iptables -A FORWARD -o ${module.exports.WG_INTERFACE} -j ACCEPT;
 `.split('\n').join(' ');
@@ -28,37 +28,35 @@ module.exports.WG_NETWORK_DEFAULTS = {
   peers: {
     dns: {
       enabled: true,
-      value: typeof process.env.WG_DEFAULT_DNS === 'string'
-        ? process.env.WG_DEFAULT_DNS
-        : '1.1.1.1',
+      value: typeof process.env.WG_DEFAULT_DNS === 'string' ? process.env.WG_DEFAULT_DNS : '1.1.1.1',
     },
     mtu: {
-      enabled: false,
-      value: '',
+      enabled: !!process.env.WG_DEFAULT_MTU,
+      value: typeof process.env.WG_DEFAULT_MTU === 'string' ? process.env.WG_DEFAULT_MTU : '',
     },
     scripts: {
       PreUp: {
-        enabled: false,
-        value: '',
+        enabled: !!process.env.WG_DEFAULT_PRE_UP,
+        value: typeof process.env.WG_DEFAULT_PRE_UP === 'string' ? process.env.WG_DEFAULT_PRE_UP : '',
       },
       PostUp: {
-        enabled: false,
-        value: '',
+        enabled: !!process.env.WG_DEFAULT_POST_UP,
+        value: typeof process.env.WG_DEFAULT_POST_UP === 'string' ? process.env.WG_DEFAULT_POST_UP : '',
       },
       PreDown: {
-        enabled: false,
-        value: '',
+        enabled: !!process.env.WG_DEFAULT_PRE_DOWN,
+        value: typeof process.env.WG_DEFAULT_PRE_DOWN === 'string' ? process.env.WG_DEFAULT_PRE_DOWN : '',
       },
       PostDown: {
-        enabled: false,
-        value: '',
+        enabled: !!process.env.WG_DEFAULT_POST_DOWN,
+        value: typeof process.env.WG_DEFAULT_POST_DOWN === 'string' ? process.env.WG_DEFAULT_POST_DOWN : '',
       },
     },
   },
   connections: {
     persistentKeepalive: {
-      enabled: !!process.env.WG_PERSISTENT_KEEPALIVE,
-      value: (process.env.WG_PERSISTENT_KEEPALIVE || 25).toString(),
+      enabled: !!process.env.WG_DEFAULT_PERSISTENT_KEEPALIVE,
+      value: (process.env.WG_DEFAULT_PERSISTENT_KEEPALIVE || 25).toString(),
     },
   },
 };
