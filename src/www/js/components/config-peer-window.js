@@ -473,7 +473,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
     },
     peerEditEndpointColor() {
       // eslint-disable-next-line no-nested-ternary
-      return this.peerEditMobility === 'static' ? this.peerEditEndpoint !== this.network.peers[this.value.id].endpoint
+      return this.peerEditMobility === 'static' ? this.peerEditEndpoint !== this.network.peers[this.value.id].endpoint || !WireGuardHelper.checkField('endpoint', this.peerEditEndpoint)
         ? (WireGuardHelper.checkField('endpoint', this.peerEditEndpoint) ? 'bg-green-200' : 'bg-red-200') : 'bg-white' : 'bg-gray-100';
     },
     peerEditConfigColor() {
@@ -493,7 +493,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
 
       let peerErrorField = '';
       // check for the errors in the peer's config
-      if (this.peerEditConfigColor.div === 'bg-red-50') {
+      if (this.peerEditConfigColor === 'bg-red-50') {
         peerErrorField = this.peerEditNameColor === 'bg-red-200' ? 'name' : peerErrorField;
         peerErrorField = this.peerEditAddressColor === 'bg-red-200' ? 'address' : peerErrorField;
         peerErrorField = this.peerEditEndpointColor === 'bg-red-200' ? 'endpoint' : peerErrorField;
