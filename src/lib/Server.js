@@ -11,7 +11,7 @@ const ServerError = require('./ServerError');
 const WireGuard = require('../services/WireGuard');
 
 const {
-  PORT,
+  WEB_PORT,
   RELEASE,
   PASSWORD,
 } = require('../config');
@@ -208,8 +208,8 @@ module.exports = class Server {
         return WireGuard.updateConnectionPersistentKeepalive({ connectionId, enabled, value });
       }))
 
-      .listen(PORT, () => {
-        debug(`Listening on http://0.0.0.0:${PORT}`);
+      .listen(WEB_PORT, () => {
+        debug(`Listening on http://0.0.0.0:${WEB_PORT}`);
       });
   }
 
