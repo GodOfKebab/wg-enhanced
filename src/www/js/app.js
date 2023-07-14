@@ -12,7 +12,7 @@ function bytes(bytes, decimals, kib, maxunit) {
   const k = kib ? 1024 : 1000;
   const dm = decimals != null && !Number.isNaN(decimals) && decimals >= 0 ? decimals : 2;
   const sizes = kib
-    ? ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB', 'BiB']
+    ? ['b', 'Kb', 'Mb', 'Gb', 'Tb', 'Pb', 'Eb', 'Zb', 'Yb', 'Bb']
     : ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB', 'BB'];
   let i = Math.floor(Math.log(bytes) / Math.log(k));
   if (maxunit !== undefined) {
