@@ -55,6 +55,16 @@ const configPeerWindow = Vue.component('config-peer-window', {
     return {
       dialogId: '',
 
+      peerConfigWindow: 'edit',
+      peerEditName: this.network.peers[this.value.id].name,
+      peerEditAddress: this.network.peers[this.value.id].address,
+      peerEditMobility: this.network.peers[this.value.id].mobility,
+      peerEditEndpoint: this.network.peers[this.value.id].endpoint,
+      peerEditPublicKey: this.network.peers[this.value.id].publicKey,
+      peerEditPrivateKey: this.network.peers[this.value.id].privateKey,
+      peerEditOldConfig: { peers: {}, connections: {} },
+      peerEditNewConfig: { peers: {}, connections: {} },
+
       dnsmtuIslandData: {
         dns: this.network.peers[this.value.id].dns,
         mtu: this.network.peers[this.value.id].mtu,
@@ -85,17 +95,9 @@ const configPeerWindow = Vue.component('config-peer-window', {
         removedFields: {},
         changedFields: {},
         error: null,
+        subnet: this.network.subnet,
+        selfAddress: this.network.peers[this.value.id].address,
       },
-
-      peerConfigWindow: 'edit',
-      peerEditName: this.network.peers[this.value.id].name,
-      peerEditAddress: this.network.peers[this.value.id].address,
-      peerEditMobility: this.network.peers[this.value.id].mobility,
-      peerEditEndpoint: this.network.peers[this.value.id].endpoint,
-      peerEditPublicKey: this.network.peers[this.value.id].publicKey,
-      peerEditPrivateKey: this.network.peers[this.value.id].privateKey,
-      peerEditOldConfig: { peers: {}, connections: {} },
-      peerEditNewConfig: { peers: {}, connections: {} },
     };
   },
   created() {
@@ -246,7 +248,7 @@ const configPeerWindow = Vue.component('config-peer-window', {
                                    </span>
                        <input class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow"
                               type="text" :placeholder="\`Address (e.g. \${WireGuardHelper.getNextAvailableAddress(network)})\`"
-                              v-model="peerEditAddress" :class="[peerEditAddressColor]"/>
+                              v-model="peerEditAddress" :class="[peerEditAddressColor]" @change="connectionIslandsData.selfAddress = peerEditAddress"/>
                        <div v-if="peerEditAddressColor !== 'bg-white'" class="inline-block float-right absolute z-20 right-[0.2rem] top-[-0.1rem]">
                          <button class="align-middle p-0.5 rounded bg-gray-100 hover:bg-gray-500 hover:text-white opacity-0 transition undo-button-itself"
                                  title="Undo Changes"
@@ -464,17 +466,17 @@ const configPeerWindow = Vue.component('config-peer-window', {
     peerEditNameColor() {
       // eslint-disable-next-line no-nested-ternary
       return this.peerEditName !== this.network.peers[this.value.id].name
-        ? (WireGuardHelper.checkField('name', this.peerEditName) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+          ? (WireGuardHelper.checkField('name', this.peerEditName) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
     },
     peerEditAddressColor() {
       // eslint-disable-next-line no-nested-ternary
       return this.peerEditAddress !== this.network.peers[this.value.id].address
-        ? (WireGuardHelper.checkField('address', this.peerEditAddress) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
+          ? (WireGuardHelper.checkField('address', this.peerEditAddress) ? 'bg-green-200' : 'bg-red-200') : 'bg-white';
     },
     peerEditEndpointColor() {
       // eslint-disable-next-line no-nested-ternary
       return this.peerEditMobility === 'static' ? this.peerEditEndpoint !== this.network.peers[this.value.id].endpoint || !WireGuardHelper.checkField('endpoint', this.peerEditEndpoint)
-        ? (WireGuardHelper.checkField('endpoint', this.peerEditEndpoint) ? 'bg-green-200' : 'bg-red-200') : 'bg-white' : 'bg-gray-100';
+          ? (WireGuardHelper.checkField('endpoint', this.peerEditEndpoint) ? 'bg-green-200' : 'bg-red-200') : 'bg-white' : 'bg-gray-100';
     },
     peerEditConfigColor() {
       let error = false;

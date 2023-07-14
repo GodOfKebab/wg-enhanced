@@ -156,18 +156,34 @@ const connectionIslands = Vue.component('connection-islands', {
                        </div>
                        
                        <div class="relative text-gray-800 text-xs">
-                         <div class="mt-1 flex items-center">
+                         <div class="mt-1">
                            <span class="flex-none"><strong>{{ focusPeerName }}</strong> will forward IP subnet(s)</span>
-                           <input v-if="WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
-                           <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
+                           <input v-if="WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" :list="WireGuardHelper.getConnectionId(focusPeerId, peerId) + 'focusPeerName to peerDetails.name'" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
+                           <input v-else :list="WireGuardHelper.getConnectionId(focusPeerId, peerId) + 'focusPeerName to peerDetails.name'" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
                            <span class="flex-none pr-2"> to <strong>{{ peerDetails.name }}</strong></span>
                          </div>
-                         <div class="mt-1 flex">
+                         <div class="mt-1">
                            <span class="flex-none"><strong>{{ peerDetails.name }}</strong> will forward IP subnet(s)</span>
-                           <input v-if="!WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
-                           <input v-else class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
+                           <input v-if="!WireGuardHelper.getConnectionId(focusPeerId, peerId).startsWith(focusPeerId)" :list="WireGuardHelper.getConnectionId(focusPeerId, peerId) + 'peerDetails.name to focusPeerName'" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsAtoB[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
+                           <input v-else :list="WireGuardHelper.getConnectionId(focusPeerId, peerId) + 'peerDetails.name to focusPeerName'" class="text-gray-800 text-xs mx-1 rounded-md px-1 grow" v-model="value.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]" :class="[color.allowedIPsBtoA[WireGuardHelper.getConnectionId(focusPeerId, peerId)]]" @change="colorRefresh += 1" @keyup="colorRefresh += 1">
                            <span class="flex-none pr-2"> to <strong>{{ focusPeerName }}</strong></span>
                          </div>
+                         <datalist :id="WireGuardHelper.getConnectionId(focusPeerId, peerId) + 'focusPeerName to peerDetails.name'">
+                           <option value="0.0.0.0/0">
+                             All traffic
+                           </option>
+                           <option :value="value.subnet">
+                             Only VPN subnet
+                           </option>
+                           <option :value="peerDetails.address + '/32'">
+                             Only {{ peerDetails.name }}
+                           </option>
+                         </datalist>
+                         <datalist :id="WireGuardHelper.getConnectionId(focusPeerId, peerId) + 'peerDetails.name to focusPeerName'">
+                           <option :value="value.selfAddress + '/32'">
+                             Only {{ focusPeerName }}
+                           </option>
+                         </datalist>
                        </div>
                      </div>
                    </div>
@@ -245,7 +261,7 @@ const connectionIslands = Vue.component('connection-islands', {
           changedFields[connectionId] = {};
           // eslint-disable-next-line no-nested-ternary
           color.allowedIPsAtoB[connectionId] = this.value.context === 'create' || !this.allAttachedPeersPrev.includes(peerId) || this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]
-            ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+              ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsAtoB[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
           if (this.value.allowedIPsAtoB[connectionId] !== this.rollbackData.allowedIPsAtoB[connectionId]) {
             changedFields[connectionId].allowedIPsAtoB = this.value.allowedIPsAtoB[connectionId];
           }
@@ -253,7 +269,7 @@ const connectionIslands = Vue.component('connection-islands', {
 
           // eslint-disable-next-line no-nested-ternary
           color.allowedIPsBtoA[connectionId] = this.value.context === 'create' || !this.allAttachedPeersPrev.includes(peerId) || this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]
-            ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+              ? WireGuardHelper.checkField('allowedIPs', this.value.allowedIPsBtoA[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
           if (this.value.allowedIPsBtoA[connectionId] !== this.rollbackData.allowedIPsBtoA[connectionId]) {
             changedFields[connectionId].allowedIPsBtoA = this.value.allowedIPsBtoA[connectionId];
           }
@@ -263,7 +279,7 @@ const connectionIslands = Vue.component('connection-islands', {
           // eslint-disable-next-line no-nested-ternary
           color.persistentKeepalive[connectionId] = !this.allAttachedPeersPrev.includes(peerId) || this.value.persistentKeepaliveEnabled[connectionId] !== this.rollbackData.persistentKeepaliveEnabled[connectionId]
           || this.value.persistentKeepaliveValue[connectionId] !== this.rollbackData.persistentKeepaliveValue[connectionId]
-            ? WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+              ? WireGuardHelper.checkField('persistentKeepalive', this.value.persistentKeepaliveValue[connectionId]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
           if (this.value.persistentKeepaliveEnabled[connectionId] !== this.rollbackData.persistentKeepaliveEnabled[connectionId]) {
             changedPersistentKeepalive.enabled = this.value.persistentKeepaliveEnabled[connectionId];
           }

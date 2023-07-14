@@ -40,14 +40,14 @@ const dnsmtuIsland = Vue.component('dnsmtu-island', {
                            <strong class="text-sm">{{ field.toUpperCase() }}: </strong>
                          </span>
                        </label>
-                       <input :list="field + 'Recommendations'" style="width: 25vw;" type="text" :placeholder="defaults[field].value ? 'Click to see recommendations' : 'No recommendations'"
+                       <input :list="field + 'Recommendations'" style="width: 25vw;" type="text" :placeholder="defaults[field].value !== '' ? 'Click to see recommendations' : 'No recommendations'"
                               class="rounded p-1 border-1 border-gray-100 focus:border-gray-200 outline-none w-full text-xs text-gray-500 grow disabled:bg-gray-100"
                               v-model="value[field].value"
                               :class="[\`enabled:\${field === 'dns' ? colors.dns : colors.mtu}\`]"
                               :disabled="!value[field].enabled"/>
                        <datalist :id="field + 'Recommendations'">
                          <option v-if="field === 'dns'" :value="defaults[field].value">
-                           Forward all {{ field.toUpperCase() }} related traffic to {{ defaults[field].value }}
+                           Forward all DNS related traffic to {{ defaults[field].value }}
                          </option>
                          <option v-if="field === 'mtu'" :value="defaults[field].value">
                            Set MTU to {{ defaults[field].value }}
@@ -74,7 +74,7 @@ const dnsmtuIsland = Vue.component('dnsmtu-island', {
       for (const field of ['dns', 'mtu']) {
         // eslint-disable-next-line no-nested-ternary
         colors[field] = this.value.context === 'create' || this.value[field].enabled !== this.rollbackData[field].enabled || this.value[field].value !== this.rollbackData[field].value
-          ? WireGuardHelper.checkField(field, this.value[field]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
+            ? WireGuardHelper.checkField(field, this.value[field]) ? 'bg-green-200' : 'bg-red-200' : 'bg-white';
 
         if (this.value[field].enabled !== this.rollbackData[field].enabled) changedFields[field].enabled = this.value[field].enabled;
         if (this.value[field].value !== this.rollbackData[field].value) changedFields[field].value = this.value[field].value;
