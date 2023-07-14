@@ -34,7 +34,7 @@ module.exports = class Server {
         return RELEASE;
       })))
 
-      // Authentication
+    // Authentication
       .get('/api/session', Util.promisify(async req => {
         const requiresPassword = !!process.env.PASSWORD;
         const authenticated = requiresPassword
@@ -65,7 +65,7 @@ module.exports = class Server {
         debug(`New Session: ${req.session.id})`);
       }))
 
-      // WireGuard
+    // WireGuard
       .use((req, res, next) => {
         if (!PASSWORD) {
           return next();
@@ -120,12 +120,20 @@ module.exports = class Server {
         return WireGuard.deleteConnection({ connectionId });
       }))
       .post('/api/wireguard/peer/', Util.promisify(async req => {
-        const { peerId, address, name, mobility, dns, mtu, endpoint, scripts, attachedPeers } = req.body;
-        return WireGuard.createPeer({ peerId, address, name, mobility, dns, mtu, endpoint, scripts, attachedPeers });
+        const {
+          peerId, address, name, mobility, dns, mtu, endpoint, scripts, attachedPeers,
+        } = req.body;
+        return WireGuard.createPeer({
+          peerId, address, name, mobility, dns, mtu, endpoint, scripts, attachedPeers,
+        });
       }))
       .post('/api/wireguard/connection/', Util.promisify(async req => {
-        const { connectionId, enabled, persistentKeepalive, allowedIPsAtoB, allowedIPsBtoA } = req.body;
-        return WireGuard.createConnection({ connectionId, enabled, persistentKeepalive, allowedIPsAtoB, allowedIPsBtoA });
+        const {
+          connectionId, enabled, persistentKeepalive, allowedIPsAtoB, allowedIPsBtoA,
+        } = req.body;
+        return WireGuard.createConnection({
+          connectionId, enabled, persistentKeepalive, allowedIPsAtoB, allowedIPsBtoA,
+        });
       }))
       .post('/api/wireguard/peer/:peerId/enable', Util.promisify(async req => {
         const { peerId } = req.params;

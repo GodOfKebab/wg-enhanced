@@ -43,6 +43,19 @@ module.exports = class WireGuard {
         try {
           config = await fs.readFile(path.join(WG_PATH, `${WG_INTERFACE}.json`), 'utf8');
           config = JSON.parse(config);
+          // override scripts on startup if set
+          if (WG_PRE_UP.length > 0) {
+            config.peers.root.scripts.PreUp = { enabled: true, value: WG_PRE_UP };
+          }
+          if (WG_POST_UP.length > 0) {
+            config.peers.root.scripts.PostUp = { enabled: true, value: WG_POST_UP };
+          }
+          if (WG_PRE_DOWN.length > 0) {
+            config.peers.root.scripts.PreDown = { enabled: true, value: WG_PRE_DOWN };
+          }
+          if (WG_POST_DOWN.length > 0) {
+            config.peers.root.scripts.PostDown = { enabled: true, value: WG_POST_DOWN };
+          }
           debug('Configuration loaded.');
         } catch (err) {
           const privateKey = await Util.exec('wg genkey');
@@ -378,9 +391,9 @@ module.exports = class WireGuard {
 
     if (!persistentKeepalive) throw new Error('Missing: persistentKeepalive : {"enabled": false, "value": "25"}');
     if (!Object.keys(persistentKeepalive).includes('enabled')
-    || !Object.keys(persistentKeepalive).includes('value')) throw new Error('Couldn\'t parse: persistentKeepalive : {"enabled": false, "value": "25"}');
+        || !Object.keys(persistentKeepalive).includes('value')) throw new Error('Couldn\'t parse: persistentKeepalive : {"enabled": false, "value": "25"}');
     if (!(persistentKeepalive.enabled === true || persistentKeepalive.enabled === false)
-    || !WireGuardHelper.checkField('persistentKeepalive', persistentKeepalive.value)) throw new Error('Couldn\'t parse: persistentKeepalive : {"enabled": false, "value": "25"}');
+        || !WireGuardHelper.checkField('persistentKeepalive', persistentKeepalive.value)) throw new Error('Couldn\'t parse: persistentKeepalive : {"enabled": false, "value": "25"}');
 
     if (!WireGuardHelper.checkField('allowedIPs', allowedIPsAtoB)) throw new Error(`Couldn't parse: allowedIPsAtoB: ${allowedIPsAtoB}`);
     if (!WireGuardHelper.checkField('allowedIPs', allowedIPsBtoA)) throw new Error(`Couldn't parse: allowedIPsBtoA: ${allowedIPsBtoA}`);
@@ -410,7 +423,7 @@ module.exports = class WireGuard {
     delete config.peers[peerId];
     await this.saveConfig();
 
-  //  TODO: add the option to delete specific connections in the map
+    //  TODO: add the option to delete specific connections in the map
   }
 
   async deleteConnection({ connectionId }) {

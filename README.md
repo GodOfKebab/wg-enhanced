@@ -10,7 +10,7 @@
 
 [//]: # ([![Sponsor]&#40;https://img.shields.io/github/sponsors/weejewel&#41;]&#40;https://github.com/sponsors/WeeJeWel&#41;)
 
-### This is a fork of the [wg-easy](https://github.com/WeeJeWel/wg-easy) project by [Emile Nijseen](https://emilenijssen.nl/?ref=wg-easy). 
+### This is a fork of the [wg-easy](https://github.com/WeeJeWel/wg-easy) project by [Emile Nijseen](https://emilenijssen.nl/?ref=wg-easy).
 
 You have found the easiest way to install & manage WireGuard on any Linux host!
 Instead of displaying a server/client relationship, this fork enables the creation of multi-peer networks.
@@ -99,7 +99,7 @@ $ docker run -d \
 </pre>
 
 > 💡 Replace `YOUR_SERVER_IP` with your WAN IP, or a Dynamic DNS hostname.
-> 
+>
 > 💡 Replace `YOUR_ADMIN_PASSWORD` with a password to log in on the Web UI.
 
 The Web UI will now be available on `http://0.0.0.0:51821`.
@@ -116,7 +116,7 @@ These options can be configured by setting environment variables using `-e KEY="
 
 | Env                               | Default           | Example             | Description                                                                                                               |
 |-----------------------------------|-------------------|---------------------|---------------------------------------------------------------------------------------------------------------------------|
-| `PORT`                            | `51820`           | `12345`             | The internal HTTP port of your VPN management console. Web UI will listen on `51821` inside the Docker container.         |
+| `WEB_PORT`                            | `51820`           | `12345`             | The internal HTTP port of your VPN management console. Web UI will listen on `51821` inside the Docker container.         |
 | `PASSWORD`                        | -                 | `foobar123`         | When set, requires a password when logging in to the Web UI.                                                              |
 | `WG_HOST`                         | -                 | `vpn.myserver.com`  | The public hostname of your VPN server.                                                                                   |
 | `WG_PORT`                         | `51820`           | `12345`             | The public and internal UDP port of your VPN server. WireGuard will listen on this (`51820`) inside the Docker container. |
@@ -137,7 +137,9 @@ These options can be configured by setting environment variables using `-e KEY="
 | `WG_DEFAULT_POST_UP`              | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the client.                                           |
 | `WG_DEFAULT_POST_DOWN`            | `...`             | `iptables ...`      | See [config.js](./src/config.js) for the default value. Executed by the client.                                           |
 
-> If you change `PORT` or `WG_PORT`, make sure to also change the exposed port(s).
+> If you change `WEB_PORT` or `WG_PORT`, make sure to also change the exposed port(s).
+
+> If you set any of the following fields, these will override at startup: `WG_PRE_UP`, `WG_PRE_DOWN`, `WG_POST_UP`, `WG_POST_UP`. If you don't set them, previous values are used to configure host.
 
 # Updating
 

@@ -3,7 +3,7 @@
 const { release } = require('./package.json');
 
 module.exports.RELEASE = release;
-module.exports.PORT = process.env.PORT || 51821;
+module.exports.WEB_PORT = process.env.WEB_PORT || 51821;
 module.exports.PASSWORD = process.env.PASSWORD;
 module.exports.NETWORK_INTERFACE = process.env.NETWORK_INTERFACE || 'eth0';
 module.exports.WG_INTERFACE = process.env.WG_INTERFACE || 'wg0';
